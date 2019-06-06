@@ -14,15 +14,44 @@ case(switch_value): \
     charStorageResult = (*(type *) ptr1 ) action (*(type *) ptr2 );\
     goto exitLabel;
 
-
-
+#define COMPARE__DUMP_FULL_SWITCH(type, comparator, newExitLabelName, charStorageResult, ptr1, ptr2) \
+do{\
+switch(type){\
+            case(OBC_ACTION_COMPARE_INT_):\
+                    COMPARE__SWITCH_SET(comparator, newExitLabelName, signed int, charStorageResult, ptr1, ptr2);\
+            case(OBC_ACTION_COMPARE_UINT_):\
+                    COMPARE__SWITCH_SET(comparator, newExitLabelName, unsigned int, charStorageResult, ptr1, ptr2);\
+            case(OBC_ACTION_COMPARE_FLOAT_):\
+                    COMPARE__SWITCH_SET(comparator, newExitLabelName, float, charStorageResult, ptr1, ptr2);\
+            case(OBC_ACTION_COMPARE_DOUBLE_):\
+                    COMPARE__SWITCH_SET(comparator, newExitLabelName, double, charStorageResult, ptr1, ptr2);\
+            case(OBC_ACTION_COMPARE_CHAR_):\
+                    COMPARE__SWITCH_SET(comparator, newExitLabelName, signed char, charStorageResult, ptr1, ptr2);\
+            case(OBC_ACTION_COMPARE_UCHAR_):\
+                    COMPARE__SWITCH_SET(comparator, newExitLabelName, unsigned char, charStorageResult, ptr1, ptr2);\
+            case(OBC_ACTION_COMPARE_SHORT_):\
+                    COMPARE__SWITCH_SET(comparator, newExitLabelName, signed short, charStorageResult, ptr1, ptr2);\
+            case(OBC_ACTION_COMPARE_USHORT_):\
+                    COMPARE__SWITCH_SET(comparator, newExitLabelName, unsigned short, charStorageResult, ptr1, ptr2);\
+            case(OBC_ACTION_COMPARE_LLINT_):\
+                    COMPARE__SWITCH_SET(comparator, newExitLabelName, signed long long int, charStorageResult, ptr1, ptr2);\
+            case(OBC_ACTION_COMPARE_ULLINT_):\
+                    COMPARE__SWITCH_SET(comparator, newExitLabelName, unsigned long long int, charStorageResult, ptr1, ptr2);\
+            case(OBC_ACTION_COMPARE_CHARSTRING_):{break;}\
+        }\
+        newExitLabelName:;\
+}while(0);
 
 void *OBC_traverseLinkedNodes(void *base, void *node){
-	void *offset = (void*)((node-base)-1);
     void *accumulator = node;
     void *ret = node;
+    /*/
+    void *offset = (void*)((node-base)-1);
     void *max = (void*)(((void *)0)-1);
-
+    /*/
+    void *offset = (void*)((node-base));
+    void *max = NULL;
+    //*/
 	while((accumulator=(void *)DEREF_VOID(accumulator))!=NULL){
         ret = accumulator;
         accumulator -= max-offset;
@@ -102,6 +131,7 @@ void* linkedListTraversal_(void *base, ...){
 
     while(ptr2!=NULL){
 
+        /**
         switch(type){
             case(OBC_ACTION_COMPARE_INT_):
                     COMPARE__SWITCH_SET(comparator, EXIT_TYPES, signed int, truth, ptr1, ptr2);
@@ -127,9 +157,8 @@ void* linkedListTraversal_(void *base, ...){
                 //
             }
         }
-        EXIT_TYPES:
-        ///FIXME DUMMY CODE
-        ptr1=ptr1;
+        EXIT_TYPES:;**/
+        COMPARE__DUMP_FULL_SWITCH(type,comparator,EXIT_TYPES,truth, ptr1, ptr2);
 
     }
 

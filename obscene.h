@@ -8,15 +8,32 @@
     #define NULL 0
 #endif // NULL
 
+#include "obsceneqsort.h"
+#include <stdlib.h>
+
+/*
+void appendToLinkedStructure(void **base, void **baseNode);
+void *removeFromLinkedStructure(void **base, void **baseNode, int nodeNumber);
+void deleteFromLinkedStructure(void **base, void **baseNode, void (*freeFunction)(void *freeDataFunction));
+void insertToLinkedStructure(void **base, void **baseNode, int nodeNumber);
+
+void appendToLinkedStructure_(void *base, unsigned int nodeOffset);
+void *removeFromLinkedStructure_(void **base, unsigned int nodeOffset, int nodeNumber);
+void deleteFromLinkedStructure_(void *base, unsigned int nodeOffset, void (*freeFunction)(void *freeDataFunction));
+void insertToLinkedStructure_(void *base, unsigned int nodeOffset, int nodeNumber);
+*/
+
 void *OBC_traverseLinkedNodes(void *base, void *node);
 
 //uses a char* as the base, as the size is the smallest primitive type to support as many systems as possible -- 8bit systems and up
 //will throw a ptr casting warning in a compiler when the sizeof(char) is smaller than the sizeof(void *)
 void* linkedListTraversal_(void *base, ...);
 
-enum{
-    OBC_ACTION_,
-    OBC_ACTION_END_,
+
+#define OBC_ACTION_ ((void *)NULL)
+enum OBC_QUERY{
+    //OBC_ACTION_,
+    OBC_ACTION_END_ = 1,
 
     OBC_ACTION_DATANODE_,
     OBC_ACTION_NEXTNODE_,
@@ -50,7 +67,9 @@ enum{
     OBC_ACTION_SUMMATION_,
     OBC_ACTION_AVERAGE_,
 
-};
+    OBC_ACTION_LINKED_LIST_
+
+} OBC_QUERY;
 
 #define COMPARE_FLOAT OBC_ACTION_, OBC_ACTION_COMPARE_FLOAT_
 #define COMPARE_DOUBLE OBC_ACTION_, OBC_ACTION_COMPARE_DOUBLE_
