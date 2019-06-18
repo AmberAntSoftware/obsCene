@@ -75,8 +75,15 @@ typedef struct
       stack first, with the algorithm then concentrating on the
       smaller partition.  This *guarantees* no more than log (total_elems)
       stack size is needed (actually O(1) in this case)!  */
-void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, __compar_d_fn_t cmp, void *arg)
+void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, int OBC_TYPE)
 {
+  /**AC**/
+
+  char truth = 0;
+  //other values already supplied and comparator is a constant <
+
+  /******/
+
   char *base_ptr = (char *) pbase;
   const size_t max_thresh = MAX_THRESH * size;
   if (total_elems == 0)
@@ -99,14 +106,32 @@ void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, __compar
              skips a comparison for both the LEFT_PTR and RIGHT_PTR in
              the while loops. */
           char *mid = lo + size * ((hi - lo) / size >> 1);
+          /**
           if ((*cmp) ((void *) mid, (void *) lo, arg) < 0)
             SWAP (mid, lo, size);
+          **/
+          COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_ACTION_COMPARE_L_, CMP0 ,truth,mid,lo);
+          if(truth){
+            SWAP (mid, lo, size);
+          }
+          /**
           if ((*cmp) ((void *) hi, (void *) mid, arg) < 0)
             SWAP (mid, hi, size);
+          **/
+          COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_ACTION_COMPARE_L_,CMP1,truth,hi,mid);
+          if(truth){
+            SWAP (mid, hi, size);
+          }
           else
             goto jump_over;
+          /**
           if ((*cmp) ((void *) mid, (void *) lo, arg) < 0)
             SWAP (mid, lo, size);
+          **/
+          COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_ACTION_COMPARE_L_,CMP2,truth,mid,lo);
+          if(truth){
+            SWAP (mid, lo, size);
+          }
         jump_over:;
           left_ptr  = lo + size;
           right_ptr = hi - size;
@@ -115,10 +140,25 @@ void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, __compar
              that this algorithm runs much faster than others. */
           do
             {
+              /**
               while ((*cmp) ((void *) left_ptr, (void *) mid, arg) < 0)
                 left_ptr += size;
               while ((*cmp) ((void *) mid, (void *) right_ptr, arg) < 0)
                 right_ptr -= size;
+              **/
+              goto PIPE_SKIP_1;
+              do{
+                left_ptr += size;
+                PIPE_SKIP_1:
+                COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_ACTION_COMPARE_L_,CMP3,truth,left_ptr,mid);
+              }while(truth);
+              goto PIPE_SKIP_2;
+              do{
+                right_ptr -= size;
+                PIPE_SKIP_2:
+                COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_ACTION_COMPARE_L_,CMP4,truth,mid,right_ptr);
+              }while(truth);
+
               if (left_ptr < right_ptr)
                 {
                   SWAP (left_ptr, right_ptr, size);
@@ -182,8 +222,16 @@ void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, __compar
        array's beginning.  This is the smallest array element,
        and the operation speeds up insertion sort's inner loop. */
     for (run_ptr = tmp_ptr + size; run_ptr <= thresh; run_ptr += size)
+      /**
       if ((*cmp) ((void *) run_ptr, (void *) tmp_ptr, arg) < 0)
         tmp_ptr = run_ptr;
+      **/
+    {
+        COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_ACTION_COMPARE_L_,CMP5,truth,run_ptr,tmp_ptr);
+        if(truth){
+            tmp_ptr = run_ptr;
+        }
+    }
     if (tmp_ptr != base_ptr)
       SWAP (tmp_ptr, base_ptr, size);
     /* Insertion sort, running from left-hand-side up to right-hand-side.  */
@@ -191,8 +239,16 @@ void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, __compar
     while ((run_ptr += size) <= end_ptr)
       {
         tmp_ptr = run_ptr - size;
+        /**
         while ((*cmp) ((void *) run_ptr, (void *) tmp_ptr, arg) < 0)
           tmp_ptr -= size;
+        **/
+        goto PIPE_SKIP_4;
+        do{
+          tmp_ptr -= size;
+          PIPE_SKIP_4:
+          COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_ACTION_COMPARE_L_,CMP6,truth,run_ptr,tmp_ptr);
+        }while(truth);
         tmp_ptr += size;
         if (tmp_ptr != run_ptr)
           {

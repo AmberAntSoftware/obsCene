@@ -13,6 +13,6 @@ typedef int (*__compar_d_fn_t)(const void *, const void *, void *);
 #include <stdlib.h>
 #include <string.h>
 
-void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, __compar_d_fn_t cmp, void *userStorage);
+void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, int OBC_TYPE);
 
 #endif // OBSCENEQSORT_H_INCLUDED

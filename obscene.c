@@ -2,45 +2,7 @@
 
 #define DEREF_VOID(ptr) (*((void **) ( ptr ) ))
 
-#define COMPARE__SWITCH_SET(comparator, exitLabel, type, charStorageResult, ptr1, ptr2) \
-switch( comparator ){\
-    COMPARE__SWITCH_UNIT( OBC_ACTION_COMPARE_E_, exitLabel , type ,== , charStorageResult, ptr1 , ptr2);\
-    COMPARE__SWITCH_UNIT( OBC_ACTION_COMPARE_L_, exitLabel , type , <, charStorageResult, ptr1, ptr2);\
-    COMPARE__SWITCH_UNIT( OBC_ACTION_COMPARE_LE_, exitLabel , type , <= ,charStorageResult, ptr1 , ptr2);\
-    default:goto exitLabel;\
-}
-#define COMPARE__SWITCH_UNIT(switch_value, exitLabel, type, action, charStorageResult, ptr1, ptr2) \
-case(switch_value): \
-    charStorageResult = (*(type *) ptr1 ) action (*(type *) ptr2 );\
-    goto exitLabel;
 
-#define COMPARE__DUMP_FULL_SWITCH(type, comparator, newExitLabelName, charStorageResult, ptr1, ptr2) \
-do{\
-switch(type){\
-            case(OBC_ACTION_COMPARE_INT_):\
-                    COMPARE__SWITCH_SET(comparator, newExitLabelName, signed int, charStorageResult, ptr1, ptr2);\
-            case(OBC_ACTION_COMPARE_UINT_):\
-                    COMPARE__SWITCH_SET(comparator, newExitLabelName, unsigned int, charStorageResult, ptr1, ptr2);\
-            case(OBC_ACTION_COMPARE_FLOAT_):\
-                    COMPARE__SWITCH_SET(comparator, newExitLabelName, float, charStorageResult, ptr1, ptr2);\
-            case(OBC_ACTION_COMPARE_DOUBLE_):\
-                    COMPARE__SWITCH_SET(comparator, newExitLabelName, double, charStorageResult, ptr1, ptr2);\
-            case(OBC_ACTION_COMPARE_CHAR_):\
-                    COMPARE__SWITCH_SET(comparator, newExitLabelName, signed char, charStorageResult, ptr1, ptr2);\
-            case(OBC_ACTION_COMPARE_UCHAR_):\
-                    COMPARE__SWITCH_SET(comparator, newExitLabelName, unsigned char, charStorageResult, ptr1, ptr2);\
-            case(OBC_ACTION_COMPARE_SHORT_):\
-                    COMPARE__SWITCH_SET(comparator, newExitLabelName, signed short, charStorageResult, ptr1, ptr2);\
-            case(OBC_ACTION_COMPARE_USHORT_):\
-                    COMPARE__SWITCH_SET(comparator, newExitLabelName, unsigned short, charStorageResult, ptr1, ptr2);\
-            case(OBC_ACTION_COMPARE_LLINT_):\
-                    COMPARE__SWITCH_SET(comparator, newExitLabelName, signed long long int, charStorageResult, ptr1, ptr2);\
-            case(OBC_ACTION_COMPARE_ULLINT_):\
-                    COMPARE__SWITCH_SET(comparator, newExitLabelName, unsigned long long int, charStorageResult, ptr1, ptr2);\
-            case(OBC_ACTION_COMPARE_CHARSTRING_):{break;}\
-        }\
-        newExitLabelName:;\
-}while(0);
 
 void *OBC_traverseLinkedNodes(void *base, void *node){
     void *accumulator = node;
