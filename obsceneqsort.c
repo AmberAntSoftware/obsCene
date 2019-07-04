@@ -16,6 +16,15 @@
 /* If you consider tuning this algorithm, you should consult first:
    Engineering a sort function; Jon Bentley and M. Douglas McIlroy;
    Software - Practice and Experience; Vol. 23 (11), 1249-1265, 1993.  */
+
+#include "obsceneqsort.h"
+#include "obscene.h"
+
+
+//#include <alloca.h>
+#include <limits.h>
+#include <stdlib.h>
+#include <string.h>
 /* Byte-wise swap two items of size SIZE. */
 #define SWAP(a, b, size)                                                      \
   do                                                                              \
@@ -29,130 +38,14 @@
           *__b++ = __tmp;                                                      \
         } while (--__size > 0);                                                      \
     } while (0)
-#include "obsceneqsort.h"
-#include "obscene.h"
-/********************************************************************/
-void heapify(unsigned char *arr, int n, int i)
-{
-    int largest = i; // Initialize largest as root
-    int l = 2*i + 1; // left = 2*i + 1
-    int r = 2*i + 2; // right = 2*i + 2
-
-    // If left child is larger than root
-    if (l < n && arr[l] > arr[largest])
-        largest = l;
-
-    // If right child is larger than largest so far
-    if (r < n && arr[r] > arr[largest])
-        largest = r;
-///printf("largest:%i  I: %i\n",largest,i);
-    // If largest is not root
-    if (largest != i)
-    {heapify(arr, n, largest);///printf("Hell Swap\n");
-        SWAP(&arr[i], &arr[largest],sizeof(unsigned char));
-
-        // Recursively heapify the affected sub-tree
-        heapify(arr, n, largest);///printf("NON NORMAL\n");
-    }
-}
-
-// main function to do heap sort
-void heapSort(unsigned char *arr, int length)
-{
-    ///printf("LEN:%i  \n",length);
-    int i;
-    // Build heap (rearrange array)
-    for (i = length / 2 - 1; i >= 0; i--){
-        ///printf("NORMAL HEAP\n");
-        heapify(arr, length, i);
-    }
-
-    // One by one extract an element from heap
-    for (i=length-1; i>=0; i--)
-    {
-        ///printf("DeathSwap\n");
-        // Move current root to end
-        SWAP(&arr[0], &arr[i],sizeof(unsigned char));
-///printf("SecondHeap\n");
-        // call max heapify on the reduced heap
-        heapify(arr, i, 0);
-    }
-}
-/** //https://www.geeksforgeeks.org/heap-sort/
-void heapify(char *pbase, size_t cur, size_t top, int OBC_TYPE)
-{
-    char truth = 0;
-    char *largest = pbase; // Initialize largest as root
-    char *l = 2*i + 1; // left = 2*i + 1
-    char *r = 2*i + 2; // right = 2*i + 2
-
-    // If left child is larger than root
-    if (l < n && arr[l] > arr[largest])
-        largest = l;
-
-    // If right child is larger than largest so far
-    if (r < n && arr[r] > arr[largest])
-        largest = r;
-
-    // If largest is not root
-    if (largest != i)
-    {
-        SWAP(top, largest);
-
-        // Recursively heapify the affected sub-tree
-        heapify(arr, n, largest);
-    }
-}
-//*/
-/**
-void heapSort(void *const pbase, size_t total_elems, size_t size, int OBC_TYPE)
-{
-
-    char *end = (total_elems*size)+pbase;
-    char *top;
-    size_t doubleSize = size<<1;
-    size_t half = (total_elems*size)>>1;
-
-    // Build heap (rearrange array)
-    for (top = ((total_elems*size)>>1) - size; top < end; top+=doubleSize){
-        heapify(pbase, end, top, OBC_TYPE);
-    }
-
-    // One by one extract an element from heap
-    for (top=end-size; top>=pbase; top-=size)
-    {
-        // Move current root to end
-        SWAP(pbase, end);
-
-        // call max heapify on the reduced heap
-        heapify(pbase, top, 0);
-    }
-}
-//**/
-//https://github.com/AlexandruValeanu/Introsort/blob/master/introsort.h#L97
-/********************************************************************/
-
-
-//#include <alloca.h>
-#include <limits.h>
-#include <stdlib.h>
-#include <string.h>
-
 /* Discontinue quicksort algorithm when partition gets below this size.
-   This particular magic number was chosen to work best on a Sun 4/260.  */
-#ifdef WIN32
-#define MAX_THRESH 16
-#else // WIN32
+   This particular magic number was chosen to work best on a Sun 4/260. */
 #define MAX_THRESH 4
-#endif // WIN32
 /* Stack node declarations used to store unfulfilled partition obligations. */
 typedef struct
   {
     char *lo;
     char *hi;
-    ///
-    char depth;
-    ///
   } stack_node;
 /* The next 4 #defines implement a very fast in-line stack abstraction. */
 /* The stack needs log (total_elements) entries (we could even subtract
@@ -160,9 +53,8 @@ typedef struct
    upper bound for log (total_elements):
    bits per byte (CHAR_BIT) * sizeof(size_t).  */
 #define STACK_SIZE        (CHAR_BIT * sizeof (size_t))
-///#define PUSH(low, high)        ((void) ((top->lo = (low)), (top->hi = (high)), ++top))
-#define PUSH(low, high)        ((void) ((top->lo = (low)), (top->hi = (high)), (top->depth = (curDepth)), ++top))
-#define        POP(low, high)        ((void) (--top, (low = top->lo), (high = top->hi), (curDepth = top->depth)))
+#define PUSH(low, high)        ((void) ((top->lo = (low)), (top->hi = (high)), ++top))
+#define        POP(low, high)        ((void) (--top, (low = top->lo), (high = top->hi)))
 #define        STACK_NOT_EMPTY        (stack < top)
 /* Order size using quicksort.  This implementation incorporates
    four optimizations discussed in Sedgewick:
@@ -188,14 +80,6 @@ void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, int OBC_
   /**AC**/
 
   char truth = 0;
-  char maxDepth = 0;
-  char curDepth;
-  int _ix;
-  unsigned long long int units = 0;
-  for(_ix = total_elems; _ix > 0; _ix>>=1){
-    maxDepth++;//*2 at ending for max_depth
-  }maxDepth--;
-  curDepth = maxDepth;
   //other values already supplied and comparator is a constant <
 
   /******/
@@ -212,10 +96,8 @@ void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, int OBC_
       stack_node stack[STACK_SIZE];
       stack_node *top = stack;
       PUSH (NULL, NULL);
-      //
       while (STACK_NOT_EMPTY)
         {
-            curDepth--;
           char *left_ptr;
           char *right_ptr;
           /* Select median value from among LO, MID, and HI. Rearrange
@@ -253,25 +135,9 @@ void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, int OBC_
         jump_over:;
           left_ptr  = lo + size;
           right_ptr = hi - size;
-
-          ////////////////////////////
-            //*
-            if(curDepth==0){
-                units++;
-
-                ///HEAP SORT
-                heapSort(left_ptr,(right_ptr-left_ptr)-size);
-
-                left_ptr = right_ptr+size;///FIXME skip qsorter
-                right_ptr-=size;
-                goto SKIP_QSORT;
-            }//*/
-          ////////////////////////////
-
           /* Here's the famous ``collapse the walls'' section of quicksort.
              Gotta like those tight inner loops!  They are the main reason
              that this algorithm runs much faster than others. */
-        /**//////////////////////////////////////////////////////////////////////////////////////////////////////////////// unguarded pivot
           do
             {
               /**
@@ -310,13 +176,7 @@ void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, int OBC_
                   break;
                 }
             }
-          //**
           while (left_ptr <= right_ptr);
-          SKIP_QSORT:
-          /*//**
-          while (right_ptr - left_ptr > max_thresh);
-          //**/
-          /**////////////////////////////////////////////////////////////////////////////////////////////////////////////////
           /* Set up pointers for next iteration.  First determine whether
              left and right partitions are below the threshold size.  If so,
              ignore one or both.  Otherwise, push the larger partition's
@@ -405,5 +265,519 @@ void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, int OBC_
           }
       }
   }
-  printf("UNITS: %llu\n",units);
 }
+
+/**
+unsigned long long int funcCalls;
+unsigned long long int heapSorts;
+void heapify(unsigned char *arr, unsigned long long int length, unsigned long long int i)
+{
+    unsigned long long int largest = i; // Initialize largest as root
+    unsigned long long int l = 2*i + 1; // left = 2*i + 1
+    unsigned long long int r = 2*i + 2; // right = 2*i + 2
+
+    funcCalls++;
+
+    // If left child is larger than root
+    if (l < length && arr[l] > arr[largest])
+        largest = l;
+
+    // If right child is larger than largest so far
+    if (r < length && arr[r] > arr[largest])
+        largest = r;
+
+    // If largest is not root
+    if (largest != i)
+    {
+        SWAP(&arr[i], &arr[largest],sizeof(unsigned char));
+
+        // Recursively heapify the affected sub-tree
+        heapify(arr, length, largest);
+    }
+}
+
+// main function to do heap sort
+void heapSort(unsigned char *arr, unsigned long long int length)
+{
+
+    funcCalls++;
+
+    unsigned long long int i;
+
+    // Build heap (rearrange array)
+    for (i = length / 2 - 1; i >= 0; i--)
+        heapify(arr, length, i);
+
+    // One by one extract an element from heap
+    for (i=length-1; i>=0; i--)
+    {
+        // Move current root to end
+        SWAP(&arr[0], &arr[i], sizeof(unsigned char));
+
+        // call max heapify on the reduced heap
+        heapify(arr, i, 0);
+    }
+}
+
+unsigned long long int partition(unsigned char *arr, unsigned long long int length)
+{
+
+    funcCalls++;
+
+    OBC_ENUM type = OBC_ACTION_COMPARE_UCHAR_;
+    char truth;
+    /* Select median value from among LO, MID, and HI. Rearrange
+                 LO and HI so the three values are sorted. This lowers the
+                 probability of picking a pathological pivot value and
+                 skips a comparison for both the LEFT_PTR and RIGHT_PTR in
+                 the while loops. * /
+    unsigned char *mid = arr+(length/2);
+    /**
+    if ((*cmp) ((void *) mid, (void *) lo, arg) < 0)
+      SWAP (mid, lo, size);
+    ** /
+    COMPARE__DUMP_FULL_SWITCH(type,OBC_ACTION_COMPARE_L_, CMP0,truth,mid,arr);
+    if(truth)
+    {
+        SWAP (mid, arr, sizeof(unsigned char));
+    }
+    /**
+    if ((*cmp) ((void *) hi, (void *) mid, arg) < 0)
+      SWAP (mid, hi, size);
+    ** /
+    COMPARE__DUMP_FULL_SWITCH(type,OBC_ACTION_COMPARE_L_,CMP1,truth,arr+length-1,mid);
+    if(truth)
+    {
+        SWAP (mid, arr+length-1, sizeof(unsigned char));
+    }
+    else
+        goto jump_over;
+    /**
+    if ((*cmp) ((void *) mid, (void *) lo, arg) < 0)
+      SWAP (mid, lo, size);
+    ** /
+    COMPARE__DUMP_FULL_SWITCH(type,OBC_ACTION_COMPARE_L_,CMP2,truth,mid,arr);
+    if(truth)
+    {
+        SWAP (mid, arr, sizeof(unsigned char));
+    }
+    jump_over:
+    return (unsigned long long int)(mid-arr);
+
+}
+
+void introsort(unsigned char *arr, unsigned long long int length, int maxdepth){
+    unsigned long long int p = partition(arr,length);  // assume this function does pivot selection, p is the final position of the pivot
+
+    p = length/2;
+
+    funcCalls++;
+
+    if (length <= 1){
+        return;
+    }else if (maxdepth == 0){
+        heapSorts++;
+        heapSort(arr,length);
+        return;
+    }else{
+        introsort(arr,p, maxdepth - 1);
+        introsort(arr+p+1,(length)-p, maxdepth - 1);
+    }
+}
+
+void OBC_introSortFunc(unsigned char *arr, unsigned long long int length){
+    int maxdepth = (int)(log((double)length)/log(2));
+    printf("MAX DEPTH: %i\n",maxdepth);
+    funcCalls = 0;
+    heapSorts = 0;
+    introsort(arr, length, maxdepth);
+
+    printf("FUNC CALLS: %llu\n",funcCalls);
+    printf("HEAP SORTS: %llu\n",heapSorts);
+}**/
+
+
+/*
+void heapSort(unsigned char *arr, unsigned long long int length);
+void heapify(unsigned char *arr, unsigned long long int length, unsigned long long int i);
+void swapValue(unsigned char *a, unsigned char *b);
+void InsertionSort(unsigned char arr[], unsigned char *begin, unsigned char *end);
+int* Partition(unsigned char *arr, unsigned long long int low, unsigned long long int high);
+unsigned char *MedianOfThree(unsigned char * a, unsigned char * b, unsigned char * c);
+
+
+unsigned long long int funcCalls;
+unsigned long long int heapSorts;
+void heapify(unsigned char *arr, unsigned long long int length, unsigned long long int i)
+{
+    unsigned long long int largest = i; // Initialize largest as root
+    unsigned long long int l = 2*i + 1; // left = 2*i + 1
+    unsigned long long int r = 2*i + 2; // right = 2*i + 2
+
+    funcCalls++;
+
+    // If left child is larger than root
+    if (l < length && largest < length){
+        printf("LEFT_ %llu: %i\n",l, arr[l]);
+        printf("LARGE %llu: %i\n",largest,arr[largest]);
+        if(arr[l] > arr[largest])
+        largest = l;
+    }
+
+    // If right child is larger than largest so far
+    if (r < length && arr[r] > arr[largest])
+        largest = r;
+
+    // If largest is not root
+    if (largest != i)
+    {
+        SWAP(arr +i, arr + largest,sizeof(unsigned char));
+
+        // Recursively heapify the affected sub-tree
+        heapify(arr, length, largest);
+    }
+}
+void heapSort(unsigned char *arr, unsigned long long int length)
+{
+
+    funcCalls++;
+
+    unsigned long long int i = 0;
+
+    // Build heap (rearrange array)
+    for (i = length / 2 - 1; i >= 0; i--)
+        heapify(arr, length-1, i);
+
+    // One by one extract an element from heap
+    for (i=length-1; i>=0; i--)
+    {
+        // Move current root to end
+        SWAP(arr, arr+i, sizeof(unsigned char));
+
+        // call max heapify on the reduced heap
+        heapify(arr, i, 0);
+    }
+}
+
+// A utility function to swap the values pointed by
+// the two pointers
+void swapValue(unsigned char *a, unsigned char *b)
+{
+    unsigned char *temp = a;
+    a = b;
+    b = temp;
+    return;
+}
+
+//* Function to sort an array using insertion sort* /
+void InsertionSort(unsigned char arr[], unsigned char *begin, unsigned char *end)
+{
+    // Get the left and the right index of the subarray
+    // to be sorted
+    unsigned long long int left = begin - arr;
+    unsigned long long int right = end - arr;
+unsigned long long int i;
+    for (i = left+1; i <= right; i++)
+    {
+        unsigned char key = arr[i];
+        unsigned long long int j = i-1;
+
+       //* Move elements of arr[0..i-1], that are
+        //  greater than key, to one position ahead
+        //  of their current position * /
+        while (j >= left && arr[j] > key)
+        {
+            arr[j+1] = arr[j];
+            j = j-1;
+        }
+        arr[j+1] = key;
+   }
+
+   return;
+}
+
+// A function to partition the array and return
+// the partition point
+int* Partition(unsigned char *arr, unsigned long long int low, unsigned long long int high)
+{
+    unsigned char pivot = arr[high];    // pivot
+    unsigned long long int i = (low - 1);  // Index of smaller element
+unsigned long long int j;
+    for (j = low; j <= high- 1; j++)
+    {
+        // If current element is smaller than or
+        // equal to pivot
+        if (arr[j] <= pivot)
+        {
+            // increment index of smaller element
+            i++;
+
+            swapValue(arr+i , arr+j );
+        }
+    }
+    swapValue(arr+i + 1, arr + high);
+    return arr + i + 1;
+}
+
+// A function that find the middle of the
+// values pointed by the pointers a, b, c
+// and return that pointer
+unsigned char *MedianOfThree(unsigned char * a, unsigned char * b, unsigned char * c)
+{
+    if (*a < *b && *b < *c)
+        return (b);
+
+    if (*a < *c && *c <= *b)
+        return (c);
+
+    if (*b <= *a && *a < *c)
+        return (a);
+
+    if (*b < *c && *c <= *a)
+        return (c);
+
+    if (*c <= *a && *a < *b)
+        return (a);
+
+    if (*c <= *b && *b <= *a)
+        return (b);
+}
+
+// A Utility function to perform intro sort
+void IntrosortUtil(unsigned char arr[], unsigned char * begin,
+                  unsigned char * end, int depthLimit)
+{
+    // Count the number of elements
+    unsigned long long int size = (unsigned long long int)(end - begin);
+
+      // If partition size is low then do insertion sort
+    if (size < 16)
+    {
+        InsertionSort(arr, begin, end);
+        return;
+    }
+
+    // If the depth is zero use heapsort
+    if (depthLimit == 0)
+    {
+        //make_heap(begin, end+1);
+        //sort_heap(begin, end+1);
+        if(begin < end)
+        heapSort(begin,size);
+
+        return;
+    }
+
+    // Else use a median-of-three concept to
+    // find a good pivot
+    unsigned char * pivot = MedianOfThree(begin, begin+size/2, end);
+
+    // Swap the values pointed by the two pointers
+    ///swapValue(pivot, end);
+
+   // Perform Quick Sort
+    unsigned char * partitionPoint = Partition(arr, begin-arr, end-arr);
+    IntrosortUtil(arr, begin, partitionPoint-1, depthLimit - 1);
+    IntrosortUtil(arr, partitionPoint + 1, end, depthLimit - 1);
+
+    return;
+}
+
+//* Implementation of introsort* /
+void OBC_Introsort2(unsigned char arr[], unsigned char *begin, unsigned char *end)
+{
+    int depthLimit = 2 * (log(end-begin)/log(2));
+
+    // Perform a recursive Introsort
+    IntrosortUtil(arr, begin, end, depthLimit);
+
+      return;
+}
+//*/
+
+
+
+
+
+
+
+/**
+// To heapify a subtree rooted with node i which is
+// an index in arr[]. n is size of heap
+void heapify(int arr[], int n, int i)
+{
+    int largest = i; // Initialize largest as root
+    int l = 2*i + 1; // left = 2*i + 1
+    int r = 2*i + 2; // right = 2*i + 2
+
+    // If left child is larger than root
+    if (l < n && arr[l] > arr[largest])
+        largest = l;
+
+    // If right child is larger than largest so far
+    if (r < n && arr[r] > arr[largest])
+        largest = r;
+
+    // If largest is not root
+    if (largest != i)
+    {
+        SWAP(arr +i, arr+largest,sizeof(int));
+
+        // Recursively heapify the affected sub-tree
+        heapify(arr, n, largest);
+    }
+}
+
+// main function to do heap sort
+void heapSort(int arr[], int n)
+{int i;
+    // Build heap (rearrange array)
+    for (i = n / 2 - 1; i >= 0; i--)
+        heapify(arr, n, i);
+
+    // One by one extract an element from heap
+    for (i=n-1; i>=0; i--)
+    {
+        // Move current root to end
+        SWAP(arr, arr+i, sizeof(int));
+
+        // call max heapify on the reduced heap
+        heapify(arr, i, 0);
+    }
+}
+
+
+// A utility function to swap the values pointed by
+// the two pointers
+void swapValue(int *a, int *b)
+{
+    int *temp = a;
+    a = b;
+    b = temp;
+    return;
+}
+
+//* Function to sort an array using insertion sort* /
+void InsertionSort(int arr[], int *begin, int *end)
+{
+    // Get the left and the right index of the subarray
+    // to be sorted
+    int left = begin - arr;
+    int right = end - arr;
+int i;
+    for (i = left+1; i <= right; i++)
+    {
+        int key = arr[i];
+        int j = i-1;
+
+        //* Move elements of arr[0..i-1], that are
+        //  greater than key, to one position ahead
+        //  of their current position * /
+        while (j >= left && arr[j] > key)
+        {
+            arr[j+1] = arr[j];
+            j = j-1;
+        }
+        arr[j+1] = key;
+   }
+
+   return;
+}
+
+// A function to partition the array and return
+// the partition point
+int* Partition(int arr[], int low, int high)
+{
+    int pivot = arr[high];    // pivot
+    int i = (low - 1);  // Index of smaller element
+int j;
+    for ( j = low; j <= high- 1; j++)
+    {
+        // If current element is smaller than or
+        // equal to pivot
+        if (arr[j] <= pivot)
+        {
+            // increment index of smaller element
+            i++;
+
+            SWAP(arr+i, arr+j,sizeof(int));
+        }
+    }
+    SWAP(arr+ i + 1, arr+high,sizeof(int));
+    return (arr + i + 1);
+}
+
+
+// A function that find the middle of the
+// values pointed by the pointers a, b, c
+// and return that pointer
+int *MedianOfThree(int * a, int * b, int * c)
+{
+    if (*a < *b && *b < *c)
+        return (b);
+
+    if (*a < *c && *c <= *b)
+        return (c);
+
+    if (*b <= *a && *a < *c)
+        return (a);
+
+    if (*b < *c && *c <= *a)
+        return (c);
+
+    if (*c <= *a && *a < *b)
+        return (a);
+
+    if (*c <= *b && *b <= *a)
+        return (b);
+}
+
+// A Utility function to perform intro sort
+void IntrosortUtil(int arr[], int * begin,
+                  int * end, int depthLimit)
+{
+    // Count the number of elements
+    int size = end - begin;
+
+      // If partition size is low then do insertion sort
+    if (size < 16)
+    {
+        InsertionSort(arr, begin, end);
+        return;
+    }
+
+    // If the depth is zero use heapsort
+    if (depthLimit == 0)
+    {
+        //make_heap(begin, end+1);
+        //sort_heap(begin, end+1);
+        heapSort(begin, size);
+        return;
+    }
+
+    // Else use a median-of-three concept to
+    // find a good pivot
+    int * pivot = MedianOfThree(begin, begin+size/2, end);
+
+    // Swap the values pointed by the two pointers
+    swapValue(pivot, end);
+
+   // Perform Quick Sort
+    int * partitionPoint = Partition(arr, begin-arr, end-arr);
+    IntrosortUtil(arr, begin, partitionPoint-1, depthLimit - 1);
+    IntrosortUtil(arr, partitionPoint + 1, end, depthLimit - 1);
+
+    return;
+}
+
+//* Implementation of introsort* /
+void Introsort(int arr[], int *begin, int *end)
+{
+    int depthLimit = 2 * log(end-begin);
+
+    // Perform a recursive Introsort
+    IntrosortUtil(arr, begin, end, depthLimit);
+
+      return;
+}
+//**/

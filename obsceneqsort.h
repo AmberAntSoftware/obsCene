@@ -15,4 +15,9 @@ typedef int (*__compar_d_fn_t)(const void *, const void *, void *);
 
 void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, int OBC_TYPE);
 
+void OBC_introSortFunc(unsigned char *arr, unsigned long long int length);
+
+void OBC_Introsort2(unsigned char arr[], unsigned char *begin, unsigned char *end);
+void Introsort(int arr[], int *begin, int *end);
+
 #endif // OBSCENEQSORT_H_INCLUDED
