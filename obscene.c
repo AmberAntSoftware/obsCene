@@ -25,8 +25,8 @@ void *OBC_LinkedListInsert(void **base, void *node, void *cmprNode, void *data, 
 
     char truth;
 
-    char *ptr1 = (char*)(((char*)*base)-dataOffset);
-    char *ptr2 = (char*)(ddata-dataOffset);
+    char *ptr1 = (char*)(ddata-dataOffset);
+    char *ptr2 = (char*)(((char*)*base)-dataOffset);
     COMPARE__DUMP_FULL_SWITCH(type,compare,EXIT_SWITCH,truth,ptr1,ptr2);
 
     if(truth){
@@ -46,8 +46,8 @@ void *OBC_LinkedListInsert(void **base, void *node, void *cmprNode, void *data, 
     //if / dowhile
 	while(accumulator!=NULL){
 
-        ptr1 = (char*)(accumulator-dataOffset);
-        ptr2 = (char*)(ddata-dataOffset);
+        ptr1 = (char*)(ddata-dataOffset);
+        ptr2 = (char*)(accumulator-dataOffset);
         COMPARE__DUMP_FULL_SWITCH(type,compare,EXIT_INSIDE_SWITCH,truth,ptr1,ptr2);
         if(truth){
 
@@ -122,6 +122,151 @@ void *OBC_LinkedListPrepend(void **base, void *node, void *data){
 
 	return *base;
 }
+
+//void *OBC_LinkedListInsert(void **base, void *node, void *cmprNode, void *data, OBC_ENUM type, OBC_ENUM compare){
+
+void *OBC_ArrayPrepend(void *base, void *data, size_t unitSize, size_t arrLen){
+    //base+=unitSize;
+    memmove((char*)(((char*)base)+unitSize),base,arrLen*unitSize);
+    if(unitSize > 32){
+        memmove(base,data,unitSize);
+        return base;
+    }
+
+    if(unitSize-- > 0){
+        do{
+            *((char*)base) = *((char*)data);
+            base = ((char*)base)+1;
+            data = ((char*)data)+1;
+        }while(unitSize--);
+    }
+
+    /*void *offset = (void*)(((char*)NULL)-(char*)(node-*base));
+    *((void**)(data-offset)) = *base;
+    *base = data;*/
+
+	return base;
+}
+
+
+void *OBC_ArrayInsert(void *base, void *cmprNode, void *data, size_t unitSize, size_t arrLen, OBC_ENUM type, OBC_ENUM compare){
+
+    if(arrLen == 0){
+        memmove(base,data,unitSize);
+        return base;
+    }
+
+    size_t bLen = arrLen*unitSize;
+    size_t aLen = arrLen;
+
+    size_t dataOffset = cmprNode-base;
+    char truth;
+    char *ptr1 = ((char*)data)+dataOffset;
+    char *ptr2 = ((char*)base)+dataOffset;
+
+    char *end  = ((char*)base)+bLen;
+    char *left = base;
+
+
+    /*for(;start<end;start+=unitSize){
+
+    }*/
+
+    ///ln(arrLen)/ln(2)+1
+    ///check end if uneven
+    if( (arrLen & 1) == 1){
+        end-=unitSize;
+        end+=dataOffset;
+        COMPARE__DUMP_FULL_SWITCH(type,compare,EXIT_INSIDE_SWITCH,truth,ptr1,end);
+        end-=dataOffset;
+        end+=unitSize;
+        if(!truth){
+            if(unitSize-- > 0){
+                do{
+                    *end = *((char*)data);
+                    end++;
+                    data=(char*)(((char*)data)+1);
+                }while(unitSize--);
+            }
+            return base;
+        }
+    }
+
+    size_t accumuLen = (arrLen)*unitSize;
+    if( (arrLen & 1) == 1){
+        accumuLen-=unitSize;
+    }
+    do{
+        accumuLen/=2;
+        left+=accumuLen;
+        left+=dataOffset;
+        COMPARE__DUMP_FULL_SWITCH(type,compare,EXIT_LOG_SWITCH,truth,ptr1,left);
+        left-=dataOffset;
+        if(truth){
+            left-=accumuLen;
+        }else{
+            left+=accumuLen;
+        }
+    }while(accumuLen>unitSize);
+
+
+    left+=dataOffset;
+    COMPARE__DUMP_FULL_SWITCH(type,compare,EXIT_END_SWITCH_PROCESS,truth,ptr1,left);
+    left-=dataOffset;
+    if(!truth){
+        left+=unitSize;
+    }
+
+    //
+    memmove(left+unitSize,left,(size_t)(end-left));
+    //
+
+    if(unitSize-- > 0){printf("BBBBBBBBBBBBBBBBBBBBB\n");printf("DATA: %i\n",*(int*)data);printf("DATA: %i\n",*(int*)left);printf("DIFF: %i\n",(size_t)(end-left));
+        do{
+            *left = *((char*)data);
+            left++;
+            data = (char*)(((char*)data)+1);
+        }while(unitSize--);
+    }
+
+/*
+    ///FIXME dowhile pipeline skip
+    //if / dowhile
+	while(accumulator!=NULL){
+
+        ptr1 = (char*)(ddata-dataOffset);
+        ptr2 = (char*)(accumulator-dataOffset);
+        COMPARE__DUMP_FULL_SWITCH(type,compare,EXIT_INSIDE_SWITCH,truth,ptr1,ptr2);
+        if(truth){
+
+            *((char **)(ddata-offset)) = accumulator;
+            *((char **)(ret-offset)) = ddata;
+
+            return;//goes to default assignments
+        }
+
+        ret = accumulator;
+        accumulator=((char *)(accumulator-offset));
+        accumulator=(char *)DEREF_VOID(accumulator);
+	}
+
+	*((char **)(ddata-offset)) = accumulator;
+    *((char **)(ret-offset)) = ddata;
+
+*/
+	return base;
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -254,7 +399,7 @@ void* linkedListTraversal_(void *base, ...){
 }
 
 
-
+/*
 void *OBC_query (void *pbase, OBC_ENUM pbaseType, ...){
 
     char rawbuffer[32];//for the accumulator types, -- int double float -- ect Avg, Total
@@ -288,7 +433,7 @@ case(OBC_QUERY_RAW_ARRAY_):
 case(OBC_QUERY_PTR_ARRAY_):
     arrayLength = va_arg(params, int);
 }
-*/
+* /
 
 
 
@@ -332,7 +477,7 @@ case(OBC_QUERY_LINKED_ARR_RAW_)://arrayLength dynamic storage
                 case():continue;
                 case():continue;
                 case():continue;
-                case():continue;*/
+                case():continue;* /
                 //
                 case(OBC_ACTION_NEXTNODE_):
                     //process nodes
@@ -355,7 +500,7 @@ lastIter = currIter;
     ***
     ***
     ***
-    **/
+    ** /
 
     //while(ptr2!=NULL){
 
@@ -385,10 +530,282 @@ lastIter = currIter;
                 //
             }
         }
-        EXIT_TYPES:;**/
+        EXIT_TYPES:;** /
         //COMPARE__DUMP_FULL_SWITCH(type,comparator,EXIT_TYPES,truth, ptr1, ptr2);
 
     //}
 
     return pbase;
+}
+*/
+
+///limit of 127 actual VARGS due to C spec, attempt to minimize fluff besides passed data
+/*
+void *OBC_query (void *pbase, OBC_ENUM pbaseType, ...){
+
+    int units;
+
+    void *storage[127];//used to store last node path to prevent recalculations -- benefits the preprocess optimizer
+    char rawbuffer[32];//for the accumulator types, -- int double float -- ect Avg, Total
+    int arrayPos = 0;//replace system with static pointer -- less multiplying
+    int arrayLength = 0;
+    int unitSize = 1;//for arrays
+
+    char truth = 0;
+    char *lastIter = NULL;
+    char *currIter = pbase;
+
+    va_list params;
+    va_start(params, pbaseType);
+
+
+    /************************************************************************** /
+    ///preprocess into void ptrs and optimize offsets
+
+    //OBC_ENUM dat = 0;
+    OBC_ENUM action;
+
+    char* toStore = &(storage[0]);
+
+    //default first param storage
+    *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+
+    do{
+
+        //param count of passed args list
+        units = (size_t)(va_arg(params,int));
+        *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+
+        //the specified action of the args list
+        action = (va_arg(params,int));
+        *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+
+        //exit if the action is the end token
+        if(action == OBC_ACTION_END_){
+            break;
+        }
+
+        switch(units){
+            TOP_OF_PREPROCESS_VARG_SWITCH:
+            case(12):va_arg(params,void*); *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+            case(11):va_arg(params,void*); *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+            case(10):va_arg(params,void*); *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+            case(9):va_arg(params,void*); *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+            case(8):va_arg(params,void*); *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+            case(7):va_arg(params,void*); *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+            case(6):va_arg(params,void*); *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+            case(5):va_arg(params,void*); *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+            case(4):va_arg(params,void*); *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+            case(3):va_arg(params,void*); *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+            case(2):va_arg(params,void*); *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+            case(1):va_arg(params,void*); *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+            case(0):break;
+            default:
+                for(;units>12;units--){
+                    va_arg(params,void*); *((void**)toStore) = (void*)params; toStore+=sizeof(void *);
+                }
+                goto TOP_OF_PREPROCESS_VARG_SWITCH;
+        }
+
+        //exit only by end token
+    }while(1);//(dat!=OBC_ACTION_END_);
+
+    //tokens have been parsed into the void* list, use to speed up processing instead of VA_ funcs (tiny possibility of bit packing, choice of error and fix if this has issues)
+
+    toStore = &(storage[0]);
+
+    //init data here for faster query processing
+    units = *(int*)toStore; toStore+=sizeof(void *);
+
+    switch(*(int*)toStore){
+        case(OBC_QUERY_LINKED_LIST_):
+            break;
+        case(OBC_QUERY_PTR_ARRAY_):
+            break;
+        case(OBC_QUERY_RAW_ARRAY_):
+            break;
+        case(OBC_QUERY_LINKED_ARR_PTR_):
+            break;
+        case(OBC_QUERY_LINKED_ARR_RAW_):
+            break;
+    }
+    // this should already skip to end when processing, but full skipping for now
+    toStore+=sizeof(void *)*units;
+
+    do{
+    //get the unit count for the query and advance to actual args
+    units = *(int*)toStore; toStore+=sizeof(void *);
+
+    //the specified action of the args list and advance to the "next" args
+    action = *(int*)toStore; toStore+=sizeof(void *);
+
+    //exit if the action is the end token
+    if(action == OBC_ACTION_END_){
+        break;
+    }
+
+    toStore+=sizeof(void *)*units;//skip to end to melt pointers backwards efficiently
+
+    switch(*(int*)toStore){
+        TOP_OF_PREPROCESS_VOIDP_SWITCH:
+        case(12): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(11): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(10): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(9): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(8): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(7): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(6): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(5): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(4): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(3): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(2): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(1): *((void**)toStore) = (*((void**)toStore)) - pbase; toStore-=sizeof(void *);
+        case(0):break;
+        default:
+            for(;units>12;units--){
+                *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+            }
+            goto TOP_OF_PREPROCESS_VOIDP_SWITCH;
+    }
+    toStore+=sizeof(void *)*units;//increment for counter size of arguments had as working backwards costs the total amount needing to be skipped
+
+    }while(1);
+
+    /************************************************************************** /
+    //finished optimizing looping of data
+
+
+
+}*/
+void *OBC_query (void *pbase, OBC_ENUM pbaseType, ...){
+
+    int units;
+
+    void *storage[127];//used to store last node path to prevent recalculations -- benefits the preprocess optimizer
+    char rawbuffer[32];//for the accumulator types, -- int double float -- ect Avg, Total
+    int arrayPos = 0;//replace system with static pointer -- less multiplying
+    int arrayLength = 0;
+    int unitSize = 1;//for arrays
+
+    char truth = 0;
+    char *lastIter = NULL;
+    char *currIter = pbase;
+
+    va_list params;
+    va_start(params, pbaseType);
+
+
+    /**************************************************************************/
+    ///preprocess into void ptrs and optimize offsets
+
+    //OBC_ENUM dat = 0;
+    OBC_ENUM action;
+
+    char* toStore = &(storage[0]);
+
+    ///default first param storage
+    ///*((void**)toStore) = (void*)va_arg(params,void *); toStore+=sizeof(void *);
+
+    void *prevPtr;
+    void *prevPtr2;
+
+    do{
+
+        //param count of passed args list
+        units = (size_t)(va_arg(params,int));
+        *(int *)toStore = units; toStore+=sizeof(void *);
+
+        //the specified action of the args list
+        action = (va_arg(params,int));
+        *(int *)toStore = action; toStore+=sizeof(void *);
+
+        //exit if the action is the end token
+
+        if(action == OBC_ACTION_END_){
+            break;
+        }
+
+        if(action == OBC_VALUE_CONST_){//do NOT modify the value of the thing
+            *((void**)toStore) = (void*)va_arg(params,void*);
+            continue;
+        }
+
+        prevPtr = pbase;
+        for(;units>0;units--){
+            *((void**)toStore) = (void*)va_arg(params,void*);//(void*)(((void*)va_arg(params,void*))-prevPtr);
+            prevPtr2 = (*((void**)toStore))-prevPtr;
+            prevPtr = *((void**)toStore);
+            *((void**)toStore) = prevPtr2;
+            toStore+=sizeof(void *);
+        }
+
+        //exit only by end token
+    }while(1);//(dat!=OBC_ACTION_END_);
+/**
+    //tokens have been parsed into the void* list, use to speed up processing instead of VA_ funcs (tiny possibility of bit packing, choice of error and fix if this has issues)
+
+    toStore = &(storage[0]);
+
+    //init data here for faster query processing
+    units = *(int*)toStore; toStore+=sizeof(void *);
+
+    switch(*(int*)toStore){
+        case(OBC_QUERY_LINKED_LIST_):
+            break;
+        case(OBC_QUERY_PTR_ARRAY_):
+            break;
+        case(OBC_QUERY_RAW_ARRAY_):
+            break;
+        case(OBC_QUERY_LINKED_ARR_PTR_):
+            break;
+        case(OBC_QUERY_LINKED_ARR_RAW_):
+            break;
+    }
+    // this should already skip to end when processing, but full skipping for now
+    toStore+=sizeof(void *)*units;
+
+    do{
+    //get the unit count for the query and advance to actual args
+    units = *(int*)toStore; toStore+=sizeof(void *);
+
+    //the specified action of the args list and advance to the "next" args
+    action = *(int*)toStore; toStore+=sizeof(void *);
+
+    //exit if the action is the end token
+    if(action == OBC_ACTION_END_){
+        break;
+    }
+
+    toStore+=sizeof(void *)*units;//skip to end to melt pointers backwards efficiently
+
+    switch(*(int*)toStore){
+        TOP_OF_PREPROCESS_VOIDP_SWITCH:
+        case(12): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(11): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(10): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(9): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(8): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(7): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(6): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(5): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(4): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(3): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(2): *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+        case(1): *((void**)toStore) = (*((void**)toStore)) - pbase; toStore-=sizeof(void *);
+        case(0):break;
+        default:
+            for(;units>12;units--){
+                *((void**)toStore) = (*((void**)toStore)) - (*((void**)(toStore-sizeof(void *)))); toStore-=sizeof(void *);
+            }
+            goto TOP_OF_PREPROCESS_VOIDP_SWITCH;
+    }
+    toStore+=sizeof(void *)*units;//increment for counter size of arguments had as working backwards costs the total amount needing to be skipped
+
+    }while(1);
+*/
+    /**************************************************************************/
+    //finished optimizing looping of data
+
+
+
 }
