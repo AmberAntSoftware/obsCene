@@ -110,7 +110,7 @@ void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, OBC_ENUM
           if ((*cmp) ((void *) mid, (void *) lo, arg) < 0)
             SWAP (mid, lo, size);
           **/
-          COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_COMPARE_L_, CMP0 ,truth,mid,lo);
+          OBC___COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_COMPARE_L_, CMP0 ,truth,mid,lo);
           if(truth){
             SWAP (mid, lo, size);
           }
@@ -118,7 +118,7 @@ void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, OBC_ENUM
           if ((*cmp) ((void *) hi, (void *) mid, arg) < 0)
             SWAP (mid, hi, size);
           **/
-          COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_COMPARE_L_,CMP1,truth,hi,mid);
+          OBC___COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_COMPARE_L_,CMP1,truth,hi,mid);
           if(truth){
             SWAP (mid, hi, size);
           }
@@ -128,7 +128,7 @@ void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, OBC_ENUM
           if ((*cmp) ((void *) mid, (void *) lo, arg) < 0)
             SWAP (mid, lo, size);
           **/
-          COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_COMPARE_L_,CMP2,truth,mid,lo);
+          OBC___COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_COMPARE_L_,CMP2,truth,mid,lo);
           if(truth){
             SWAP (mid, lo, size);
           }
@@ -150,13 +150,13 @@ void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, OBC_ENUM
               do{
                 left_ptr += size;
                 PIPE_SKIP_1:
-                COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_COMPARE_L_,CMP3,truth,left_ptr,mid);
+                OBC___COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_COMPARE_L_,CMP3,truth,left_ptr,mid);
               }while(truth);
               goto PIPE_SKIP_2;
               do{
                 right_ptr -= size;
                 PIPE_SKIP_2:
-                COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_COMPARE_L_,CMP4,truth,mid,right_ptr);
+                OBC___COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_COMPARE_L_,CMP4,truth,mid,right_ptr);
               }while(truth);
 
               if (left_ptr < right_ptr)
@@ -227,7 +227,7 @@ void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, OBC_ENUM
         tmp_ptr = run_ptr;
       **/
     {
-        COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_COMPARE_L_,CMP5,truth,run_ptr,tmp_ptr);
+        OBC___COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_COMPARE_L_,CMP5,truth,run_ptr,tmp_ptr);
         if(truth){
             tmp_ptr = run_ptr;
         }
@@ -247,7 +247,7 @@ void OBC_quicksort (void *const pbase, size_t total_elems, size_t size, OBC_ENUM
         do{
           tmp_ptr -= size;
           PIPE_SKIP_4:
-          COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_COMPARE_L_,CMP6,truth,run_ptr,tmp_ptr);
+          OBC___COMPARE__DUMP_FULL_SWITCH(OBC_TYPE,OBC_COMPARE_L_,CMP6,truth,run_ptr,tmp_ptr);
         }while(truth);
         tmp_ptr += size;
         if (tmp_ptr != run_ptr)
