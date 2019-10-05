@@ -61,9 +61,24 @@ size_t OBC_RayUnitSize(void *rawPtr);
 https://en.cppreference.com/w/cpp/container/vector
 https://en.cppreference.com/w/cpp/container/vector/data
 */
-///#define OBC_RayDoExapand(rawPtr) do{ if(OBC_TO_RAW_RAY(rawPtr)->curLength == OBC_TO_RAW_RAY(rawPtr)->maxLength){OBC_RayExpand(rawPtr);} }while(0);
-
+/*
 #define OBC_RayAddValue(rawPtr, data) do{ if(OBC_RayDoExpand(rawPtr)!= OBC_FAILURE){ (*((*(rawPtr))+OBC_TO_RAW_RAY(rawPtr)->unitLength)) = data; OBC_RayNewElement(rawPtr); } }while(0);
+/*/
+#define OBC_RayAddValue(rawPtr, data)\
+    if(OBC_TO_RAW_RAY(rawPtr)->curLength==OBC_TO_RAW_RAY(rawPtr)->maxLength){\
+        if(OBC_RayExpand(rawPtr) != OBC_FAILURE){\
+            (*((*(rawPtr))+OBC_TO_RAW_RAY(rawPtr)->unitLength)) = data;\
+            OBC_TO_RAW_RAY(rawPtr)->curLength+=OBC_TO_RAW_RAY(rawPtr)->unitSize;\
+            OBC_TO_RAW_RAY(rawPtr)->unitLength++;\
+        }\
+    }else{\
+        (*((*(rawPtr))+OBC_TO_RAW_RAY(rawPtr)->unitLength)) = data;\
+        OBC_TO_RAW_RAY(rawPtr)->curLength+=OBC_TO_RAW_RAY(rawPtr)->unitSize;\
+        OBC_TO_RAW_RAY(rawPtr)->unitLength++;\
+    }
+//*/
+
+
 #define OBC_RayAddPointer(rawPtr, dataPtr) do{ if(OBC_RayDoExpand(rawPtr)!= OBC_FAILURE){ OBC_RaySetLast(rawPtr, dataPtr); OBC_RayNewElement(rawPtr); } }while(0);
 
 /*#define OBC_RayGetNewPointer(rawPtr)
