@@ -29,9 +29,10 @@ void *OBC_initRay(OBC_Ray *ray, size_t initialReserveCount, size_t unitSize){
     }
 
     ray->curLength = 0;
-    ray->unitLength = 0;
+    ray->curUnitLength = 0;
     ray->unitSize = unitSize;
     ray->maxLength = unitSize*initialReserveCount;
+    ray->maxUnitLength = ray->maxLength*ray->unitSize;
 
     return ray;
 
@@ -55,14 +56,14 @@ OBC_ERROR_ENUM OBC_RayRemove(void *rawPtr, size_t index){
 
     void *toRemove = ray->rawData+(index*ray->unitSize);
 
-    if(index!=ray->unitLength-1){
-        memmove(toRemove,toRemove+ray->unitSize,(ray->unitLength-(index+1))*ray->unitSize);
+    if(index!=ray->curUnitLength-1){
+        memmove(toRemove,toRemove+ray->unitSize,(ray->curUnitLength-(index+1))*ray->unitSize);
     }
 
     ray->curLength-=ray->unitSize;
-    ray->unitLength--;
+    ray->curUnitLength--;
 
-    return OBC_NO_OP;
+    return OBC_ERROR_NO_OP;
 
 }
 
@@ -78,22 +79,35 @@ OBC_ERROR_ENUM OBC_RayRemoveFast(void *rawPtr, size_t index){
     }
 
     ray->curLength-=ray->unitSize;
-    ray->unitLength--;
+    ray->curUnitLength--;
 
-    return OBC_NO_OP;
+    return OBC_ERROR_NO_OP;
 
 }
 
 OBC_ERROR_ENUM OBC_RayNewElement(void *rawPtr){
-    OBC_Ray *ray = OBC_TO_RAW_RAY(rawPtr);
 
-    ray->curLength+=ray->unitSize;
-    ray->unitLength++;
+    OBC_RayPushElement(rawPtr);
 
     OBC_RAY_ERROR_PROPAGATE(OBC_RayDoExpand(rawPtr));
 
-    return OBC_SUCCESS;
+    return OBC_ERROR_SUCCESS;
 }
+
+void OBC_RayPushElement(void *rawPtr){
+    OBC_Ray *ray = OBC_TO_RAW_RAY(rawPtr);
+
+    ray->curLength+=ray->unitSize;
+    ray->curUnitLength++;
+}
+
+void OBC_RayPopElement(void *rawPtr){
+    OBC_Ray *ray = OBC_TO_RAW_RAY(rawPtr);
+
+    ray->curLength-=ray->unitSize;
+    ray->curUnitLength--;
+}
+
 
 OBC_ERROR_ENUM OBC_RayDoExpand(void *rawPtr){
     OBC_Ray *ray = OBC_TO_RAW_RAY(rawPtr);
@@ -101,9 +115,9 @@ OBC_ERROR_ENUM OBC_RayDoExpand(void *rawPtr){
 
         OBC_RAY_ERROR_PROPAGATE(OBC_RayExpand(rawPtr));
 
-        return OBC_SUCCESS;
+        return OBC_ERROR_SUCCESS;
     }
-    return OBC_NO_OP;
+    return OBC_ERROR_NO_OP;
 }
 
 OBC_ERROR_ENUM OBC_RayExpand(void *rawPtr){
@@ -123,58 +137,65 @@ OBC_ERROR_ENUM OBC_RayExpand(void *rawPtr){
         }
 
         if(newData == NULL){
-            return OBC_FAILURE;
+            return OBC_ERROR_FAILURE;
         }
         ray->rawData = newData;
         ray->maxLength = size;
+        ray->maxUnitLength = size*ray->unitSize;
     ///}
 
-    return OBC_SUCCESS;
+    return OBC_ERROR_SUCCESS;
 
 }
 OBC_ERROR_ENUM OBC_RayContract(void *rawPtr){
 
     OBC_Ray *ray = OBC_TO_RAW_RAY(rawPtr);
-    size_t size = ray->maxLength/2;//<<1;
-    if(size < ray->unitSize){
-        size=ray->unitSize;
+    size_t newSize = ray->maxLength/2;//<<1;
+    if(newSize < ray->unitSize){
+        newSize=ray->unitSize;
     }
 
     char *newData;
     if(ray->rawData==NULL){
-        newData = malloc(size);
+        newData = malloc(newSize);
     }else{
-        newData = realloc(ray->rawData,size);
+        newData = realloc(ray->rawData,newSize);
     }
 
     if(newData == NULL){
-        return OBC_FAILURE;
+        return OBC_ERROR_FAILURE;
     }
     ray->rawData = newData;
-    ray->maxLength = size;
+    ray->maxLength = newSize;
+    ray->maxUnitLength = newSize*ray->unitSize;
+    if(ray->curLength > ray->maxLength){
+        ray->curLength = ray->maxLength;
+        ray->curUnitLength = ray->maxUnitLength;
+    }
 
-    return OBC_SUCCESS;
+    return OBC_ERROR_SUCCESS;
 
 }
 OBC_ERROR_ENUM OBC_RayShrinkToFit(void *rawPtr){
     OBC_Ray *ray = OBC_TO_RAW_RAY(rawPtr);
-    size_t size = ray->curLength;//<<1;
+    size_t newSize = ray->curLength;//<<1;
 
     char *newData;
     if(ray->rawData==NULL){
-        return OBC_NO_OP;
+        return OBC_ERROR_NO_OP;
     }else{
-        newData = realloc(ray->rawData,ray->curLength);
+        newData = realloc(ray->rawData,newSize);
     }
 
     if(newData==NULL){
-        return OBC_FAILURE;
+        return OBC_ERROR_FAILURE;
     }
 
     ray->rawData = newData;
-    ray->maxLength = ray->curLength;
+    ray->maxLength = newSize;
+    ray->maxUnitLength = ray->maxLength*ray->unitSize;
 
-    return OBC_SUCCESS;
+    return OBC_ERROR_SUCCESS;
 }
 
 OBC_ERROR_ENUM OBC_RaySetLast(void *rawPtr, void *data){
@@ -194,7 +215,7 @@ OBC_ERROR_ENUM OBC_RaySetLast(void *rawPtr, void *data){
         unit++;
     }while(--size);
 
-    return OBC_SUCCESS;
+    return OBC_ERROR_SUCCESS;
 
 }
 
@@ -206,8 +227,8 @@ void* OBC_RayGetLast(void *rawPtr){
     return ray->rawData+ray->curLength;
 }
 
-size_t OBC_RayUnitLenth(void *rawPtr){
-    return OBC_TO_RAW_RAY(rawPtr)->unitLength;
+size_t OBC_RayCurUnitLength(void *rawPtr){
+    return OBC_TO_RAW_RAY(rawPtr)->curUnitLength;
 }
 
 size_t OBC_RayLength(void *rawPtr){
@@ -220,4 +241,8 @@ size_t OBC_RayMaxLength(void *rawPtr){
 
 size_t OBC_RayUnitSize(void *rawPtr){
     return OBC_TO_RAW_RAY(rawPtr)->unitSize;
+}
+
+size_t OBC_RayUnitMaxLength(void *rawPtr){
+    return OBC_TO_RAW_RAY(rawPtr)->maxUnitLength;
 }
