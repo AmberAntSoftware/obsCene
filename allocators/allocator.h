@@ -22,8 +22,6 @@ typedef struct OBC_AllocRay{
 
     void *earliestMeta;
 
-    void (*freeFunction)(void *value);
-
 }OBC_AllocRay;
 
 ///returns the starting location of the data -1 unitSize
