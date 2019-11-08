@@ -32,7 +32,7 @@ void *OBC_initRay(OBC_Ray *ray, size_t initialReserveCount, size_t unitSize){
     ray->curUnitLength = 0;
     ray->unitSize = unitSize;
     ray->maxLength = unitSize*initialReserveCount;
-    ray->maxUnitLength = ray->maxLength*ray->unitSize;
+    ray->maxUnitLength = initialReserveCount;
 
     return ray;
 
@@ -141,7 +141,7 @@ OBC_ERROR_ENUM OBC_RayExpand(void *rawPtr){
         }
         ray->rawData = newData;
         ray->maxLength = size;
-        ray->maxUnitLength = size*ray->unitSize;
+        ray->maxUnitLength = size/ray->unitSize;
     ///}
 
     return OBC_ERROR_SUCCESS;
@@ -167,7 +167,7 @@ OBC_ERROR_ENUM OBC_RayContract(void *rawPtr){
     }
     ray->rawData = newData;
     ray->maxLength = newSize;
-    ray->maxUnitLength = newSize*ray->unitSize;
+    ray->maxUnitLength = newSize/ray->unitSize;
     if(ray->curLength > ray->maxLength){
         ray->curLength = ray->maxLength;
         ray->curUnitLength = ray->maxUnitLength;
@@ -193,7 +193,7 @@ OBC_ERROR_ENUM OBC_RayShrinkToFit(void *rawPtr){
 
     ray->rawData = newData;
     ray->maxLength = newSize;
-    ray->maxUnitLength = ray->maxLength*ray->unitSize;
+    ray->maxUnitLength = ray->maxLength/ray->unitSize;
 
     return OBC_ERROR_SUCCESS;
 }
