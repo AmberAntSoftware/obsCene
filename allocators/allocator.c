@@ -53,13 +53,18 @@ size_t OBC_AllocRayMalloc(void *allocator){
         if(OBC_AllocRayExpand(allocator) == OBC_ERROR_FAILURE){
             return OBC_NULL_INDEX;
         }
+
         place = allocRay->backed.curUnitLength;
+        printf("FREELOC: %llu\n",(unsigned long long int)place);
+        if(place > 57){
+            printf("A\n");
+        }
     }
 
     if(place >= allocRay->backed.curUnitLength){
         OBC_RayNewElement(& (allocRay->backed.rawData));
     }
-
+printf("pos: %llu\n",(unsigned long long int)place);
     OBC_AllocRayMarkAllocated(allocator,place);
 
     /*if(place > 1000){
@@ -103,6 +108,10 @@ size_t OBC_AllocRayGetFreeLocation(void *allocator){
         place+=i*BITS;
         if(place >= allocRay->backed.maxUnitLength){
             return OBC_NULL_INDEX;
+        }
+        printf("FOUD_PLACE: %llu\n",(unsigned long long int)place);
+        if(place > 57){
+            //printf("A\n");
         }
         //place*=allocRay->backed.unitSize;
     }else {
@@ -159,9 +168,13 @@ OBC_ERROR_ENUM OBC_AllocRayExpand(void *allocator){
             return OBC_ERROR_FAILURE;
         }
 
-        memset(allocRay->meta.rawData+start,0,
-               ((allocRay->meta.maxLength)-start));
-
+        /**
+        for(; start < allocRay->meta.maxLength; start++){
+            allocRay->meta.rawData[start]=0;
+        }
+        /*/
+        memset(allocRay->meta.rawData+start,0,((allocRay->meta.maxLength)-start));
+        //*/
     }
 
     //OBC_RayAddValue(&allocRay->meta.rawData,0);
