@@ -149,6 +149,7 @@ OBC_ERROR_ENUM OBC_RayExpand(void *rawPtr){
     return OBC_ERROR_SUCCESS;
 
 }
+///https://stackoverflow.com/questions/12125308/can-realloc-fail-return-null-when-trimming
 OBC_ERROR_ENUM OBC_RayContract(void *rawPtr){
 
     OBC_Ray *ray = OBC_TO_RAW_RAY(rawPtr);

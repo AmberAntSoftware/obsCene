@@ -237,6 +237,32 @@ OBC_ERROR_ENUM OBC_metaMarkBit(OBC_ALLOCATOR_META_TYPE *meta, const size_t pos, 
     return OBC_ERROR_NO_OP;
 }
 
+OBC_ERROR_ENUM OBC_metaMarkBit1(OBC_ALLOCATOR_META_TYPE *meta, const size_t pos){
+
+    const size_t unit = pos/META_BITS;
+    const size_t bits = (pos-(unit*META_BITS));
+    OBC_ALLOCATOR_META_TYPE unitMask = 1<<((META_BITS-bits)-1);
+    meta+=unit;
+    *meta = (*meta) | unitMask;
+
+    return OBC_ERROR_NO_OP;
+}
+
+OBC_ERROR_ENUM OBC_metaMarkBit0(OBC_ALLOCATOR_META_TYPE *meta, const size_t pos){
+
+    const size_t unit = pos/META_BITS;
+    const size_t bits = (pos-(unit*META_BITS));
+    OBC_ALLOCATOR_META_TYPE unitMask = 1<<((META_BITS-bits)-1);
+    unitMask=~unitMask;
+    meta+=unit;
+    *meta = (*meta) & unitMask;
+
+    return OBC_ERROR_NO_OP;
+}
+
+
+
+
 size_t OBC_metaFirstEmptyBit(OBC_ALLOCATOR_META_TYPE *meta, size_t metaUnitLength){
 
     size_t i;
@@ -418,7 +444,7 @@ size_t OBC_AllocatorGetFreeLocation(void *allocator){
 
     if(units == 0){
         found = OBC_metaFirstEmptyBit(
-                     alloc->rawAlloc.meta.rawData,
+                     (OBC_ALLOCATOR_META_TYPE *)alloc->rawAlloc.meta.rawData,
                      alloc->rawAlloc.meta.maxUnitLength);
         return found;
     }else{
@@ -431,7 +457,7 @@ size_t OBC_AllocatorGetFreeLocation(void *allocator){
             *OBC_ALLOCATOR_META_CHUNKSIZE+found;
 
             found = OBC_metaFirstEmptyBit(
-                     alloc->meta[index].rawData,
+                     (OBC_ALLOCATOR_META_TYPE *)alloc->meta[index].rawData,
                      alloc->meta[index].maxUnitLength);
             if(found == OBC_NULL_INDEX){
                 return OBC_NULL_INDEX;
@@ -444,44 +470,48 @@ size_t OBC_AllocatorGetFreeLocation(void *allocator){
 
 }
 
+/**
 OBC_ERROR_ENUM OBC_AllocatorExpand(void *allocator){
 
     OBC_Allocator *allocator_ = OBC_TO_RAW_ALLOCATOR(allocator);
     size_t i, index;
 
-    if(OBC_AllocRayExpand(& allocator_->rawAlloc.backed.rawData)==OBC_ERROR_FAILURE){
+    if(OBC_AllocRayExpand(OBC_FROM_RAW_ALLOCRAY(& allocator_->rawAlloc))==OBC_ERROR_FAILURE){
         //no op re err
         return OBC_ERROR_FAILURE;
     }
 
     const unsigned int units = allocator_->metaUnits;
-    size_t start, len;
+    size_t len;
 
-    /*
-    switch(alloc->metaUnits){
-    case(0):
-    case(1):
-    case(2):
-    case(3):
-    case(4):
-        //
-    }//*/
+
+    //switch(alloc->metaUnits){
+    //case(0):
+    //case(1):
+    //case(2):
+    //case(3):
+    //case(4):
+    //
+    //}
 
     len = allocator_->rawAlloc.backed.curUnitLength;
 
-    if(len > OBC_ALLOC_UNITS_3){
+    if(allocator_->metaUnits == 0){
 
-    }else
-    if(len > OBC_ALLOC_UNITS_2){
+        if(allocator_->rawAlloc.backed.curLength > OBC_ALLOC_UNITS_0){
 
-    }else
-    if(len > OBC_ALLOC_UNITS_1){
+            size_t start = allocator_->meta[0].maxLength;
+            if(OBC_RayExpand(& allocator_->meta[0].rawData)== OBC_ERROR_FAILURE){
+                return OBC_ERROR_FAILURE;
+            }
+            allocator_->metaUnits=1;
+            memset(allocator_->meta[0].rawData+start,0,(allocator_->meta[0].maxLength)-start);
 
-    }else
-    if(len > OBC_ALLOC_UNITS_0){
+            return OBC_ERROR_SUCCESS;
+        }
 
+        return OBC_ERROR_NO_OP;
     }
-
 
     for(i = 0; i < units; i++){
         index = (units-i)-1;
@@ -514,36 +544,10 @@ OBC_ERROR_ENUM OBC_AllocatorExpand(void *allocator){
         }
     }
 
-    /*
-    if(OBC_RayDoExpand(& allocator_->rawAlloc.backed.rawData) == OBC_ERROR_FAILURE){
-        return OBC_ERROR_FAILURE;
-    }
-
-    const size_t metaMaxUnits = BITS*allocRay->meta.maxUnitLength;
-    const size_t backedMaxUnits = allocRay->backed.maxUnitLength;
-
-    if(metaMaxUnits < backedMaxUnits){
-
-        size_t start = allocRay->meta.maxLength;
-
-        if(OBC_RayExpand(& allocRay->meta.rawData) == OBC_ERROR_FAILURE){
-            for(i = 0; i < OBC_ALLOCATOR_MAX_CONTRACT_TRIES; i++){
-                if(OBC_RayContract(& allocRay->backed.rawData) != OBC_ERROR_FAILURE){
-                    return OBC_ERROR_FAILURE;
-                }else{
-                    break;
-                }
-            }
-            return OBC_ERROR_FAILURE;
-        }
-
-        memset(allocRay->meta.rawData+start,0,((allocRay->meta.maxLength)-start));
-
-    }
-    */
     return OBC_ERROR_FAILURE;
 
 }
+//**/
 
 /**
 
@@ -612,4 +616,82 @@ OBC_ERROR_ENUM OBC_AllocatorMarkFreed(void *allocator, size_t pos){
 }
 */
 
+OBC_ERROR_ENUM OBC_AllocatorExpand(void *allocator){
 
+    OBC_Allocator2 *allocator_ = OBC_TO_RAW_ALLOCATOR2(allocator);
+
+    const unsigned int units = allocator_->metaUnits;
+    const size_t expansionLimits[OBC_ALLOCATOR_META_ADDRESSING] = {OBC_ALLOC_UNITS_0,OBC_ALLOC_UNITS_1,OBC_ALLOC_UNITS_2,OBC_ALLOC_UNITS_3};
+
+    size_t i,j;
+
+    if(units<4){
+        if(allocator_->backed.curLength > expansionLimits[units]){
+            allocator_->metaUnits = units+1;
+        }
+    }
+
+    i = 0;
+    do{
+
+        if(OBC_RayExpand(& allocator_->meta[i].rawData)==OBC_ERROR_FAILURE){
+
+            do{
+
+                for(j = 0;
+                    OBC_RayContract(& allocator_->meta[i-1].rawData)==OBC_ERROR_FAILURE
+                    && j < OBC_ALLOCATOR_MAX_CONTRACT_TRIES; j++ ){
+                    ///something horrible happened, continue to attempt other trimming
+                }
+
+                i--;
+            }while(i);
+
+            return OBC_ERROR_FAILURE;
+        }
+
+    }while(i < units);
+
+    i=0;
+    do{
+        size_t start = allocator_->meta[i].maxLength/2;
+        memset(allocator_->meta[i].rawData+start,0,((allocator_->meta[i].maxLength)-start));
+        i++;
+    }while(i < units);
+
+    return OBC_ERROR_SUCCESS;
+
+}
+
+OBC_ERROR_ENUM OBC_AllocatorMarkAllocated(void *allocator){
+
+    OBC_Allocator2 *allocator_ = OBC_TO_RAW_ALLOCATOR2(allocator);
+
+    const unsigned int units = allocator_->metaUnits;
+
+    size_t pos;
+    size_t posAccum = 0;
+    unsigned int i, index;
+    for(i = 0; i < units; i++){
+        index = (units-i)-1;
+
+        pos = OBC_metaFirstEmptyBit((OBC_ALLOCATOR_META_TYPE *)allocator_->meta[index].rawData,allocator_->meta[index].maxUnitLength);
+        if(pos==OBC_NULL_INDEX){
+            return OBC_ERROR_FAILURE;
+        }
+
+        posAccum*=(OBC_ALLOCATOR_META_CHUNKSIZE*META_BITS);
+        posAccum+=pos;
+    }
+
+    ///FIXME
+    ///TODO heuristically apply used bits to meta lines
+
+    return OBC_ERROR_SUCCESS;
+
+
+}
+
+OBC_ERROR_ENUM OBC_AllocatorMarkFreed(void *allocator){
+    return OBC_ERROR_SUCCESS;
+}
