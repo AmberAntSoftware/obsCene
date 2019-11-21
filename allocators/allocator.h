@@ -15,27 +15,18 @@
 #define _OBC_ALLOCRAY_OFFSET ((size_t)(&((OBC_AllocRay *)NULL)->backed.rawData))
 #define OBC_TO_RAW_ALLOCRAY(rawPtr) (_OBC_ALLOCRAY_PTR_CAST(((void*)(rawPtr)) - _OBC_ALLOCRAY_OFFSET))
 
-/*
-typedef struct OBC_Allocator{
-
-    size_t (*calloc)(void** self);
-    size_t (*malloc)(void** self);
-    size_t (*free)(void** self, size_t unit);
-
-}OBC_Allocator;
-*/
-
 typedef struct OBC_AllocRay{
 
     OBC_Ray backed;
     OBC_Ray meta;
-    size_t metaBits;
 
 }OBC_AllocRay;
 
 ///returns the starting location of the data -1 unitSize
 void **OBC_newAllocRay(size_t unitSize);
 void *OBC_initAllocRay(void *allocator, size_t unitSize);
+void OBC_freeAllocRay(void *allocator);
+void OBC_freeAllocRayData(void *allocator);
 
 size_t OBC_AllocRayMalloc(void *allocator);
 OBC_ERROR_ENUM OBC_AllocRayFree(void *allocator, size_t data);
@@ -88,5 +79,36 @@ OBC_ERROR_ENUM OBC_AllocRayExpand(void *allocator);
 OBC_ERROR_ENUM OBC_AllocRayMarkAllocated(void *allocator, size_t pos);
 OBC_ERROR_ENUM OBC_AllocRayMarkFreed(void *allocator, size_t pos);
 */
+
+
+
+
+
+#define _OBC_ALLOCATOR_PTR_CAST(rawPtr) ((OBC_Allocator *)(rawPtr))
+#define _OBC_ALLOCATOR_OFFSET ((size_t)(&((OBC_Allocator *)NULL)->rawAlloc.backed.rawData))
+#define OBC_TO_RAW_ALLOCATOR(rawPtr) (_OBC_ALLOCATOR_PTR_CAST(((void*)(rawPtr)) - _OBC_ALLOCATOR_OFFSET))
+
+typedef struct OBC_Allocator{
+    OBC_AllocRay rawAlloc;
+    unsigned int metaUnits;
+    OBC_Ray meta[OBC_ALLOCATOR_META_ADDRESSING];
+}OBC_Allocator;
+
+
+OBC_ERROR_ENUM OBC_metaMarkBit(OBC_ALLOCATOR_META_TYPE *meta, const size_t pos, const char bitVal);
+size_t OBC_metaFirstEmptyBit(OBC_ALLOCATOR_META_TYPE *meta, size_t metaUnitLength);
+
+
+
+
+
+void **OBC_newAllocator(size_t unitSize);
+void *OBC_initAllocator(void *allocator, size_t unitSize);
+void OBC_freeAllocator(void *allocator);
+void OBC_freeAllocatorData(void *allocator);
+
+size_t OBC_AllocatorMalloc(void *allocator);
+
+size_t OBC_AllocatorGetFreeLocation(void *allocator);
 
 #endif // ALLOCATOR_H_INCLUDED

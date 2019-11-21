@@ -46,7 +46,9 @@ void OBC_freeRay(void *rawPtr){
 
 void OBC_freeRayData(void *rawPtr){
     OBC_Ray *ray = OBC_TO_RAW_RAY(rawPtr);
-    OBC_freeRayData(ray->rawData);
+    if(ray->rawData != NULL){
+        free(ray);
+    }
 }
 
 
