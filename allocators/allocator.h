@@ -41,7 +41,7 @@ OBC_ERROR_ENUM OBC_AllocRayExpand(void *allocator);
 
 
 ///utility -- finds first empty leftmost bit of value
-int OBC_FindFirstEmptyBit(OBC_ALLOCATOR_META_TYPE rraw);
+int OBC_FindFirstEmptyBit(OBC_ALLOC_META_TYPE rraw);
 ///utility -- marks the location bit as used
 OBC_ERROR_ENUM OBC_AllocRayMarkAllocated(void *allocator, size_t pos);
 ///utility -- marks the location bit as free
@@ -94,7 +94,7 @@ OBC_ERROR_ENUM OBC_AllocRayMarkFreed(void *allocator, size_t pos);
 typedef struct OBC_Allocator{
     OBC_AllocRay rawAlloc;
     unsigned int metaUnits;
-    OBC_Ray meta[OBC_ALLOCATOR_META_ADDRESSING];
+    OBC_Ray meta[OBC_ALLOC_META_ADDRESSING];
 }OBC_Allocator;
 
 #define _OBC_ALLOCATOR2_PTR_CAST(rawPtr) ((OBC_Allocator2 *)(rawPtr))
@@ -103,14 +103,14 @@ typedef struct OBC_Allocator{
 typedef struct OBC_Allocator2{
     OBC_Ray backed;
     unsigned int metaUnits;
-    OBC_Ray meta[OBC_ALLOCATOR_META_ADDRESSING+1];
+    OBC_Ray meta[OBC_ALLOC_META_ADDRESSING+1];
 }OBC_Allocator2;
 
 
-OBC_ERROR_ENUM OBC_metaMarkBit1(OBC_ALLOCATOR_META_TYPE *meta, const size_t pos);
-OBC_ERROR_ENUM OBC_metaMarkBit0(OBC_ALLOCATOR_META_TYPE *meta, const size_t pos);
-OBC_ERROR_ENUM OBC_metaMarkBit(OBC_ALLOCATOR_META_TYPE *meta, const size_t pos, const char bitVal);
-size_t OBC_metaFirstEmptyBit(OBC_ALLOCATOR_META_TYPE *meta, size_t metaUnitLength);
+OBC_ERROR_ENUM OBC_metaMarkBit1(OBC_ALLOC_META_TYPE *meta, const size_t pos);
+OBC_ERROR_ENUM OBC_metaMarkBit0(OBC_ALLOC_META_TYPE *meta, const size_t pos);
+OBC_ERROR_ENUM OBC_metaMarkBit(OBC_ALLOC_META_TYPE *meta, const size_t pos, const char bitVal);
+size_t OBC_metaFirstEmptyBit(OBC_ALLOC_META_TYPE *meta, size_t metaUnitLength);
 
 
 
@@ -127,5 +127,17 @@ size_t OBC_AllocatorGetFreeLocation(void *allocator);
 
 OBC_ERROR_ENUM OBC_AllocatorMarkAllocated(void *allocator);
 OBC_ERROR_ENUM OBC_AllocatorMarkFreed(void *allocator);
+
+
+
+
+void **OBC_newAllocator2(size_t unitSize);
+void *OBC_initAllocator2(void *allocator, size_t unitSize);
+
+OBC_ERROR_ENUM OBC_Allocator2Expand(void *allocator);
+size_t OBC_Allocator2GetFreeLocation(void *allocator);
+size_t OBC_Allocator2Malloc(void *allocator);
+OBC_ERROR_ENUM OBC_Allocator2MarkAllocated(void *allocator, size_t pos);
+OBC_ERROR_ENUM OBC_Allocator2MarkFreed(void *allocator, size_t pos);
 
 #endif // ALLOCATOR_H_INCLUDED
