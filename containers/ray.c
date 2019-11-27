@@ -113,7 +113,7 @@ void OBC_RayPopElement(void *rawPtr){
 
 OBC_ERROR_ENUM OBC_RayDoExpand(void *rawPtr){
     OBC_Ray *ray = OBC_TO_RAW_RAY(rawPtr);
-    if(ray->curLength==ray->maxLength){
+    if(ray->curLength>=ray->maxLength){
 
         OBC_RAY_ERROR_PROPAGATE(OBC_RayExpand(rawPtr));
 

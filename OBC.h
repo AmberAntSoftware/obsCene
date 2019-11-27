@@ -1,6 +1,7 @@
 #ifndef OBC_H_INCLUDED
 #define OBC_H_INCLUDED
 
+#include <limits.h>
 
 #ifndef NULL
     #define NULL 0
@@ -13,6 +14,12 @@
 #ifndef OBC_MEMORY_FAILURE
     #define OBC_MEMORY_FAILURE 1
 #endif // NULL
+
+#if 0
+    #define debug(...) printf(__VA_ARGS__)
+#else
+    #define debug(...) do{}while(0);
+#endif // 1
 
 typedef enum OBC_ERROR_ENUM{
     OBC_ERROR_NO_OP = 0,
