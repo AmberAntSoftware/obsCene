@@ -435,6 +435,20 @@ void *OBC_initAllocator2(OBC_Allocator2 *allocator, size_t unitSize){
     initAlloc = (initAlloc/2)*2;//round to 0 if large
     */
 
+    /*
+    if(OBC_initRay(
+           OBC_TO_RAW_RAY(& allocator->backed.rawData)
+           ,OBC_ALLOC_META_CHUNKSIZE/2,unitSize) == NULL){
+        return NULL;
+    }
+    if(OBC_initRay(
+            OBC_TO_RAW_RAY(& allocator->meta[0].rawData)
+           , OBC_ALLOC_META_CHUNKSIZE/2,
+       sizeof(OBC_ALLOC_META_TYPE)) == NULL){
+        OBC_freeRayData(&allocator->backed.rawData);
+        return NULL;
+    }
+    /*/
     if(OBC_initRay(
            OBC_TO_RAW_RAY(& allocator->backed.rawData)
            ,0,unitSize) == NULL){
@@ -447,6 +461,8 @@ void *OBC_initAllocator2(OBC_Allocator2 *allocator, size_t unitSize){
         OBC_freeRayData(&allocator->backed.rawData);
         return NULL;
     }
+    //*/
+
     memset(allocator->meta[0].rawData,0,allocator->meta[0].maxLength);
 
     unsigned int i;
@@ -508,11 +524,17 @@ size_t OBC_metaFirst0Bit(OBC_ALLOC_META_TYPE *data, size_t unitsToCheck){
 
     size_t i;
     for(i=0; i < unitsToCheck; i++){
+        /*
         OBC_ALLOC_META_TYPE cheq = data[i];
         cheq = ~cheq;
         if(cheq){
             break;
         }
+        /*/
+        if((OBC_ALLOC_META_TYPE)(~(data[i]))){
+            break;
+        }
+        //*/
     }
     if(i==unitsToCheck){
         return OBC_NULL_INDEX;
@@ -520,20 +542,59 @@ size_t OBC_metaFirst0Bit(OBC_ALLOC_META_TYPE *data, size_t unitsToCheck){
 
     found = i*OBC_ALLOC_META_BITS;
 
+    //*
     char *raw = (char*)(&data[i]);
 
     ///printf("BYTES: %u \n",sizeof(OBC_ALLOC_META_TYPE)*OBC_ALLOC_META_CHUNKSIZE);
+
     size_t j;
     for(i = 0; i < sizeof(OBC_ALLOC_META_TYPE)*OBC_ALLOC_META_CHUNKSIZE; i++){
         if(~raw[i]){
             for(j=0; j < CHAR_BIT; j++){
-                if(((raw[i]>>((CHAR_BIT-j)-1))&1) == 0){
+                if(((raw[i]>>((CHAR_BIT-j)-1))&0x01) == 0){
                     return found+j+(i*CHAR_BIT);
                 }
+            }
+            return OBC_NULL_INDEX;
+        }
+    }
+    /*/
+
+    OBC_ALLOC_META_TYPE *raw = data+i;
+
+    size_t j,k;
+    for(i = 0; i < OBC_ALLOC_META_CHUNKSIZE; i++){
+        if((~(raw[i]))){
+            for(j=0; j < OBC_ALLOC_META_BITS; j+=CHAR_BIT){
+                #ifdef ENDIAN_BIG
+                if(((raw[i]>>((OBC_ALLOC_META_BITS-j)-1))&0x01) == 0){
+                    return found+j+(i*CHAR_BIT);
+                }
+                #else
+                //int byteShift = ((j/CHAR_BIT)+1)*CHAR_BIT;
+                //int bitSub = (j%CHAR_BIT)+1;
+                //printf("RAW::: %p\n",raw[i]);
+                //if(
+                //   ((raw[i]>>(byteShift-bitSub))&0x1)
+                //   == 0){
+                //    return found+(byteShift-bitSub);
+                //}
+                if((~((raw[i]>>j)&0xFF))){
+                    for(k=0; k < CHAR_BIT; k++){
+                        if(((((raw[i]>>j)&0xFF)>>((CHAR_BIT-k)-1))&0x01) == 0){
+                            return found+j+(k);
+                        }
+                    }
+                }
+
+
+                #endif
             }
             return found;
         }
     }
+
+    //*/
 
     return OBC_NULL_INDEX;
 
