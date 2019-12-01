@@ -7,11 +7,19 @@
 
 typedef unsigned long long int OBC_T;
 
+//uint
+//8
+//ushort
+//16
+
+#define OBC_ALLOC_MAX_INIT_BUFFER_BYTES 1024
+
 #define OBC_ALLOC_MAX_CONTRACT_TRIES 3
-#define OBC_ALLOC_META_TYPE unsigned char
-#define OBC_ALLOC_META_CHUNKSIZE 8
+#define OBC_ALLOC_META_TYPE long long unsigned int
+#define OBC_ALLOC_META_CHUNKSIZE 1
 #define OBC_ALLOC_META_CHUNKSIZE_BITS (OBC_ALLOC_META_CHUNKSIZE*OBC_ALLOC_META_BITS)
 //#define OBC_ALLOCATOR_META_CHUNKSIZE_MOD(position) ((position)&1024))
+#define OBC_ALLOC_META_BYTES (sizeof(OBC_ALLOC_META_TYPE))
 #define OBC_ALLOC_META_BITS ((sizeof(OBC_ALLOC_META_TYPE))*CHAR_BIT)
 #define OBC_ALLOC_META_MASK ((OBC_ALLOC_META_TYPE)(1 << (sizeof(OBC_ALLOC_META_TYPE)*CHAR_BIT-1)))
 

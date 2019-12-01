@@ -131,31 +131,25 @@ OBC_ERROR_ENUM OBC_AllocatorMarkFreed(void *allocator);
 
 
 
+#define OBC_Allocator2GetPointer(rawPtr, index) ((*(rawPtr))+index)
+#define OBC_Allocator2GetValue(rawPtr, index) ((*(rawPtr))[index])
+
+
+
+size_t OBC_metaFirst0Bit(OBC_ALLOC_META_TYPE *data, size_t unitsToCheck);
 void **OBC_newAllocator2(size_t unitSize);
 void *OBC_initAllocator2(OBC_Allocator2 *allocator, size_t unitSize);
 
 void OBC_freeAllocator2(void *allocator);
 void OBC_freeAllocator2Data(void *allocator);
 
-OBC_ERROR_ENUM OBC_Allocator2Free(void *allocator, size_t pos);
 
-OBC_ERROR_ENUM OBC_Allocator2Expand(void *allocator);
-size_t OBC_Allocator2GetFreeLocation(void *allocator);
-size_t OBC_Allocator2Malloc(void *allocator);
-OBC_ERROR_ENUM OBC_Allocator2MarkAllocated(void *allocator, size_t pos);
-OBC_ERROR_ENUM OBC_Allocator2MarkFreed(void *allocator, size_t pos);
-
-size_t OBC_Allocator2GetFreeLocation2(void *allocator);
-OBC_ERROR_ENUM OBC_Allocator2MarkAllocated2(void *allocator, size_t pos);
-size_t OBC_Allocator2Malloc2(void *allocator);
-
-
-size_t OBC_metaFirst0Bit(OBC_ALLOC_META_TYPE *data, size_t unitsToCheck);
 OBC_ERROR_ENUM OBC_Allocator2MarkAllocated3(void *allocator, size_t pos);
 OBC_ERROR_ENUM OBC_Allocator2Expand3(void *allocator);
 size_t OBC_Allocator2GetFreeLocation3(void *allocator);
 size_t OBC_Allocator2Malloc3(void *allocator);
 OBC_ERROR_ENUM OBC_Allocator2Free3(void *allocator, size_t pos);
+OBC_ERROR_ENUM OBC_Allocator2MarkFreed3(void *allocator, size_t pos);
 
 OBC_ERROR_ENUM OBC_metaMarkBit1__(OBC_ALLOC_META_TYPE *meta, const size_t pos);
 OBC_ERROR_ENUM OBC_metaMarkBit0__(OBC_ALLOC_META_TYPE *meta, const size_t pos);
