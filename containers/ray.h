@@ -7,7 +7,7 @@
 
 
 
-#define OBC_RAY_ERROR_PROPAGATE(tokenResolvingToRayEnumValue) do { if( tokenResolvingToRayEnumValue == OBC_ERROR_FAILURE ) { return OBC_ERROR_FAILURE; } } while(0);
+#define OBC_RAY_ERROR_PROPAGATE(tokenResolvingToRayEnumValue) do { if( (tokenResolvingToRayEnumValue) == OBC_ERROR_FAILURE ) { return OBC_ERROR_FAILURE; } } while(0);
 
 
 typedef struct OBC_Ray{

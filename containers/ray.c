@@ -89,9 +89,33 @@ OBC_ERROR_ENUM OBC_RayRemoveFast(void *rawPtr, size_t index){
 
 OBC_ERROR_ENUM OBC_RayNewElement(void *rawPtr){
 
+
+    /*
+    if(OBC_RayDoExpand(rawPtr) == OBC_ERROR_FAILURE){
+        return OBC_ERROR_FAILURE;
+    }
     OBC_RayPushElement(rawPtr);
+    return OBC_ERROR_SUCCESS;
+    */
+
+    /*
+    OBC_ERROR_ENUM err = OBC_RayDoExpand(rawPtr);
+    switch(err){
+    case(OBC_ERROR_NO_OP):
+        OBC_RayPushElement(rawPtr);
+        break;
+    case(OBC_ERROR_SUCCESS):
+        OBC_RayPushElement(rawPtr);
+        break;
+    case(OBC_ERROR_FAILURE):
+        return OBC_ERROR_FAILURE;
+    }
+    /*/
 
     OBC_RAY_ERROR_PROPAGATE(OBC_RayDoExpand(rawPtr));
+    OBC_RayPushElement(rawPtr);
+
+    //*/
 
     return OBC_ERROR_SUCCESS;
 }
@@ -210,8 +234,8 @@ OBC_ERROR_ENUM OBC_RaySetLast(void *rawPtr, void *data){
 
     size_t size = ray->unitSize;
 
-    char *tcpy = (char *)data;
-    char *unit = (char *)OBC_RayGetLast(rawPtr);
+    unsigned char *tcpy = (unsigned char *)data;
+    unsigned char *unit = (unsigned char *)(ray->rawData+ray->curLength);//OBC_RayGetLast(rawPtr);
     do{
         *unit=*tcpy;
         tcpy++;
@@ -227,6 +251,7 @@ void* OBC_RayGetLast(void *rawPtr){
     if(ray->curLength==ray->maxLength){
         return ray->rawData+ray->curLength-ray->unitSize;
     }
+    unsigned char *unit = (unsigned char *)(ray->rawData+ray->curLength);
     return ray->rawData+ray->curLength;
 }
 

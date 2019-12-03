@@ -3,17 +3,6 @@
 
 #include "OBC.h"
 
-//typedef unsigned int OBC_ALLOC_META_TYPE;
-
-typedef unsigned long long int OBC_T;
-
-//uint
-//8
-//ushort
-//16
-
-#define OBC_ALLOC_MAX_INIT_BUFFER_BYTES 1024
-
 #define OBC_ALLOC_MAX_CONTRACT_TRIES 3
 #define OBC_ALLOC_META_TYPE size_t
 ///CHUNKSIZE must be a power of 2
@@ -24,11 +13,11 @@ typedef unsigned long long int OBC_T;
 #define OBC_ALLOC_META_BITS ((sizeof(OBC_ALLOC_META_TYPE))*CHAR_BIT)
 #define OBC_ALLOC_META_MASK ((OBC_ALLOC_META_TYPE)(1 << (sizeof(OBC_ALLOC_META_TYPE)*CHAR_BIT-1)))
 
-//meta addressing is N units to reach approximately size of 2^64
-//through lookups -- current is 32bit ish of 1k, 4 is ~2^64
-//mutate as needed with other above chunk and comparison size optimizations
 
-#define OBC_ALLOC_META_ADDRESSING 4
+///meta addressing is N units to reach approximately size of 2^64
+///through lookups -- current is 32bit ish of 1k, 4 is ~2^64
+///mutate as needed with other above chunk and comparison size optimizations
+#define OBC_ALLOC_META_ADDRESSING 5
 
 ///set extras to 0 past size_t maximum value
 #define OBC_ALLOC_UNITS_0 (OBC_ALLOC_META_CHUNKSIZE_BITS)
@@ -37,33 +26,12 @@ typedef unsigned long long int OBC_T;
 #define OBC_ALLOC_UNITS_3 (OBC_ALLOC_META_CHUNKSIZE_BITS*OBC_ALLOC_UNITS_2)
 #define OBC_ALLOC_UNITS_4 (OBC_ALLOC_META_CHUNKSIZE_BITS*OBC_ALLOC_UNITS_3)
 #define OBC_ALLOC_UNITS_5 (OBC_ALLOC_META_CHUNKSIZE_BITS*OBC_ALLOC_UNITS_4)
-
-
-
+///manually keep in synch with unit limits of addressing
 #define OBC_ALLOC_META_LIMITS \
 {\
     OBC_ALLOC_UNITS_0,OBC_ALLOC_UNITS_1 \
     ,OBC_ALLOC_UNITS_2,OBC_ALLOC_UNITS_3 \
-    /*,OBC_ALLOC_UNITS_4,OBC_ALLOC_UNITS_5,*/ \
+    ,OBC_ALLOC_UNITS_4/*,OBC_ALLOC_UNITS_5,*/ \
 };
-
-/*
-typedef OBC_AllocMeta{
-
-}
-*/
-
-/*
-typedef struct OBC_Allocator{
-
-    size_t (*calloc)(void** self);
-    size_t (*malloc)(void** self);
-    size_t (*free)(void** self, size_t unit);
-
-}OBC_Allocator;
-*/
-
-//size_t OBC_findFirstLeftBit(OBC_ALLOC_META_TYPE *meta);
-
 
 #endif // ALLOCATORS_H_INCLUDED
