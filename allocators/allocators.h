@@ -34,4 +34,10 @@
     ,OBC_ALLOC_UNITS_4/*,OBC_ALLOC_UNITS_5,*/ \
 };
 
+
+typedef struct OBC_AllocatorPointer{
+    void **allocator;
+    size_t where;
+}OBC_AllocatorPointer;
+
 #endif // ALLOCATORS_H_INCLUDED

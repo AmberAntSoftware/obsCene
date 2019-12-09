@@ -4,6 +4,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #ifndef NULL
     #define NULL 0
@@ -41,5 +42,42 @@ typedef struct OBC_ErrorPointer{
     void *realValue;
 }OBC_ErrorPointer;
 
+void *OBC_memset (void *ptr, int c, size_t len);
+
+
+
+/*
+typedef struct OBC_BigTimer{
+
+}OBC_BigTimer;
+
+typedef size_t OBC_BigMilliseconds;
+
+size_t OBC_BigClock(clock_t start, clock_t end);
+*/
+unsigned int OBC_clockMillis(clock_t start, clock_t end);
+unsigned int OBC_clockSeconds(clock_t start, clock_t end);
+
+/*
+#define INTERFACE(returnValue, functionName, argsListWithParenthesis)\
+    returnValue (* functionName) argsListWithParenthesis
+
+#define IMPLEMENT_INTERFACE(interface,typename)
+
+typedef union I_Allocator{
+
+    INTERFACE(void**,New,(size_t unitSize));
+    INTERFACE(void*,init,(void *allocator, size_t unitSize));
+    INTERFACE(void,free,(void *allocator));
+    INTERFACE(void,freeData,(void *allocator));
+    INTERFACE(OBC_ERROR_ENUM,markAllocated,(void *allocator, size_t pos));
+    INTERFACE(OBC_ERROR_ENUM,expand,(void *allocator));
+    INTERFACE(size_t,getFreeLocation,(void *allocator));
+    INTERFACE(size_t,malloc,(void *allocator));
+    INTERFACE(OBC_ERROR_ENUM,allocatorFree,(void *allocator, size_t pos));
+    INTERFACE(OBC_ERROR_ENUM,markFreed,(void *allocator, size_t pos));
+
+}I_Allocator;
+*/
 
 #endif // OBC_H_INCLUDED

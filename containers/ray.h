@@ -5,10 +5,14 @@
 
 #include "OBC.h"
 
-
-
 #define OBC_RAY_ERROR_PROPAGATE(tokenResolvingToRayEnumValue) do { if( (tokenResolvingToRayEnumValue) == OBC_ERROR_FAILURE ) { return OBC_ERROR_FAILURE; } } while(0);
 
+
+#define _OBC_RAY_PTR_CAST(rawPtr) ((OBC_Ray *)(rawPtr))
+#define _OBC_RAY_OFFSET ((size_t)(&((OBC_Ray *)NULL)->rawData))
+#define OBC_TO_RAY_PTR(rawPtr) (_OBC_RAY_PTR_CAST(((void*)(rawPtr)) - _OBC_RAY_OFFSET))
+#define OBC_FROM_RAY_PTR(rawPtr) ((void**)(((void*)(OBC_RayPtr)) + _OBC_RAY_OFFSET))
+#define OBC_FROM_RAY_VAL(rayVal) ((void**)(((void*)(&(rayVal))) + _OBC_RAY_OFFSET))
 
 typedef struct OBC_Ray{
 
@@ -28,11 +32,6 @@ typedef struct OBC_Ray{
 
 }OBC_Ray;
 
-
-
-#define _OBC_RayPTR_CAST(rawPtr) ((OBC_Ray *)(rawPtr))
-#define _OBC_RAY_OFFSET ((size_t)(&((OBC_Ray *)NULL)->rawData))
-#define OBC_TO_RAW_RAY(rawPtr) (_OBC_RayPTR_CAST(((void*)(rawPtr)) - _OBC_RAY_OFFSET))
 
 ///NULL on failed allocation
 void **OBC_newRay(size_t initialReserveCount, size_t unitSize);
@@ -70,16 +69,16 @@ https://en.cppreference.com/w/cpp/container/vector/data
 /*/
     //**
     #define OBC_RayAddValue(rawPtr, data)\
-        if(OBC_TO_RAW_RAY(rawPtr)->curLength==OBC_TO_RAW_RAY(rawPtr)->maxLength){\
+        if(OBC_TO_RAY_PTR(rawPtr)->curLength==OBC_TO_RAY_PTR(rawPtr)->maxLength){\
             if(OBC_RayExpand(rawPtr) != OBC_ERROR_FAILURE){\
-                (*((*(rawPtr))+OBC_TO_RAW_RAY(rawPtr)->curUnitLength)) = data;\
-                OBC_TO_RAW_RAY(rawPtr)->curLength+=OBC_TO_RAW_RAY(rawPtr)->unitSize;\
-                OBC_TO_RAW_RAY(rawPtr)->curUnitLength++;\
+                (*((*(rawPtr))+OBC_TO_RAY_PTR(rawPtr)->curUnitLength)) = data;\
+                OBC_TO_RAY_PTR(rawPtr)->curLength+=OBC_TO_RAY_PTR(rawPtr)->unitSize;\
+                OBC_TO_RAY_PTR(rawPtr)->curUnitLength++;\
             }\
         }else{\
-            (*((*(rawPtr))+OBC_TO_RAW_RAY(rawPtr)->curUnitLength)) = data;\
-            OBC_TO_RAW_RAY(rawPtr)->curLength+=OBC_TO_RAW_RAY(rawPtr)->unitSize;\
-            OBC_TO_RAW_RAY(rawPtr)->curUnitLength++;\
+            (*((*(rawPtr))+OBC_TO_RAY_PTR(rawPtr)->curUnitLength)) = data;\
+            OBC_TO_RAY_PTR(rawPtr)->curLength+=OBC_TO_RAY_PTR(rawPtr)->unitSize;\
+            OBC_TO_RAY_PTR(rawPtr)->curUnitLength++;\
         }
     //**/
 //*/
@@ -108,7 +107,7 @@ OBC_ERROR_ENUM OBC_RayContract(void *rawPtr);
 OBC_ERROR_ENUM OBC_RayShrinkToFit(void *rawPtr);
 
 ///sets the last position to the next element and attempts expansion if full
-OBC_ERROR_ENUM OBC_RayNewElement(void *rawPtr);
+size_t OBC_RayNewElement(void *rawPtr);
 ///sets the last position to the next element
 void OBC_RayPushElement(void *rawPtr);
 ///sets the last position to the previous element
@@ -123,5 +122,22 @@ OBC_ERROR_ENUM OBC_RayRemove(void *rawPtr, size_t index);
 OBC_ERROR_ENUM OBC_RayRemoveFast(void *rawPtr, size_t index);
 ///returns the last index address
 void* OBC_RayGetLast(void *rawPtr);
+
+#define OBC_RayNewElementFast(size_tStorage,rawPtr)\
+    {\
+    if(OBC_TO_RAY_PTR(rawPtr)->curLength==OBC_TO_RAY_PTR(rawPtr)->maxLength){\
+            if(OBC_RayExpand(rawPtr) != OBC_ERROR_FAILURE){\
+                size_tStorage = OBC_TO_RAY_PTR(rawPtr)->curUnitLength;\
+                OBC_TO_RAY_PTR(rawPtr)->curLength+=OBC_TO_RAY_PTR(rawPtr)->unitSize;\
+                OBC_TO_RAY_PTR(rawPtr)->curUnitLength++;\
+            }else{\
+                size_tStorage = OBC_NULL_INDEX;\
+            }\
+    }else{\
+        size_tStorage = OBC_TO_RAY_PTR(rawPtr)->curUnitLength;\
+        OBC_TO_RAY_PTR(rawPtr)->curLength+=OBC_TO_RAY_PTR(rawPtr)->unitSize;\
+        OBC_TO_RAY_PTR(rawPtr)->curUnitLength++;\
+    }\
+    }
 
 #endif // RAY_H_INCLUDED

@@ -44,12 +44,12 @@ void **OBC_newAllocator2(size_t unitSize){
 void *OBC_initAllocator2(OBC_Allocator2 *allocator, size_t unitSize){
 
     if(OBC_initRay(
-           OBC_TO_RAW_RAY(& allocator->backed.rawData)
+           OBC_TO_RAY_PTR(& allocator->backed.rawData)
            ,0,unitSize) == NULL){
         return NULL;
     }
     if(OBC_initRay(
-            OBC_TO_RAW_RAY(& allocator->meta[0].rawData)
+            OBC_TO_RAY_PTR(& allocator->meta[0].rawData)
            , 1,
        sizeof(OBC_ALLOC_META_TYPE)) == NULL){
         OBC_freeRayData(&allocator->backed.rawData);
@@ -60,7 +60,7 @@ void *OBC_initAllocator2(OBC_Allocator2 *allocator, size_t unitSize){
     unsigned int i;
     for(i = 1; i <= OBC_ALLOC_META_ADDRESSING; i++){
         if(OBC_initRay(
-               OBC_TO_RAW_RAY(& allocator->meta[i].rawData)
+               OBC_TO_RAY_PTR(& allocator->meta[i].rawData)
                , 0,
                sizeof(OBC_ALLOC_META_TYPE)) == NULL){
             while(i){
@@ -269,7 +269,7 @@ size_t OBC_Allocator2Malloc3(void *allocator){
 
     if(place >= allocator_->backed.curUnitLength){
         place = allocator_->backed.curUnitLength;
-        if(OBC_RayNewElement(& allocator_->backed.rawData) == OBC_ERROR_FAILURE){
+        if(OBC_RayNewElement(& allocator_->backed.rawData) == OBC_NULL_INDEX){
             return OBC_NULL_INDEX;
         }
 
