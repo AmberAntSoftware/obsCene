@@ -10,7 +10,7 @@ void *OBC_memset(void *ptr, int c, size_t len){
 
     if(len < sizeof(OBC_MEMSET_TYPE)){
 
-        for(; i < len; i++){
+        for(i = 0; i < len; i++){
             *((unsigned char*)(ptr+i)) = (unsigned char)c;
         }
 
@@ -56,10 +56,10 @@ void *OBC_memset(void *ptr, int c, size_t len){
 
 }
 
-unsigned int OBC_clockMillis(clock_t start, clock_t end){
-    return (end-start)*1000.0f/CLOCKS_PER_SEC;
+unsigned int OBC_clockMillis(const clock_t start, const clock_t end){
+    return (end-start)*1000/CLOCKS_PER_SEC;
 }
 
-unsigned int OBC_clockSeconds(clock_t start, clock_t end){
+unsigned int OBC_clockSeconds(const clock_t start, const clock_t end){
     return (end-start)/CLOCKS_PER_SEC;
 }

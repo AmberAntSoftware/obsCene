@@ -142,7 +142,7 @@ OBC_ERROR_ENUM OBC_RayDoExpand(void *rawPtr){
     OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
     if(ray->curLength>=ray->maxLength){
 
-        OBC_RAY_ERROR_PROPAGATE(OBC_RayExpand(rawPtr));
+        OBC_ERROR_PROPAGATE(OBC_RayExpand(rawPtr));
 
         return OBC_ERROR_SUCCESS;
     }
@@ -233,7 +233,7 @@ OBC_ERROR_ENUM OBC_RayShrinkToFit(void *rawPtr){
 
 OBC_ERROR_ENUM OBC_RaySetLast(void *rawPtr, void *data){
 
-    OBC_RAY_ERROR_PROPAGATE(OBC_RayDoExpand(rawPtr));
+    OBC_ERROR_PROPAGATE(OBC_RayDoExpand(rawPtr));
 
     OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
     rawPtr = ray->rawData;

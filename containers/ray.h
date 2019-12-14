@@ -5,13 +5,13 @@
 
 #include "OBC.h"
 
-#define OBC_RAY_ERROR_PROPAGATE(tokenResolvingToRayEnumValue) do { if( (tokenResolvingToRayEnumValue) == OBC_ERROR_FAILURE ) { return OBC_ERROR_FAILURE; } } while(0);
+#define OBC_ERROR_PROPAGATE(tokenResolvingToRayEnumValue) do { if( (tokenResolvingToRayEnumValue) == OBC_ERROR_FAILURE ) { return OBC_ERROR_FAILURE; } } while(0);
 
 
 #define _OBC_RAY_PTR_CAST(rawPtr) ((OBC_Ray *)(rawPtr))
 #define _OBC_RAY_OFFSET ((size_t)(&((OBC_Ray *)NULL)->rawData))
 #define OBC_TO_RAY_PTR(rawPtr) (_OBC_RAY_PTR_CAST(((void*)(rawPtr)) - _OBC_RAY_OFFSET))
-#define OBC_FROM_RAY_PTR(rawPtr) ((void**)(((void*)(OBC_RayPtr)) + _OBC_RAY_OFFSET))
+#define OBC_FROM_RAY_PTR(rawPtr) ((void**)(((void*)(rawPtr)) + _OBC_RAY_OFFSET))
 #define OBC_FROM_RAY_VAL(rayVal) ((void**)(((void*)(&(rayVal))) + _OBC_RAY_OFFSET))
 
 typedef struct OBC_Ray{
@@ -124,7 +124,7 @@ OBC_ERROR_ENUM OBC_RayRemoveFast(void *rawPtr, size_t index);
 void* OBC_RayGetLast(void *rawPtr);
 
 #define OBC_RayNewElementFast(size_tStorage,rawPtr)\
-    {\
+    do{\
     if(OBC_TO_RAY_PTR(rawPtr)->curLength==OBC_TO_RAY_PTR(rawPtr)->maxLength){\
             if(OBC_RayExpand(rawPtr) != OBC_ERROR_FAILURE){\
                 size_tStorage = OBC_TO_RAY_PTR(rawPtr)->curUnitLength;\
@@ -138,6 +138,6 @@ void* OBC_RayGetLast(void *rawPtr);
         OBC_TO_RAY_PTR(rawPtr)->curLength+=OBC_TO_RAY_PTR(rawPtr)->unitSize;\
         OBC_TO_RAY_PTR(rawPtr)->curUnitLength++;\
     }\
-    }
+    }while(0);
 
 #endif // RAY_H_INCLUDED

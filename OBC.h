@@ -24,6 +24,7 @@
     #define debug(...) do{}while(0);
 #endif // 1
 
+//https://stackoverflow.com/questions/2100331/c-macro-definition-to-determine-big-endian-or-little-endian-machine
 ///TODO may need to supply PDP endianess later
 #if 16777216 & 0x00000001 != 0
     #define ENDIAN_BIG 1
@@ -42,9 +43,9 @@ typedef struct OBC_ErrorPointer{
     void *realValue;
 }OBC_ErrorPointer;
 
+typedef size_t OBC_Offset;
+
 void *OBC_memset (void *ptr, int c, size_t len);
-
-
 
 /*
 typedef struct OBC_BigTimer{
@@ -55,8 +56,8 @@ typedef size_t OBC_BigMilliseconds;
 
 size_t OBC_BigClock(clock_t start, clock_t end);
 */
-unsigned int OBC_clockMillis(clock_t start, clock_t end);
-unsigned int OBC_clockSeconds(clock_t start, clock_t end);
+unsigned int OBC_clockMillis(const clock_t start, const clock_t end);
+unsigned int OBC_clockSeconds(const clock_t start, const clock_t end);
 
 /*
 #define INTERFACE(returnValue, functionName, argsListWithParenthesis)\

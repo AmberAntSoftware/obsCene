@@ -87,7 +87,7 @@ OBC_ERROR_ENUM OBC_AllocFastFree(void *allocator, size_t data){
 
     //*/
 
-    OBC_ALLOCFAST_META **dat = &allocator_->meta.rawData;
+    OBC_ALLOCFAST_META **dat = (OBC_ALLOCFAST_META **)&allocator_->meta.rawData;
     OBC_RayAddValue(dat,data);
 
     return OBC_ERROR_SUCCESS;
