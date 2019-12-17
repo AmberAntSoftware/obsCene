@@ -52,7 +52,7 @@ void *OBC_initAllocator2(OBC_Allocator2 *allocator, size_t unitSize){
             OBC_TO_RAY_PTR(& allocator->meta[0].rawData)
            , 1,
        sizeof(OBC_ALLOC_META_TYPE)) == NULL){
-        OBC_freeRayData(&allocator->backed.rawData);
+        OBC_freeRayData(&allocator->backed);
         return NULL;
     }
     memset(allocator->meta[0].rawData,0,allocator->meta[0].maxLength);
@@ -64,10 +64,10 @@ void *OBC_initAllocator2(OBC_Allocator2 *allocator, size_t unitSize){
                , 0,
                sizeof(OBC_ALLOC_META_TYPE)) == NULL){
             while(i){
-                OBC_freeRayData(& allocator->meta[i-1].rawData);
+                OBC_freeRayData(& allocator->meta[i-1]);
                 i--;
             }
-            OBC_freeRayData(& allocator->backed.rawData);
+            OBC_freeRayData(& allocator->backed);
             return NULL;
         }
     }

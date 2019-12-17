@@ -23,7 +23,7 @@ void *OBC_initAllocFast(OBC_AllocFast *allocator, size_t unitSize){
     }
 
     if(OBC_initRay(&allocator->meta,0,sizeof(OBC_ALLOCFAST_META)) == NULL){
-        OBC_freeRayData(&allocator->backed.rawData);
+        OBC_freeRayData(&allocator->backed);
         return NULL;
     }
 
@@ -38,8 +38,8 @@ void OBC_freeAllocFast(void *allocator){
 }
 void OBC_freeAllocFastData(void *allocator){
     OBC_AllocFast *allocator_ = OBC_TO_RAW_ALLOCFAST(allocator);
-    OBC_freeRayData(& allocator_->backed.rawData);
-    OBC_freeRayData(& allocator_->meta.rawData);
+    OBC_freeRayData(& allocator_->backed);
+    OBC_freeRayData(& allocator_->meta);
 }
 
 size_t OBC_AllocFastMalloc(void *allocator){

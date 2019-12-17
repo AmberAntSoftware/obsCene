@@ -23,13 +23,13 @@ void *OBC_initAllocFastBit(OBC_AllocFastBit *allocator, size_t unitSize){
     }
 
     if(OBC_initRay(& allocator->meta,1,sizeof(OBC_ALLOCFASTBIT_META_TYPE)) == NULL){
-        OBC_freeRayData(&allocator->backed.rawData);
+        OBC_freeRayData(&allocator->backed);
         return NULL;
     }
 
     if(OBC_initRay(&allocator->available,1,sizeof(OBC_ALLOCFASTBIT_META_TYPE)) == NULL){
-        OBC_freeRayData(&allocator->meta.rawData);
-        OBC_freeRayData(&allocator->backed.rawData);
+        OBC_freeRayData(&allocator->meta);
+        OBC_freeRayData(&allocator->backed);
         return NULL;
     }
 
@@ -45,9 +45,9 @@ void OBC_freeAllocFastBit(void *allocator){
 
 void OBC_freeAllocFastBitData(void *allocator){
     OBC_AllocFastBit *allocator_ = OBC_TO_RAW_ALLOCFASTBIT(allocator);
-    OBC_freeRayData(& allocator_->backed.rawData);
-    OBC_freeRayData(& allocator_->meta.rawData);
-    OBC_freeRayData(& allocator_->available.rawData);
+    OBC_freeRayData(& allocator_->backed);
+    OBC_freeRayData(& allocator_->meta);
+    OBC_freeRayData(& allocator_->available);
 }
 
 /**
@@ -496,7 +496,7 @@ void *OBC_initAllocFastBit2(OBC_AllocFastBit2 *allocator, size_t unitSize){
     }
 
     if(OBC_initRay(& allocator->meta,2,sizeof(OBC_ALLOCFASTBIT_META_TYPE)) == NULL){
-        OBC_freeRayData(&allocator->backed.rawData);
+        OBC_freeRayData(&allocator->backed);
         return NULL;
     }
 
@@ -514,8 +514,8 @@ void OBC_freeAllocFastBit2(void *allocator){
 
 void OBC_freeAllocFastBit2Data(void *allocator){
     OBC_AllocFastBit2 *allocator_ = OBC_TO_RAW_ALLOCFASTBIT2(allocator);
-    OBC_freeRayData(& allocator_->backed.rawData);
-    OBC_freeRayData(& allocator_->meta.rawData);
+    OBC_freeRayData(& allocator_->backed);
+    OBC_freeRayData(& allocator_->meta);
 }
 
 
@@ -615,7 +615,6 @@ MARK_DATA:;
 
 }
 
-/*
 size_t OBC_AllocFastBit2GetFreeMeta(void *allocator){
 
     OBC_AllocFastBit2 *allocator_ = OBC_TO_RAW_ALLOCFASTBIT2(allocator);

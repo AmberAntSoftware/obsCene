@@ -40,13 +40,12 @@ void *OBC_initRay(OBC_Ray *ray, size_t initialReserveCount, size_t unitSize){
 
 void OBC_freeRay(void *rawPtr){
     OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
-    OBC_freeRayData(rawPtr);
+    OBC_freeRayData(ray);
     free(ray);
 }
 
-void OBC_freeRayData(void *rawPtr){
-    OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
-    if(rawPtr != NULL && ray->rawData != NULL){
+void OBC_freeRayData(OBC_Ray *ray){
+    if(ray->rawData != NULL){
         free(ray->rawData);
     }
 }
@@ -257,7 +256,7 @@ void* OBC_RayGetLast(void *rawPtr){
     if(ray->curLength==ray->maxLength){
         return ray->rawData+ray->curLength-ray->unitSize;
     }
-    unsigned char *unit = (unsigned char *)(ray->rawData+ray->curLength);
+    //unsigned char *unit = (unsigned char *)(ray->rawData+ray->curLength);
     return ray->rawData+ray->curLength;
 }
 

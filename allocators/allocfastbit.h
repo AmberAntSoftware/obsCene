@@ -43,7 +43,7 @@ void OBC_freeAllocFastBit(void *allocator);
 void OBC_freeAllocFastBitData(void *allocator);
 
 size_t OBC_AllocFastBitMalloc(void *allocator);
-OBC_ERROR_ENUM OBC_AllocFastFree(void *allocator, size_t data);
+OBC_ERROR_ENUM OBC_AllocFastBitFree(void *allocator, size_t pos);
 
 size_t OBC_AllocFastBitGetFreeLocation(void *allocator);
 OBC_ERROR_ENUM OBC_AllocFastBitExpand(void *allocator);

@@ -44,6 +44,7 @@ typedef struct OBC_ErrorPointer{
 }OBC_ErrorPointer;
 
 typedef size_t OBC_Offset;
+typedef OBC_Offset OBC_Iterator;
 
 void *OBC_memset (void *ptr, int c, size_t len);
 
@@ -56,8 +57,10 @@ typedef size_t OBC_BigMilliseconds;
 
 size_t OBC_BigClock(clock_t start, clock_t end);
 */
-unsigned int OBC_clockMillis(const clock_t start, const clock_t end);
-unsigned int OBC_clockSeconds(const clock_t start, const clock_t end);
+typedef clock_t OBC_Timer;
+#define OBC_newTimer() clock()
+unsigned int OBC_timerMillis(const OBC_Timer start, const OBC_Timer end);
+unsigned int OBC_timerSeconds(const OBC_Timer start, const OBC_Timer end);
 
 /*
 #define INTERFACE(returnValue, functionName, argsListWithParenthesis)\
@@ -80,5 +83,53 @@ typedef union I_Allocator{
 
 }I_Allocator;
 */
+
+#define OBC_X_MEMCPY(voidCharDataPtr,unitSize, unit, itemPtr)\
+if(unitSize > 512){\
+    memcpy(voidCharDataPtr+(unitSize*unit),item,unitSize);\
+}else{\
+size_t where = 0;\
+\
+    void *dataX = voidCharDataPtr+(unitSize*unit);\
+\
+    if(sizeof(unsigned int)*8 < unitSize){\
+        do{\
+            *((unsigned int *)(dataX+where))\
+                = *((unsigned int *)(itemPtr+where));\
+            *((unsigned int *)(dataX+where+sizeof(unsigned int)))\
+                = *((unsigned int *)(itemPtr+where+sizeof(unsigned int)));\
+            *((unsigned int *)(dataX+where+sizeof(unsigned int)*2))\
+                = *((unsigned int *)(itemPtr+where+sizeof(unsigned int)*2));\
+            *((unsigned int *)(dataX+where+sizeof(unsigned int)*3))\
+                = *((unsigned int *)(itemPtr+where+sizeof(unsigned int)*3));\
+            *((unsigned int *)(dataX+where+sizeof(unsigned int)*4))\
+                = *((unsigned int *)(itemPtr+where+sizeof(unsigned int)*4));\
+            *((unsigned int *)(dataX+where+sizeof(unsigned int)*5))\
+                = *((unsigned int *)(itemPtr+where+sizeof(unsigned int)*5));\
+            *((unsigned int *)(dataX+where+sizeof(unsigned int)*6))\
+                = *((unsigned int *)(itemPtr+where+sizeof(unsigned int)*6));\
+            *((unsigned int *)(dataX+where+sizeof(unsigned int)*7))\
+                = *((unsigned int *)(itemPtr+where+sizeof(unsigned int)*7));\
+\
+            where+=sizeof(unsigned int)*8;\
+        }while(where+sizeof(unsigned int)*8 < unitSize);\
+    }\
+\
+    if(where+sizeof(unsigned int) < unitSize){\
+        do{\
+            *((unsigned int *)(dataX+where))\
+                = *((unsigned int *)(itemPtr+where));\
+            where+=sizeof(unsigned int);\
+        }while(where < unitSize);\
+    }\
+\
+    if(where < unitSize){\
+        do{\
+            *((unsigned char *)(dataX+where))\
+                = *((unsigned char *)(itemPtr+where));\
+            where+=sizeof(unsigned char);\
+        }while(where < unitSize);\
+    }\
+}
 
 #endif // OBC_H_INCLUDED

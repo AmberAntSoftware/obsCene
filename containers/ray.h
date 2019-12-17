@@ -40,7 +40,7 @@ void *OBC_initRay(OBC_Ray *ray, size_t initialReserveCount, size_t unitSize);
 ///Frees the stack allocation and the owned data
 void OBC_freeRay(void *rawPtr);
 ///Frees only the stack data owned by the ray
-void OBC_freeRayData(void *rawPtr);
+void OBC_freeRayData(OBC_Ray *ray);
 
 /***************************************
 gets the values associated with the dealigned ray

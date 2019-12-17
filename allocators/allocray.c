@@ -25,7 +25,7 @@ void *OBC_initAllocRay(OBC_AllocRay *allocator, size_t unitSize){
     }
 
     if(OBC_initRay(&allocator->meta,0,sizeof(OBC_ALLOC_META_TYPE)) == NULL){
-        OBC_freeRayData(&allocator->backed.rawData);
+        OBC_freeRayData(&allocator->backed);
         return NULL;
     }
 
@@ -41,8 +41,8 @@ void OBC_freeAllocRay(void *allocator){
 
 void OBC_freeAllocRayData(void *allocator){
     OBC_AllocRay *allocRay = OBC_TO_RAW_ALLOCRAY(allocator);
-    OBC_freeRayData(& allocRay->backed.rawData);
-    OBC_freeRayData(& allocRay->meta.rawData);
+    OBC_freeRayData(& allocRay->backed);
+    OBC_freeRayData(& allocRay->meta);
 }
 
 

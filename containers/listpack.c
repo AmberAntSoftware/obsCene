@@ -28,7 +28,7 @@ void *OBC_initListPack(OBC_List *list,size_t unitSize){
 
 void OBC_freeListPack(void **raw){
 
-    OBC_List *list = OBC_TO_RAW_LIST(raw);
+    OBC_List *list = OBC_TO_LIST_PTR(raw);
     OBC_freeListData(list);
     free(list);
 
@@ -72,7 +72,7 @@ OBC_Offset OBC_ListPackNewItem(OBC_List *list){
     return place;
 }
 OBC_Offset OBC_ListPackNewItemRaw(void **raw){
-    return OBC_ListPackNewItem(OBC_TO_RAW_LIST(raw));
+    return OBC_ListPackNewItem(OBC_TO_LIST_PTR(raw));
 }
 
 OBC_ERROR_ENUM OBC_ListPackAdd(OBC_List *list, void *item){
@@ -103,7 +103,7 @@ OBC_Offset OBC_ListPackIterStart(OBC_List *list){
 }
 
 OBC_Offset OBC_ListPackIterStartRaw(void **raw){
-    return OBC_ListIterStart(OBC_TO_RAW_LIST(raw));
+    return OBC_ListIterStartRaw(OBC_TO_LIST_PTR(raw));
 }
 
 OBC_Offset OBC_ListPackIterNext(OBC_List *list, const OBC_Offset iter){
@@ -123,5 +123,5 @@ OBC_Offset OBC_ListPackIterNext(OBC_List *list, const OBC_Offset iter){
 }
 
 OBC_Offset OBC_ListPackIterNextRaw(void **raw, const OBC_Offset iter){
-    return OBC_ListPackIterNext(OBC_TO_RAW_LIST(raw), iter);
+    return OBC_ListPackIterNext(OBC_TO_LIST_PTR(raw), iter);
 }
