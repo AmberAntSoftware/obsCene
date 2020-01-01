@@ -98,9 +98,13 @@
     #define X_X_LONGEST long long unsigned int
 #endif // X_X_LONGEST
 
-void *OBC_memswap (void * __restrict ptr0, void * __restrict ptr1, size_t sizeInBytes);
-void OBC_swapX(void * __restrict a, void * __restrict b, size_t sizeInBytes);
-void memswap2(X_X_LONGEST* __restrict b, X_X_LONGEST* __restrict a, size_t sizeInBytes);
-void memswap3(X_X_LONGEST* __restrict b, X_X_LONGEST* __restrict a, size_t sizeInBytes);
+///general good performance on noncontention, good for high contention resources .constprop
+void memswap0(void* __restrict b, void* __restrict a, size_t sizeInBytes);
+///general good performance on noncontention, good for high contention resources
+void memswap1(void* __restrict b, void* __restrict a, size_t sizeInBytes);
+///better performance on noncontenion not as good for high contention resources -- optimized out
+void memswap2(void* __restrict b, void* __restrict a, size_t sizeInBytes);
+///better performance on noncontenion not as good for high contention resources -- optimized out
+void memswap3(void* __restrict b, void* __restrict a, size_t sizeInBytes);
 
 #endif // MEMSWAP_H_INCLUDED
