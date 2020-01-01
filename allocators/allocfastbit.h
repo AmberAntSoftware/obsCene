@@ -29,11 +29,6 @@ typedef struct OBC_AllocFastBit{
     OBC_Ray meta;
     OBC_Ray available;
 
-    /*
-    OBC_ALLOCFASTBIT_META_TYPE where;
-    OBC_ALLOCFASTBIT_META_TYPE cache;
-    */
-
 }OBC_AllocFastBit;
 
 

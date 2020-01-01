@@ -26,6 +26,8 @@ typedef struct OBC_List{
     OBC_Offset last;
     OBC_Offset first;
 
+    size_t count;
+
 }OBC_List;
 
 void **OBC_newList(size_t elementSize);
@@ -48,8 +50,12 @@ OBC_ERROR_ENUM OBC_ListRemove(void *arr, size_t freeItem);
 OBC_ERROR_ENUM OBC_ListAddRaw(OBC_List *list, void *item);
 OBC_ERROR_ENUM OBC_ListAdd(void *arr, void *item);
 
-#define OBC_ListForEach(iter, arrPtr) for(iter = OBC_ListIterStart(arrPtr); iter != OBC_NULL_INDEX; iter = OBC_ListIterNext(arrPtr, iter))
-#define OBC_ListForEachRaw(iter, listPtr) for(iter = OBC_ListIterStartRaw(listPtr); iter != OBC_NULL_INDEX; iter = OBC_ListIterNextRaw(listPtr, iter))
+
+
+typedef OBC_Offset OBC_ListIterator;
+
+#define OBC_ListForEach(arrPtr, iter) for(iter = OBC_ListIterStart(arrPtr); iter != OBC_NULL_INDEX; iter = OBC_ListIterNext(arrPtr, iter))
+#define OBC_ListForEachRaw(listPtr, iter) for(iter = OBC_ListIterStartRaw(listPtr); iter != OBC_NULL_INDEX; iter = OBC_ListIterNextRaw(listPtr, iter))
 
 OBC_Offset OBC_ListIterStartRaw(OBC_List *list);
 OBC_Offset OBC_ListIterStart(void *arr);
@@ -63,9 +69,5 @@ if(OBC_ListNewItem(arrPtr) != OBC_NULL_INDEX){\
    ((*(arrPtr))[OBC_TO_LIST_PTR(arrPtr)->last]) = itemValue;\
 }\
 }
-
-#define OBC_GetPointer(arrPtr, index) ((*(arrPtr))+index)
-#define OBC_GetValue(arrPtr, index) ((*(arrPtr))[index])
-
 
 #endif // LIST_H_INCLUDED

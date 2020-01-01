@@ -19,7 +19,7 @@ void *OBC_initQueue(OBC_Queue *queue, size_t unitSize){
     }
 
     queue->head = 0;
-    queue->size = 0;
+    queue->count = 0;
 
     return queue;
 }
@@ -37,10 +37,10 @@ void OBC_freeQueueData(OBC_Queue *queue){
 }
 
 OBC_Offset OBC_QueuePopRaw(OBC_Queue *queue){
-    if(queue->size < 1){
+    if(queue->count < 1){
         return queue->head;
     }
-    queue->size--;
+    queue->count--;
     queue->head++;
     if(queue->head >= queue->backed.maxUnitLength){
         ///TODO determine if max -1
@@ -54,14 +54,14 @@ OBC_Offset OBC_QueuePop(void *arr){
 }
 
 OBC_Offset OBC_QueuePushRaw(OBC_Queue *queue){
-    queue->size++;
-    if(queue->size >= queue->backed.maxUnitLength){
+    queue->count++;
+    if(queue->count >= queue->backed.maxUnitLength){
         if(OBC_QueueExpandRaw(queue) == OBC_ERROR_FAILURE){
-            queue->size--;
+            queue->count--;
             return OBC_NULL_INDEX;
         }
     }
-    size_t place = queue->head + queue->size -1;
+    size_t place = queue->head + queue->count -1;
     if(place >= queue->backed.maxUnitLength){
         place-=queue->backed.maxUnitLength;
     }
@@ -101,7 +101,7 @@ OBC_ERROR_ENUM OBC_QueueExpandRaw(OBC_Queue *queue){
 
     //regular full, no moving data necessary
 
-    size_t place = queue->head+queue->size;
+    size_t place = queue->head+queue->count;
 
     if(queue->head == 0 || place < end){
         return OBC_ERROR_SUCCESS;
@@ -139,7 +139,7 @@ OBC_Offset OBC_QueueIterStart(void *arr){
 
 OBC_Offset OBC_QueueIterNextRaw(const OBC_Queue *const queue, const OBC_Offset iter){
 
-    if(queue->size == queue->backed.maxUnitLength && iter+1 == queue->head){
+    if(queue->count == queue->backed.maxUnitLength && iter+1 == queue->head){
         return OBC_NULL_INDEX;
     }
 
@@ -152,7 +152,7 @@ OBC_Offset OBC_QueueIterNextRaw(const OBC_Queue *const queue, const OBC_Offset i
         len = (queue->backed.maxUnitLength - queue->head) + iter;
     }
 
-    if(len+1 >= queue->size){
+    if(len+1 >= queue->count){
         return OBC_NULL_INDEX;
     }
 

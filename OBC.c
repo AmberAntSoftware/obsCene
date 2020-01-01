@@ -2,6 +2,8 @@
 
 #define OBC_MEMSET_TYPE unsigned int
 
+#include <xmmintrin.h>
+
 void *OBC_memset(void *ptr, int c, size_t len){
 
     unsigned int i;
@@ -68,7 +70,7 @@ void *OBC_memcpy(void *dst, const void * const src, size_t len){
         return ptr;
     }
 
-    //*
+    // *
     OBC_MEMSET_TYPE fill = 0;
     for(i = 0; i < sizeof(OBC_MEMSET_TYPE); i++){
         fill<<=CHAR_BIT;

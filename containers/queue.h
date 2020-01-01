@@ -16,7 +16,7 @@ typedef struct OBC_Queue{
     OBC_Ray backed;
 
     OBC_Offset head;
-    OBC_Offset size;
+    OBC_Offset count;
 
 }OBC_Queue;
 
@@ -36,8 +36,12 @@ OBC_Offset OBC_QueuePush(void *arr);
 OBC_ERROR_ENUM OBC_QueueAddRaw(OBC_Queue *queue, void *item);
 OBC_ERROR_ENUM OBC_QueueAdd(void *arr, void *item);
 
+
+
+typedef OBC_Offset OBC_QueueIterator;
+
 #define OBC_QueueForEach(arrPtr, iter) for(iter = OBC_QueueIterStart(arrPtr); iter != OBC_NULL_INDEX; iter = OBC_QueueIterNext(arrPtr, iter))
-#define OBC_QueueForEachRaw(listPtr, iter) for(iter = OBC_QueueIterStartRaw(listPtr); iter != OBC_NULL_INDEX; iter = OBC_QueueIterNextRaw(listPtr, iter))
+#define OBC_QueueForEachRaw(queuePtr, iter) for(iter = OBC_QueueIterStartRaw(queuePtr); iter != OBC_NULL_INDEX; iter = OBC_QueueIterNextRaw(queuePtr, iter))
 
 OBC_Offset OBC_QueueIterStartRaw(OBC_Queue *queue);
 OBC_Offset OBC_QueueIterStart(void *arr);

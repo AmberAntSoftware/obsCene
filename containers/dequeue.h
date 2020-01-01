@@ -2,29 +2,23 @@
 #define DEQUEUE_H_INCLUDED
 
 #include "OBC.h"
-#include "ray.h"
+#include "queue.h"
 
 #define _OBC_DEQUEUE_PTR_CAST(rawPtr) ((OBC_Dequeue *)(rawPtr))
-#define _OBC_DEQUEUE_OFFSET ((size_t)(&((OBC_Dequeue *)NULL)->backed.rawData))
-#define OBC_TO_RAW_DEQUEUE(rawPtr) (_OBC_DEQUEUE_PTR_CAST(((void*)(rawPtr)) - _OBC_DEQUEUE_OFFSET))
+#define _OBC_DEQUEUE_OFFSET ((size_t)(&((OBC_Dequeue *)NULL)->queue.backed.rawData))
+#define OBC_TO_DEQUEUE_PTR(rawPtr) (_OBC_DEQUEUE_PTR_CAST(((void*)(rawPtr)) - _OBC_DEQUEUE_OFFSET))
 
 #define OBC_FROM_DEQUEUE_PTR(rawPtr) ((void**)(((void*)(rawPtr)) + _OBC_DEQUEUE_OFFSET))
 #define OBC_FROM_DEQUEUE_VAL(dequeueVal) ((void**)(((void*)(&(dequeueVal))) + _OBC_DEQUEUE_OFFSET))
 
 typedef struct OBC_Dequeue{
 
-    OBC_Ray backed;
-    OBC_Ray links;
-
-    size_t total;
-    size_t addedFront;
-    OBC_Offset first;
-    OBC_Offset last;
+    OBC_Queue queue;
 
 }OBC_Dequeue;
 
 void **OBC_newDequeue(size_t elementSize);
-void *OBC_initDequeue(OBC_Dequeue *dequeue,size_t unitSize);
+void *OBC_initDequeue(OBC_Dequeue *dequeue, size_t unitSize);
 
 void OBC_freeDequeue(void *arr);
 void OBC_freeDequeueData(OBC_Dequeue *dequeue);
@@ -43,6 +37,16 @@ OBC_ERROR_ENUM OBC_DequeueAddFrontRaw(OBC_Dequeue *dequeue, void* item);
 OBC_ERROR_ENUM OBC_DequeueAddBackRaw(OBC_Dequeue *dequeue, void* item);
 OBC_ERROR_ENUM OBC_DequeueAddFront(void *arr, void* item);
 OBC_ERROR_ENUM OBC_DequeueAddBack(void *arr, void* item);
+
+OBC_ERROR_ENUM OBC_DequeueAdd(void *arr, OBC_Offset pos, void* item);
+OBC_ERROR_ENUM OBC_DequeueAddRaw(OBC_Dequeue *dequeue, OBC_Offset pos, void* item);
+
+
+
+typedef OBC_Offset OBC_DequeueIterator;
+
+#define OBC_DequeueForEach(arrPtr, iter) for(iter = OBC_DequeueIterStart(arrPtr); iter != OBC_NULL_INDEX; iter = OBC_DequeueIterNext(arrPtr, iter))
+#define OBC_DequeueForEachRaw(dequeuePtr, iter) for(iter = OBC_DequeueIterStartRaw(dequeuePtr); iter != OBC_NULL_INDEX; iter = OBC_DequeueIterNextRaw(dequeuePtr, iter))
 
 OBC_Offset OBC_DequeueIterStartRaw(OBC_Dequeue *dequeue);
 OBC_Offset OBC_DequeueIterStart(void *arr);

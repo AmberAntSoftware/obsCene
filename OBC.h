@@ -32,6 +32,9 @@
     #define ENDIAN_LITTLE 1
 #endif // 1
 
+
+#define OBC_X_ITERATOR(arrPtr, iter, startFunction, incrmentFunction) for(iter = startFunction(arrPtr); iter != OBC_NULL_INDEX; iter = incrmentFunction(arrPtr, iter))
+
 typedef enum OBC_ERROR_ENUM{
     OBC_ERROR_NO_OP = 0,
     OBC_ERROR_SUCCESS,
@@ -43,10 +46,14 @@ typedef struct OBC_ErrorPointer{
     void *realValue;
 }OBC_ErrorPointer;
 
+typedef int OBC_SpaceshipValue;
 typedef size_t OBC_Offset;
 typedef OBC_Offset OBC_Iterator;
 
 void *OBC_memset (void *ptr, int c, size_t len);
+
+#define OBC_GetPointer(arrPtr, index) ((*(arrPtr))+index)
+#define OBC_GetValue(arrPtr, index) ((*(arrPtr))[index])
 
 /*
 typedef struct OBC_BigTimer{
@@ -131,5 +138,48 @@ size_t where = 0;\
         }while(where < unitSize);\
     }\
 }
+
+/**
+interface Allocator{
+
+void **new(size_t unitSize);
+void *init (interface *allocator, size_t unitSize);
+void freeAllocator(interface *allocator);
+void freeAllocatorData(interface *allocator);
+size_t malloc(interface *allocator);
+OBC_ERROR_ENUM free(interface *allocator, size_t data);
+
+};
+
+implement Allocator{
+
+    ///required named functions, must match prototypes
+    Allocator:new = OBC_newAllocFast;
+    Allocator:init = OBC_initAllocFast;
+    Allocator:freeAllocator = OBC_freeAllocFast;
+    Allocator:freeAllocatorData = OBC_freeAllocFastData;
+    Allocator:malloc = OBC_AllocFastMalloc;
+    Allocator:free = OBC_AllocFastFree;
+
+    ///other functions accessible from type
+    markAllocated = OBC_AllocFastMarkAllocated;
+    markFreed = OBC_AllocFastMarkFreed;
+
+}FreeListAllocator;
+
+void foobar(){
+
+    FreeListAllocator allocator;
+
+    allocator:init(& allocator);
+    size_t item = allocator:malloc();
+
+    //32bit print
+    printf("Allocated At Position: %u\n", item);
+
+    allocator:freeAllocatorData(& allocator);
+
+}
+**/
 
 #endif // OBC_H_INCLUDED

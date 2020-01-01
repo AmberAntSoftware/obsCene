@@ -33,6 +33,10 @@ OBC_Offset OBC_StackPop(void *raw);
 OBC_ERROR_ENUM OBC_ListPushNewRaw(OBC_Stack *stack, void *item);
 OBC_ERROR_ENUM OBC_ListPushNew(void *raw, void *item);
 
+
+
+typedef OBC_Offset OBC_StackIterator;
+
 #define OBC_StackForEach(iter, arrPtr) for(iter = OBC_StackIterStart(arrPtr); iter != OBC_NULL_INDEX; iter = OBC_StackIterNext(arrPtr, iter))
 #define OBC_StackForEachRaw(iter, listPtr) for(iter = OBC_StackIterStartRaw(listPtr); iter != OBC_NULL_INDEX; iter = OBC_StackIterNextRaw(listPtr, iter))
 
