@@ -99,12 +99,8 @@
 #endif // X_X_LONGEST
 
 void *OBC_memswap (void * __restrict ptr0, void * __restrict ptr1, size_t sizeInBytes);
-void OBC_swap(X_X_LONGEST * __restrict a, X_X_LONGEST* __restrict b, size_t sizeInBytes);
 void OBC_swapX(void * __restrict a, void * __restrict b, size_t sizeInBytes);
-void OBC_memcpyAVX(X_X_LONGEST* __restrict b, const X_X_LONGEST* __restrict a, size_t sizeInBytes);
-void memswap(X_X_LONGEST* __restrict b, X_X_LONGEST* __restrict a, size_t sizeInBytes);
 void memswap2(X_X_LONGEST* __restrict b, X_X_LONGEST* __restrict a, size_t sizeInBytes);
 void memswap3(X_X_LONGEST* __restrict b, X_X_LONGEST* __restrict a, size_t sizeInBytes);
-void OBC_swapX2(void * __restrict a, void * __restrict b, size_t sizeInBytes);
 
 #endif // MEMSWAP_H_INCLUDED
