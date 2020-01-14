@@ -32,7 +32,7 @@ void *OBC_initList(OBC_List *list,size_t unitSize){
 
     return list;
 }
-void **OBC_ListGetAccessPointer(OBC_List *list){
+void **OBC_ListGetDataPointer(OBC_List *list){
     return (void **)OBC_FROM_ALLOCFASTBIT_VAL(list->allocator);
 }
 
@@ -45,8 +45,8 @@ void OBC_freeList(void *raw){
 }
 void OBC_freeListData(OBC_List *list){
 
-    OBC_freeAllocFastBit(OBC_FROM_ALLOCFASTBIT_VAL(list->allocator));
-    OBC_freeRay(OBC_FROM_RAY_VAL(list->links));
+    OBC_freeAllocFastBitData(& list->allocator);
+    OBC_freeRayData(& list->links);
 
 }
 

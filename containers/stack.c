@@ -20,7 +20,7 @@ void *OBC_initStack(OBC_Stack *stack, size_t unitSize){
 
     return stack;
 }
-void **OBC_StackGetAccessPointer(OBC_Stack *stack){
+void **OBC_StackGetDataPointer(OBC_Stack *stack){
     return (void **)OBC_FROM_RAY_VAL(stack->stack);
 }
 

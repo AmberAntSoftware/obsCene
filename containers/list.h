@@ -32,7 +32,7 @@ typedef struct OBC_List{
 
 void **OBC_newList(size_t elementSize);
 void *OBC_initList(OBC_List *list,size_t unitSize);
-void **OBC_ListGetAccessPointer(OBC_List *list);
+void **OBC_ListGetDataPointer(OBC_List *list);
 
 void OBC_freeList(void *arr);
 void OBC_freeListData(OBC_List *list);

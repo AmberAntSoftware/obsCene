@@ -19,7 +19,7 @@ typedef struct OBC_Stack{
 
 void **OBC_newStack(size_t elementSize);
 void *OBC_initStack(OBC_Stack *stack,size_t unitSize);
-void **OBC_StackGetAccessPointer(OBC_Stack *stack);
+void **OBC_StackGetDataPointer(OBC_Stack *stack);
 
 void OBC_freeStack(void *raw);
 void OBC_freeStackData(OBC_Stack *stack);

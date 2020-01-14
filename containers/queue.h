@@ -22,7 +22,7 @@ typedef struct OBC_Queue{
 
 void **OBC_newQueue(size_t elementSize);
 void *OBC_initQueue(OBC_Queue *queue, size_t unitSize);
-void **OBC_QueueGetAccessPointer(OBC_Queue *queue);
+void **OBC_QueueGetDataPointer(OBC_Queue *queue);
 
 void OBC_freeQueue(void *arr);
 void OBC_freeQueueData(OBC_Queue *queue);

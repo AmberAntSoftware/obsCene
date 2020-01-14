@@ -151,6 +151,11 @@ OBC_ERROR_ENUM OBC_RayDoExpand(void *rawPtr){
 OBC_ERROR_ENUM OBC_RayExpand(void *rawPtr){
 
     OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
+
+    if(ray->unitSize == 0){
+        return OBC_ERROR_NO_OP;
+    }
+
     size_t size = ray->maxLength*2;//<<1;
     if(size==0){
         size=ray->unitSize;

@@ -1,7 +1,30 @@
 #include "hash.h"
 
-//obc
+//197               0xC5
+//509               0x1D
+//2039              0x7F7
+//536870909         0x1FFFFFFD
+//4294967291        0xFFFFFFFB
+#define HASH_PRIME ((OBC_Hash)0x1FFFFFFD)
+
+//alt
 OBC_Hash OBC_hash(const void *const data, const size_t sizeInBytes){
+
+    OBC_Hash hash = 0;
+    size_t i;
+    const unsigned char *const bytes = (const unsigned char *const)data;
+
+    for(i = 0; i < sizeInBytes; i++){
+
+        hash = HASH_PRIME * hash + bytes[i];
+    }
+
+    return hash;
+}
+
+
+//obc
+OBC_Hash OBC_hash2(const void *const data, const size_t sizeInBytes){
 
     OBC_Hash hash = 1;
     size_t midHash;
@@ -32,20 +55,6 @@ OBC_Hash OBC_hash(const void *const data, const size_t sizeInBytes){
     return hash;
 }
 
-//jdk
-OBC_Hash OBC_hash2(const void *const data, const size_t sizeInBytes){
-
-    OBC_Hash hash = 0;
-    size_t i;
-    const unsigned char *const bytes = (const unsigned char *const)data;
-
-    for(i = 0; i < sizeInBytes; i++){
-        hash = 197 * hash + bytes[i];
-    }
-
-    return hash;
-}
-
 //https://www.baeldung.com/java-hashcode
 //https://primes.utm.edu/lists/2small/0bit.html
 
@@ -59,3 +68,10 @@ unsigned int hash3(unsigned int valueToHash, unsigned int relativePrimeToW, unsi
     return (relativePrime*valueToHash) >> (w-m)
 }
 //*/
+
+
+OBC_Hash OBC_hashCombine(OBC_Hash hash1, OBC_Hash hash2){
+
+    return (HASH_PRIME * hash1) + hash2;
+
+}

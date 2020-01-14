@@ -23,7 +23,7 @@ void *OBC_initQueue(OBC_Queue *queue, size_t unitSize){
 
     return queue;
 }
-void **OBC_QueueGetAccessPointer(OBC_Queue *queue){
+void **OBC_QueueGetDataPointer(OBC_Queue *queue){
     return (void **) OBC_FROM_RAY_VAL(queue->backed);
 }
 

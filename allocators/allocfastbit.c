@@ -36,6 +36,9 @@ void *OBC_initAllocFastBit(OBC_AllocFastBit *allocator, size_t unitSize){
     return allocator;
 
 }
+void **OBC_AllocFastBitGetDataPointer(OBC_AllocFastBit *allocator){
+    return (void **)OBC_FROM_RAY_VAL(allocator->backed);
+}
 
 void OBC_freeAllocFastBit(void *allocator){
     OBC_AllocFastBit *allocator_ = OBC_TO_RAW_ALLOCFASTBIT(allocator);
@@ -43,7 +46,7 @@ void OBC_freeAllocFastBit(void *allocator){
     free(allocator_);
 }
 
-void OBC_freeAllocFastBitData(void *allocator){
+void OBC_freeAllocFastBitData(OBC_AllocFastBit *allocator){
     OBC_AllocFastBit *allocator_ = OBC_TO_RAW_ALLOCFASTBIT(allocator);
     OBC_freeRayData(& allocator_->backed);
     OBC_freeRayData(& allocator_->meta);

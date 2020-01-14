@@ -35,7 +35,8 @@ typedef struct OBC_AllocFastBit{
 void **OBC_newAllocFastBit(size_t unitSize);
 void *OBC_initAllocFastBit(OBC_AllocFastBit *allocator, size_t unitSize);
 void OBC_freeAllocFastBit(void *allocator);
-void OBC_freeAllocFastBitData(void *allocator);
+void OBC_freeAllocFastBitData(OBC_AllocFastBit *allocator);
+void **OBC_AllocFastBitGetDataPointer(OBC_AllocFastBit *allocator);
 
 size_t OBC_AllocFastBitMalloc(void *allocator);
 OBC_ERROR_ENUM OBC_AllocFastBitFree(void *allocator, size_t pos);
