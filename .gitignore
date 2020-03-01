@@ -60,3 +60,6 @@ obj/
 *.cbp
 *.depend
 *.layout
+
+#random
+*.zip

@@ -50,6 +50,10 @@ void OBC_freeRayData(OBC_Ray *ray){
     }
 }
 
+void **OBC_RayGetDataPointer(OBC_Ray *ray){
+    return OBC_FROM_RAY_VAL(ray);
+}
+
 
 OBC_ERROR_ENUM OBC_RayRemove(void *rawPtr, size_t index){
 

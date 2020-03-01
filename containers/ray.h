@@ -37,10 +37,12 @@ typedef struct OBC_Ray{
 void **OBC_newRay(size_t initialReserveCount, size_t unitSize);
 ///NULL on error
 void *OBC_initRay(OBC_Ray *ray, size_t initialReserveCount, size_t unitSize);
-///Frees the stack allocation and the owned data
+///Frees the heap ray allocation and the owned data
 void OBC_freeRay(void *rawPtr);
 ///Frees only the stack data owned by the ray
 void OBC_freeRayData(OBC_Ray *ray);
+
+void **OBC_RayGetDataPointer(OBC_Ray *ray);
 
 /***************************************
 gets the values associated with the dealigned ray
