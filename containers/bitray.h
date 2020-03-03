@@ -20,9 +20,9 @@ typedef struct OBC_BitRay{
 
     OBC_Ray bits;
 
-    size_t bitcount;
-
 }OBC_BitRay;
+
+typedef OBC_ERROR_ENUM OBC_ValueBit;
 
 void **OBC_newBitRay();
 void *OBC_initBitRay(OBC_BitRay *bitray);
@@ -31,11 +31,18 @@ void **OBC_BitRayGetAccessPointer(OBC_BitRay *bitray);
 void OBC_freeBitRay(void *arr);
 void OBC_freeBitRayData(OBC_BitRay *bitray);
 
+OBC_Offset OBC_BitRayFirstLeft0Bit(OBC_BitRay *bray, size_t pos);
 
-char OBC_BitRayGet(OBC_BitRay *bray, size_t pos);
-char OBC_BitRaySet(OBC_BitRay *bray, size_t pos);
+OBC_ValueBit OBC_BitRayDoSet(OBC_BitRay *bray, size_t pos, unsigned char bit);
+OBC_ValueBit OBC_BitRayDoGet(OBC_BitRay *bray, size_t pos);
+
+unsigned char OBC_BitRayGet(OBC_BitRay *bray, size_t pos);
+void OBC_BitRaySet(OBC_BitRay *bray, size_t pos, unsigned char bit);
+
 
 OBC_ERROR_ENUM OBC_BitRayDoExpand(OBC_BitRay *bray, size_t bitPosNeeded);
 OBC_ERROR_ENUM OBC_BitRayExpand(OBC_BitRay *bray);
+
+
 
 #endif // BITRAY_H_INCLUDED

@@ -30,10 +30,27 @@ void OBC_freeDequeueData(OBC_Dequeue *dequeue){
     OBC_freeQueueData(& dequeue->queue);
 }
 
-OBC_Offset OBC_DequeuePopFrontRaw(OBC_Dequeue *dequeue);
-OBC_Offset OBC_DequeuePopBackRaw(OBC_Dequeue *dequeue);
-OBC_Offset OBC_DequeuePopFront(void *arr);
-OBC_Offset OBC_DequeuePopBack(void *arr);
+OBC_Offset OBC_DequeuePopFrontRaw(OBC_Dequeue *dequeue){
+    if(dequeue->queue.count == 0){
+        return dequeue->queue.head;
+    }
+
+    dequeue->queue.count--;
+    dequeue->queue.head++;
+    if(dequeue->queue.head == dequeue->queue.backed.maxUnitLength){
+        dequeue->queue.head = 0;
+    }
+
+}
+OBC_Offset OBC_DequeuePopBackRaw(OBC_Dequeue *dequeue){
+    return OBC_QueuePopRaw(& dequeue->queue);
+}
+OBC_Offset OBC_DequeuePopFront(void *arr){
+    return OBC_DequeuePopFrontRaw(OBC_TO_DEQUEUE_PTR(arr));
+}
+OBC_Offset OBC_DequeuePopBack(void *arr){
+    return OBC_DequeuePopBackRaw(OBC_TO_DEQUEUE_PTR(arr));
+}
 
 OBC_Offset OBC_DequeuePushFrontRaw(OBC_Dequeue *dequeue){
     if(dequeue->queue.count >= dequeue->queue.backed.maxUnitLength){
@@ -59,6 +76,7 @@ OBC_Offset OBC_DequeuePushFront(void *arr){
 OBC_Offset OBC_DequeuePushBack(void *arr){
     return OBC_DequeuePushBackRaw(OBC_TO_DEQUEUE_PTR(arr));
 }
+
 
 OBC_ERROR_ENUM OBC_DequeueAddFrontRaw(OBC_Dequeue *dequeue, void* item){
     size_t pos = OBC_DequeuePushFrontRaw(dequeue);

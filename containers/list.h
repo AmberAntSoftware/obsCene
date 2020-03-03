@@ -4,14 +4,6 @@
 #include "OBC.h"
 #include "allocfastbit.h"
 
-typedef struct BadList{
-
-    int value;
-
-    struct BadList *next;
-
-}BadList;
-
 #define _OBC_LIST_PTR_CAST(arrPtr) ((OBC_List *)(arrPtr))
 #define _OBC_LIST_OFFSET ((size_t)(&((OBC_List *)NULL)->allocator.backed.rawData))
 #define OBC_TO_LIST_PTR(arrPtr) (_OBC_LIST_PTR_CAST(((void*)(arrPtr)) - _OBC_LIST_OFFSET))
