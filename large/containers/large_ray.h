@@ -1,13 +1,15 @@
-#ifndef RAY_H_INCLUDED
-#define RAY_H_INCLUDED
+#ifndef LARGE_RAY_H_INCLUDED
+#define LARGE_RAY_H_INCLUDED
 
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "../obc.h"
+#include "../../obc.h"
+#include "../../containers/ray.h"
 
-#define OBC_ERROR_PROPAGATE(tokenResolvingToRayEnumValue) do { if( (tokenResolvingToRayEnumValue) == OBC_ERROR_FAILURE ) { return OBC_ERROR_FAILURE; } } while(0);
+/*
+//#define OBC_ERROR_PROPAGATE(tokenResolvingToRayEnumValue) do { if( (tokenResolvingToRayEnumValue) == OBC_ERROR_FAILURE ) { return OBC_ERROR_FAILURE; } } while(0);
 
 
 #define _OBC_RAY_PTR_CAST(rawPtr) ((OBC_Ray *)(rawPtr))
@@ -15,26 +17,26 @@
 #define OBC_TO_RAY_PTR(rawPtr) (_OBC_RAY_PTR_CAST(((void*)(rawPtr)) - _OBC_RAY_OFFSET))
 #define OBC_FROM_RAY_PTR(rawPtr) ((void**)(((void*)(rawPtr)) + _OBC_RAY_OFFSET))
 #define OBC_FROM_RAY_VAL(rayVal) ((void**)(((void*)(&(rayVal))) + _OBC_RAY_OFFSET))
+*/
 
-typedef struct OBC_Ray{
+typedef struct OBC_LG_Ray{
 
-    ///data owned on the heap
-    char *rawData;
+    OBC_Ray addressors;
+    OBC_Ray containers;
 
-    ///the size of the elements stored in bytes
-    size_t unitSize;
-    ///the current length in units stored = (curLength/unitSize)
-    size_t curUnitLength;
-    ///the max length in units stored = (maxLength/unitSize)
-    size_t maxUnitLength;
+    ///the current length in Ray units stored
+    size_t curLength;
+    ///the max length in Ray units stored
+    size_t maxLength;
 
-}OBC_Ray;
+}OBC_LG_Ray;
 
 
 ///NULL on failed allocation
-void **OBC_newRay(size_t initialReserveCount, size_t unitSize);
+void **OBC_LG_newRay(size_t initialReserveCount, size_t unitSize);
 ///NULL on error
-OBC_ERROR_ENUM OBC_initRay(OBC_Ray *ray, size_t initialReserveCount, size_t unitSize);
+OBC_ERROR_ENUM OBC_LG_initRay(OBC_LG_Ray *ray, size_t initialReserveCount, size_t unitSize);
+#ifdef weg
 ///Frees the heap ray allocation and the owned data
 void OBC_freeRay(void *rawPtr);
 ///Frees only the stack data owned by the ray
@@ -146,5 +148,6 @@ void* OBC_RayGetLastRaw(OBC_Ray *ray);
         OBC_TO_RAY_PTR(rawPtr)->curUnitLength++;\
     }\
     }while(0);
+#endif
 
-#endif // RAY_H_INCLUDED
+#endif // LARGE_RAY_H_INCLUDED

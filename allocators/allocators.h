@@ -1,7 +1,7 @@
 #ifndef ALLOCATORS_H_INCLUDED
 #define ALLOCATORS_H_INCLUDED
 
-#include "OBC.h"
+#include "../obc.h"
 
 #define OBC_ALLOC_MAX_CONTRACT_TRIES 3
 #define OBC_ALLOC_META_TYPE size_t

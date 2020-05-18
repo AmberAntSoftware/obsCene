@@ -1,7 +1,7 @@
 #ifndef QUEUE_H_INCLUDED
 #define QUEUE_H_INCLUDED
 
-#include "OBC.h"
+#include "../obc.h"
 #include "ray.h"
 
 #define _OBC_QUEUE_PTR_CAST(rawPtr) ((OBC_Queue *)(rawPtr))
@@ -21,7 +21,7 @@ typedef struct OBC_Queue{
 }OBC_Queue;
 
 void **OBC_newQueue(size_t elementSize);
-void *OBC_initQueue(OBC_Queue *queue, size_t unitSize);
+OBC_ERROR_ENUM OBC_initQueue(OBC_Queue *queue, size_t unitSize);
 void **OBC_QueueGetDataPointer(OBC_Queue *queue);
 
 void OBC_freeQueue(void *arr);

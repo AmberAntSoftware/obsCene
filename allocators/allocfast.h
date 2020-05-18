@@ -1,9 +1,9 @@
 #ifndef ALLOCFAST_H_INCLUDED
 #define ALLOCFAST_H_INCLUDED
 
-#include "OBC.h"
+#include "../obc.h"
+#include "../containers/ray.h"
 #include "allocators.h"
-#include "ray.h"
 
 #define _OBC_ALLOCFAST_PTR_CAST(rawPtr) ((OBC_AllocFast *)(rawPtr))
 #define _OBC_ALLOCFAST_OFFSET ((size_t)(&((OBC_AllocFast *)NULL)->backed.rawData))
@@ -28,6 +28,7 @@ void OBC_freeAllocFastData(void *allocator);
 size_t OBC_AllocFastMalloc(void *allocator);
 OBC_ERROR_ENUM OBC_AllocFastFree(void *allocator, size_t data);
 
+/*
 size_t OBC_AllocRayGetFreeLocation(void *allocator);
 OBC_ERROR_ENUM OBC_AllocFastExpand(void *allocator);
 
@@ -37,7 +38,7 @@ OBC_ERROR_ENUM OBC_AllocFastMarkAllocated(void *allocator, size_t pos);
 ///UTILITY
 ///utility -- marks the location bit as free
 OBC_ERROR_ENUM OBC_AllocFastMarkFreed(void *allocator, size_t pos);
-
+*/
 #define OBC_AllocFastGetPointer(rawPtr, index) ((*(rawPtr))+index)
 #define OBC_AllocFastGetValue(rawPtr, index) ((*(rawPtr))[index])
 

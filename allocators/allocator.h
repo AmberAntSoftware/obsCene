@@ -1,9 +1,9 @@
 #ifndef ALLOCATOR_H_INCLUDED
 #define ALLOCATOR_H_INCLUDED
 
-#include "OBC.h"
+#include "../obc.h"
+#include "../containers/ray.h"
 #include "allocators.h"
-#include "ray.h"
 
 #define _OBC_ALLOCATOR2_PTR_CAST(rawPtr) ((OBC_Allocator2 *)(rawPtr))
 #define _OBC_ALLOCATOR2_OFFSET ((size_t)(&((OBC_Allocator2 *)NULL)->backed.rawData))

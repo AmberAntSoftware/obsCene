@@ -1,8 +1,8 @@
 #ifndef ALLOCFASTBIT_H_INCLUDED
 #define ALLOCFASTBIT_H_INCLUDED
 
-#include "OBC.h"
-#include "ray.h"
+#include "../obc.h"
+#include "../containers/ray.h"
 
 #define _OBC_ALLOCFASTBIT_PTR_CAST(rawPtr) ((OBC_AllocFastBit *)(rawPtr))
 #define _OBC_ALLOCFASTBIT_OFFSET ((size_t)(&((OBC_AllocFastBit *)NULL)->backed.rawData))

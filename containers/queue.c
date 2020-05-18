@@ -4,24 +4,24 @@ void **OBC_newQueue(size_t unitSize){
 
     OBC_Queue *queue = calloc(1,sizeof(OBC_Queue));
 
-    if(OBC_initQueue(queue,unitSize) == NULL){
+    if(OBC_initQueue(queue,unitSize) == OBC_ERROR_FAILURE){
         free(queue);
         return NULL;
     }
 
-    return (void **) OBC_FROM_RAY_VAL(queue->backed);
+    return OBC_QueueGetDataPointer(queue);
 
 }
-void *OBC_initQueue(OBC_Queue *queue, size_t unitSize){
+OBC_ERROR_ENUM OBC_initQueue(OBC_Queue *queue, size_t unitSize){
 
-    if(OBC_initRay(& queue->backed,0,unitSize) == NULL){
-        return NULL;
+    if(OBC_initRay(& queue->backed,0,unitSize) == OBC_ERROR_FAILURE){
+        return OBC_ERROR_FAILURE;
     }
 
     queue->head = 0;
     queue->count = 0;
 
-    return queue;
+    return OBC_ERROR_SUCCESS;
 }
 void **OBC_QueueGetDataPointer(OBC_Queue *queue){
     return (void **) OBC_FROM_RAY_VAL(queue->backed);
@@ -118,7 +118,7 @@ OBC_ERROR_ENUM OBC_QueueExpandRaw(OBC_Queue *queue){
     const size_t offset = queue->head*queue->backed.unitSize;
     const size_t size = (end - queue->head)*queue->backed.unitSize;
     memcpy(queue->backed.rawData+offset
-           ,queue->backed.rawData+queue->backed.maxLength - size
+           ,queue->backed.rawData+(queue->backed.maxUnitLength*queue->backed.unitSize) - size
            ,size);
 
     queue->head = queue->backed.maxUnitLength - queue->head;

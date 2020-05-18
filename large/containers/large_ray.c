@@ -1,18 +1,56 @@
-#include "ray.h"
+#include "large_ray.h"
 
-void **OBC_newRay(size_t initialReserveCount, size_t unitSize){
-    OBC_Ray *ray = malloc(sizeof(OBC_Ray));
+
+void **OBC_LG_newRay(size_t initialReserveCount, size_t unitSize){
+    OBC_LG_Ray *ray = malloc(sizeof(OBC_LG_Ray));
     if(ray==NULL){
         return NULL;
     }
 
-    if(OBC_initRay(ray,initialReserveCount, unitSize) == OBC_ERROR_FAILURE){
+    if(OBC_LG_initRay(ray,initialReserveCount, unitSize) == OBC_ERROR_FAILURE){
         free(ray);
         return NULL;
     }
 
-    return OBC_RayGetDataPointer(ray);
+    return NULL;//OBC_RayGetDataPointer(ray);
 }
+
+OBC_ERROR_ENUM OBC_LG_initRay(OBC_LG_Ray *ray, size_t initialReserveCount, size_t unitSize){
+
+    if(initialReserveCount==0 || unitSize == 0 || initialReserveCount == 0){
+        ray->addressors.rawData=NULL;
+        ray->addressors.maxUnitLength = 0;
+        ray->containers.rawData=NULL;
+        ray->containers.maxUnitLength = 0;
+        ray->addressors.unitSize=sizeof(void*)*unitSize;
+        ray->addressors.curUnitLength = 0;
+        ray->containers.unitSize=sizeof(OBC_Ray);
+        ray->containers.curUnitLength = 0;
+    }else{
+        /*ray->rawData = malloc(unitSize*initialReserveCount);
+        if(ray->rawData==NULL){
+            return OBC_ERROR_FAILURE;
+        }
+        ray->maxUnitLength = initialReserveCount;*/
+        size_t chunk = initialReserveCount*unitSize;
+        void* data = NULL;
+        do{
+            malloc(chunk);
+        }while(data == NULL);
+    }
+
+    ray->addressors.unitSize=sizeof(void*)*unitSize;
+    ray->addressors.curUnitLength = 0;
+
+    ray->containers.unitSize=sizeof(OBC_Ray);
+    ray->containers.curUnitLength = 0;
+
+    return OBC_ERROR_SUCCESS;
+
+}
+
+/*
+
 
 OBC_ERROR_ENUM OBC_initRay(OBC_Ray *ray, size_t initialReserveCount, size_t unitSize){
 
@@ -71,7 +109,7 @@ OBC_ERROR_ENUM OBC_RayRemoveFast(void *rawPtr, size_t index){
 
     void *toRemove = ray->rawData+(index*ray->unitSize);
     void *toReplace = ray->rawData+((ray->curUnitLength-1)*ray->unitSize);
-    /*if(index!=ray->unitLength-1 && toReplace > toRemove){*/
+
     if(toReplace > toRemove){
         memmove(toRemove,toReplace,ray->unitSize);
     }
@@ -83,29 +121,6 @@ OBC_ERROR_ENUM OBC_RayRemoveFast(void *rawPtr, size_t index){
 }
 
 size_t OBC_RayNewElement(void *rawPtr){
-
-
-    /*
-    if(OBC_RayDoExpand(rawPtr) == OBC_ERROR_FAILURE){
-        return OBC_ERROR_FAILURE;
-    }
-    OBC_RayPushElement(rawPtr);
-    return OBC_ERROR_SUCCESS;
-    */
-
-    /*
-    OBC_ERROR_ENUM err = OBC_RayDoExpand(rawPtr);
-    switch(err){
-    case(OBC_ERROR_NO_OP):
-        OBC_RayPushElement(rawPtr);
-        break;
-    case(OBC_ERROR_SUCCESS):
-        OBC_RayPushElement(rawPtr);
-        break;
-    case(OBC_ERROR_FAILURE):
-        return OBC_ERROR_FAILURE;
-    }
-    /*/
 
     size_t where = OBC_RayCurUnitLength(rawPtr);
 
@@ -168,7 +183,7 @@ OBC_ERROR_ENUM OBC_RayExpand(void *rawPtr){
         }
         //** from 0 allocaions
 
-        //*/
+        //* /
         ray->rawData = newData;
         ray->maxUnitLength = size/ray->unitSize;
     ///}
@@ -274,3 +289,4 @@ size_t OBC_RayUnitSize(void *rawPtr){
 size_t OBC_RayUnitMaxLength(void *rawPtr){
     return OBC_TO_RAY_PTR(rawPtr)->maxUnitLength;
 }
+*/

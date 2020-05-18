@@ -4,21 +4,28 @@ void **OBC_newDequeue(size_t unitSize){
 
     OBC_Dequeue *dequeue = calloc(1,sizeof(OBC_Dequeue));
 
-    if(OBC_initDequeue(dequeue,unitSize) == NULL){
+    if(dequeue == NULL){
+        return NULL;
+    }
+
+    if(OBC_initDequeue(dequeue,unitSize) == OBC_ERROR_FAILURE){
         free(dequeue);
         return NULL;
     }
 
-    return (void **) &dequeue->queue.backed.rawData;
+    return OBC_DequeueGetDataPointer(dequeue);
 
 }
-void *OBC_initDequeue(OBC_Dequeue *dequeue, size_t unitSize){
+OBC_ERROR_ENUM OBC_initDequeue(OBC_Dequeue *dequeue, size_t unitSize){
 
-    if(OBC_initQueue(& dequeue->queue,unitSize) == NULL){
-        return NULL;
+    if(OBC_initQueue(& dequeue->queue,unitSize) == OBC_ERROR_FAILURE){
+        return OBC_ERROR_FAILURE;
     }
 
-    return dequeue;
+    return OBC_ERROR_SUCCESS;
+}
+void **OBC_DequeueGetDataPointer(OBC_Dequeue *queue){
+    return OBC_QueueGetDataPointer(&queue->queue);
 }
 
 void OBC_freeDequeue(void *arr){
@@ -41,6 +48,7 @@ OBC_Offset OBC_DequeuePopFrontRaw(OBC_Dequeue *dequeue){
         dequeue->queue.head = 0;
     }
 
+    return dequeue->queue.head;
 }
 OBC_Offset OBC_DequeuePopBackRaw(OBC_Dequeue *dequeue){
     return OBC_QueuePopRaw(& dequeue->queue);

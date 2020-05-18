@@ -78,7 +78,7 @@ OBC_Hash OBC_hashCombine(OBC_Hash hash1, OBC_Hash hash2){
 }
 
 
-
+/*
 OBC_Hash OBC_hashGenerateLikelyPrime(){
 
     OBC_Hash randHash;
@@ -133,9 +133,9 @@ char OBC_hashGeneratePrimeMillerRabn(OBC_Hash hash,int testCount){
         double r = (double)rVal;
         double m = (double)hash;
         base = (long long unsigned int)ceil( fmod( (pow(a,r)) ,m) );
-        /*/
+        /* /
         base = ipow(randA, rVal);
-        //*/
+        //* /
         base%=hash;
         printf("hash: %u\n",hash);
         printf("init rand: %u\n",randA);
@@ -195,3 +195,4 @@ unsigned long long int ipow(unsigned long long int base, unsigned long long int 
 
     return result;
 }
+//*/

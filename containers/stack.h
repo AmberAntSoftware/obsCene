@@ -1,7 +1,7 @@
 #ifndef STACK_H_INCLUDED
 #define STACK_H_INCLUDED
 
-#include "OBC.h"
+#include "../obc.h"
 #include "ray.h"
 
 #define _OBC_STACK_PTR_CAST(rawPtr) ((OBC_Stack *)(rawPtr))
@@ -18,7 +18,7 @@ typedef struct OBC_Stack{
 }OBC_Stack;
 
 void **OBC_newStack(size_t elementSize);
-void *OBC_initStack(OBC_Stack *stack,size_t unitSize);
+OBC_ERROR_ENUM OBC_initStack(OBC_Stack *stack,size_t unitSize);
 void **OBC_StackGetDataPointer(OBC_Stack *stack);
 
 void OBC_freeStack(void *raw);

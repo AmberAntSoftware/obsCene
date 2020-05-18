@@ -15,6 +15,7 @@ OBC_ERROR_ENUM OBC_metaMarkBit0(OBC_ALLOC_META_TYPE *meta, const size_t pos){
     return OBC_ERROR_NO_OP;
 }
 
+/*
 char OBC_metaGetBit(OBC_ALLOC_META_TYPE *meta, const size_t pos){
 
     const size_t unit = pos/OBC_ALLOC_META_BITS;
@@ -22,7 +23,7 @@ char OBC_metaGetBit(OBC_ALLOC_META_TYPE *meta, const size_t pos){
 
     return (char)(((meta[unit])>>bits)&1);
 }
-
+*/
 
 void **OBC_newAllocator2(size_t unitSize){
 
@@ -45,24 +46,24 @@ void *OBC_initAllocator2(OBC_Allocator2 *allocator, size_t unitSize){
 
     if(OBC_initRay(
            OBC_TO_RAY_PTR(& allocator->backed.rawData)
-           ,0,unitSize) == NULL){
+           ,0,unitSize) == OBC_ERROR_FAILURE){
         return NULL;
     }
     if(OBC_initRay(
             OBC_TO_RAY_PTR(& allocator->meta[0].rawData)
            , 1,
-       sizeof(OBC_ALLOC_META_TYPE)) == NULL){
+       sizeof(OBC_ALLOC_META_TYPE)) == OBC_ERROR_FAILURE){
         OBC_freeRayData(&allocator->backed);
         return NULL;
     }
-    memset(allocator->meta[0].rawData,0,allocator->meta[0].maxLength);
+    memset(allocator->meta[0].rawData,0,allocator->meta[0].maxUnitLength*allocator->meta[0].unitSize);
 
     unsigned int i;
     for(i = 1; i <= OBC_ALLOC_META_ADDRESSING; i++){
         if(OBC_initRay(
                OBC_TO_RAY_PTR(& allocator->meta[i].rawData)
                , 0,
-               sizeof(OBC_ALLOC_META_TYPE)) == NULL){
+               sizeof(OBC_ALLOC_META_TYPE)) == OBC_ERROR_FAILURE){
             while(i){
                 OBC_freeRayData(& allocator->meta[i-1]);
                 i--;
@@ -186,12 +187,12 @@ OBC_ERROR_ENUM OBC_Allocator2Expand3(void *allocator){
 
     if((curUnits+1)/OBC_ALLOC_META_BITS >=
        allocator_->meta[0].maxUnitLength){
-        start = allocator_->meta[0].maxLength;
+        start = allocator_->meta[0].maxUnitLength*allocator_->meta[0].unitSize;
         if(OBC_RayExpand(& allocator_->meta[0].rawData) == OBC_ERROR_FAILURE){
             return OBC_ERROR_FAILURE;
         }
         memset(allocator_->meta[0].rawData+start,0,
-                allocator_->meta[0].maxLength-start);
+                (allocator_->meta[0].maxUnitLength* allocator_->meta[0].unitSize)-start);
     }
 
     unsigned int i;
@@ -200,13 +201,13 @@ OBC_ERROR_ENUM OBC_Allocator2Expand3(void *allocator){
         curUnits=allocator_->meta[i-1].maxUnitLength;
         if((curUnits+1)/OBC_ALLOC_META_BITS >=
            allocator_->meta[i].maxUnitLength){
-            start = allocator_->meta[i].maxLength;
+            start = allocator_->meta[i].maxUnitLength*allocator_->meta[i].unitSize;
             if(OBC_RayExpand(& allocator_->meta[i].rawData) == OBC_ERROR_FAILURE){
                 debug("=========FAILURE: %i\n",i);
                 return OBC_ERROR_FAILURE;
             }
             memset(allocator_->meta[i].rawData+start,0,
-                allocator_->meta[i].maxLength-start);
+                (allocator_->meta[i].maxUnitLength*allocator_->meta[i].unitSize)-start);
         }
     }
 

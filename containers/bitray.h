@@ -1,20 +1,12 @@
 #ifndef BITRAY_H_INCLUDED
 #define BITRAY_H_INCLUDED
 
-
-#include "OBC.h"
+#include "../obc.h"
 #include "ray.h"
-#include "memswap.h"
+#include "../obc_natives.h"
 
 
-#define _OBC_BITRAY_PTR_CAST(arrPtr) ((OBC_BitRay *)(arrPtr))
-#define _OBC_BITRAY_OFFSET ((size_t)(&((OBC_BitRay *)NULL)->bits.rawData))
-#define OBC_TO_BITRAY_PTR(arrPtr) (_OBC_BITRAY_PTR_CAST(((void*)(arrPtr)) - _OBC_BITRAY_OFFSET))
-
-#define OBC_FROM_BITRAY_PTR(arrPtr) ((void**)(((void*)(arrPtr)) + _OBC_BITRAY_OFFSET))
-#define OBC_FROM_BITRAY_VAL(listVal) ((void**)(((void*)(&(listVal))) + _OBC_BITRAY_OFFSET))
-
-#define OBC_BITRAY_META_BITS (sizeof(X_X_LONGEST)*CHAR_BIT)
+#define OBC_BITRAY_META_BITS (sizeof(OBC_LONGEST)*CHAR_BIT)
 
 typedef struct OBC_BitRay{
 
@@ -24,11 +16,10 @@ typedef struct OBC_BitRay{
 
 typedef OBC_ERROR_ENUM OBC_ValueBit;
 
-void **OBC_newBitRay();
-void *OBC_initBitRay(OBC_BitRay *bitray);
-void **OBC_BitRayGetAccessPointer(OBC_BitRay *bitray);
+OBC_BitRay* OBC_newBitRay();
+OBC_ERROR_ENUM OBC_initBitRay(OBC_BitRay *bitray);
 
-void OBC_freeBitRay(void *arr);
+void OBC_freeBitRay(OBC_BitRay *bray);
 void OBC_freeBitRayData(OBC_BitRay *bitray);
 
 OBC_Offset OBC_BitRayFirstLeft0Bit(OBC_BitRay *bray, size_t pos);
@@ -43,6 +34,39 @@ void OBC_BitRaySet(OBC_BitRay *bray, size_t pos, unsigned char bit);
 OBC_ERROR_ENUM OBC_BitRayDoExpand(OBC_BitRay *bray, size_t bitPosNeeded);
 OBC_ERROR_ENUM OBC_BitRayExpand(OBC_BitRay *bray);
 
+
+
+//0xFFFFFFFFFFFFFFFFLLU
+#if AVX_BIT_SIZE == 512
+
+#define BITRAY_FULL_VALUE _mm512_set1_epi64(0xFFFFFFFFFFFFFFFFLLU)
+#define BITRAY_FULL_CHECK(valueToCheck, maxValue) \
+(( ~_mm512_cmpeq_epi64_mask((maxValue),(valueToCheck)) ) == 0)
+
+
+#else
+#if AVX_BIT_SIZE == 256
+
+#define BITRAY_FULL_VALUE _mm256_set1_epi64x(0xFFFFFFFFFFFFFFFFLLU)
+#define BITRAY_FULL_CHECK(valueToCheck, maxValue) \
+( _mm256_testc_si256((maxValue),(valueToCheck)) )
+
+#else
+#if AVX_BIT_SIZE == 128
+
+#define BITRAY_FULL_VALUE _mm_set1_epi64x(0xFFFFFFFFFFFFFFFFLLU)
+#define BITRAY_FULL_CHECK(valueToCheck, maxValue) \
+( _mm_testc_si128((maxValue),(valueToCheck)) )
+
+#else
+
+#define BITRAY_FULL_VALUE 0xFFFFFFFFFFFFFFFFLLU
+#define BITRAY_FULL_CHECK(valueToCheck, maxValue) \
+( (( (valueToCheck) != (maxValue) )) )
+
+#endif // AVX_BIT_SIZE
+#endif // AVX_BIT_SIZE
+#endif // AVX_BIT_SIZE
 
 
 #endif // BITRAY_H_INCLUDED

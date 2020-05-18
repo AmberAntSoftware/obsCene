@@ -8,29 +8,33 @@ void **OBC_newList(size_t unitSize){
 
     OBC_List *list = calloc(1,sizeof(OBC_List));
 
-    if(OBC_initList(list,unitSize) == NULL){
+    if(list == NULL){
+        return NULL;
+    }
+
+    if(OBC_initList(list,unitSize) == OBC_ERROR_FAILURE){
         free(list);
         return NULL;
     }
 
-    return (void **)OBC_FROM_ALLOCFASTBIT_VAL(list->allocator);
+    return OBC_ListGetDataPointer(list);
 
 }
-void *OBC_initList(OBC_List *list,size_t unitSize){
+OBC_ERROR_ENUM OBC_initList(OBC_List *list,size_t unitSize){
 
-    if(OBC_initRay(& list->links,0,sizeof(size_t)*OBC_LIST_LINK_COUNT) == NULL){
-        return NULL;
+    if(OBC_initRay(& list->links,0,sizeof(size_t)*OBC_LIST_LINK_COUNT) == OBC_ERROR_FAILURE){
+        return OBC_ERROR_FAILURE;
     }
 
     if(OBC_initAllocFastBit(& list->allocator, unitSize ) == NULL){
         OBC_freeRayData(& list->links);
-        return NULL;
+        return OBC_ERROR_FAILURE;
     }
 
     list->first = OBC_NULL_INDEX;
     list->last = OBC_NULL_INDEX;
 
-    return list;
+    return OBC_ERROR_SUCCESS;
 }
 void **OBC_ListGetDataPointer(OBC_List *list){
     return (void **)OBC_FROM_ALLOCFASTBIT_VAL(list->allocator);

@@ -1,8 +1,8 @@
 #ifndef TREE_H_INCLUDED
 #define TREE_H_INCLUDED
 
-#include "OBC.h"
-#include "allocfastbit.h"
+#include "../obc.h"
+#include "../allocators/allocfastbit.h"
 
 #define _OBC_TREE_PTR_CAST(rawPtr) ((OBC_Tree *)(rawPtr))
 #define _OBC_TREE_OFFSET ((size_t)(&((OBC_Tree *)NULL)->allocator.backed.rawData))

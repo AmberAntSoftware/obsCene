@@ -18,16 +18,16 @@ void **OBC_newAllocFastBit(size_t unitSize){
 }
 void *OBC_initAllocFastBit(OBC_AllocFastBit *allocator, size_t unitSize){
 
-    if(OBC_initRay(&allocator->backed,0,unitSize) == NULL){
+    if(OBC_initRay(&allocator->backed,0,unitSize) == OBC_ERROR_FAILURE){
         return NULL;
     }
 
-    if(OBC_initRay(& allocator->meta,1,sizeof(OBC_ALLOCFASTBIT_META_TYPE)) == NULL){
+    if(OBC_initRay(& allocator->meta,1,sizeof(OBC_ALLOCFASTBIT_META_TYPE)) == OBC_ERROR_FAILURE){
         OBC_freeRayData(&allocator->backed);
         return NULL;
     }
 
-    if(OBC_initRay(&allocator->available,1,sizeof(OBC_ALLOCFASTBIT_META_TYPE)) == NULL){
+    if(OBC_initRay(&allocator->available,1,sizeof(OBC_ALLOCFASTBIT_META_TYPE)) == OBC_ERROR_FAILURE){
         OBC_freeRayData(&allocator->meta);
         OBC_freeRayData(&allocator->backed);
         return NULL;
@@ -71,9 +71,9 @@ size_t OBC_AllocFastBitGetFreeLocation(void *allocator){
 
     OBC_AllocFastBit *allocator_ = OBC_TO_RAW_ALLOCFASTBIT(allocator);
 
-    if(allocator_->available.curLength < 1){
+    if(allocator_->available.curUnitLength < 1){
 
-        if(allocator_->available.curLength==allocator_->available.maxLength){
+        if(allocator_->available.curUnitLength==allocator_->available.maxUnitLength){
             return OBC_NULL_INDEX;
         }
 
@@ -164,8 +164,8 @@ OBC_ERROR_ENUM OBC_AllocFastBitBalanceMeta(void *allocator){
     OBC_AllocFastBit *allocator_ = OBC_TO_RAW_ALLOCFASTBIT(allocator);
 
     int expanded = 0;
-    size_t start = allocator_->meta.maxLength;
-    while(allocator_->meta.maxLength*CHAR_BIT < allocator_->backed.maxUnitLength){
+    size_t start = allocator_->meta.maxUnitLength*allocator_->meta.unitSize;
+    while((allocator_->meta.maxUnitLength*allocator_->meta.unitSize)*CHAR_BIT < allocator_->backed.maxUnitLength){
         if(OBC_RayExpand(OBC_FROM_RAY_VAL(allocator_->meta)) == OBC_ERROR_FAILURE){
             if(OBC_RayContract(OBC_FROM_RAY_VAL(allocator_->backed))){
                     ///TODO serious crisis
@@ -181,7 +181,7 @@ OBC_ERROR_ENUM OBC_AllocFastBitBalanceMeta(void *allocator){
         }
         expanded++;
     }
-    if(memset(allocator_->meta.rawData+start,0,(allocator_->meta.maxLength)-start) != allocator_->meta.rawData+start){
+    if(memset(allocator_->meta.rawData+start,0,((allocator_->meta.maxUnitLength*allocator_->meta.unitSize))-start) != allocator_->meta.rawData+start){
         ///TODO serious crisis
         return OBC_ERROR_FAILURE;
     }
@@ -303,10 +303,10 @@ size_t OBC_AllocFastBitGetAvailable(void *allocator){
     size_t found = 0;
 
     if(allocator_->available.curUnitLength < 1){
-        if(allocator_->backed.maxLength == allocator_->backed.curLength){
+        if(allocator_->backed.maxUnitLength == allocator_->backed.curUnitLength){
             return OBC_NULL_INDEX;
         }
-        return allocator_->backed.curLength;
+        return allocator_->backed.curUnitLength*allocator_->backed.unitSize;
     }
 
 
@@ -418,7 +418,7 @@ SKIP_POP:
                                 [allocator_->available.curUnitLength-1];
             bitPos = ((OBC_ALLOCFASTBIT_META_TYPE*)allocator_->meta.rawData)
                 [found];
-        }while(bitPos == (~0));
+        }while(bitPos == (~((OBC_ALLOCFASTBIT_META_TYPE)0)));
 
         found*=OBC_ALLOCFASTBIT_META_BITS;
         bitPos = OBC_AllocFastBitGetFirstBit(bitPos);///always non ~0
@@ -494,11 +494,11 @@ void **OBC_newAllocFastBit2(size_t unitSize){
 }
 void *OBC_initAllocFastBit2(OBC_AllocFastBit2 *allocator, size_t unitSize){
 
-    if(OBC_initRay(&allocator->backed,0,unitSize) == NULL){
+    if(OBC_initRay(&allocator->backed,0,unitSize) == OBC_ERROR_FAILURE){
         return NULL;
     }
 
-    if(OBC_initRay(& allocator->meta,2,sizeof(OBC_ALLOCFASTBIT_META_TYPE)) == NULL){
+    if(OBC_initRay(& allocator->meta,2,sizeof(OBC_ALLOCFASTBIT_META_TYPE)) == OBC_ERROR_FAILURE){
         OBC_freeRayData(&allocator->backed);
         return NULL;
     }
@@ -528,7 +528,7 @@ OBC_ERROR_ENUM OBC_AllocFastBit2Expand(void *allocator){
 
     OBC_ERROR_PROPAGATE(OBC_RayExpand(OBC_FROM_RAY_VAL(allocator_->backed)));
 
-    size_t start = allocator_->meta.maxLength;
+    size_t start = allocator_->meta.maxUnitLength*allocator_->meta.unitSize;
     if(OBC_RayExpand(OBC_FROM_RAY_VAL(allocator_->meta)) == OBC_ERROR_FAILURE){
         if(OBC_RayContract(OBC_FROM_RAY_VAL(allocator_->meta)) == OBC_ERROR_FAILURE){
             ///TODO serious error
@@ -542,7 +542,7 @@ OBC_ERROR_ENUM OBC_AllocFastBit2Expand(void *allocator){
         return OBC_ERROR_FAILURE;
     }
     /*/
-    memset(allocator_->meta.rawData+start,0,(allocator_->meta.maxLength)-start);
+    memset(allocator_->meta.rawData+start,0,(allocator_->meta.maxUnitLength*allocator_->meta.unitSize)-start);
 
     return OBC_ERROR_SUCCESS;
 }

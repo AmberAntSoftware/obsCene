@@ -1,8 +1,8 @@
 #ifndef LIST_H_INCLUDED
 #define LIST_H_INCLUDED
 
-#include "OBC.h"
-#include "allocfastbit.h"
+#include "../obc.h"
+#include "../allocators/allocfastbit.h"
 
 #define _OBC_LIST_PTR_CAST(arrPtr) ((OBC_List *)(arrPtr))
 #define _OBC_LIST_OFFSET ((size_t)(&((OBC_List *)NULL)->allocator.backed.rawData))
@@ -23,7 +23,7 @@ typedef struct OBC_List{
 }OBC_List;
 
 void **OBC_newList(size_t elementSize);
-void *OBC_initList(OBC_List *list,size_t unitSize);
+OBC_ERROR_ENUM OBC_initList(OBC_List *list,size_t unitSize);
 void **OBC_ListGetDataPointer(OBC_List *list);
 
 void OBC_freeList(void *arr);

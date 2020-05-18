@@ -3,22 +3,25 @@
 void **OBC_newStack(size_t unitSize){
 
     OBC_Stack *stack = calloc(1,sizeof(OBC_Stack));
+    if(stack == NULL){
+        return NULL;
+    }
 
-    if(OBC_initStack(stack,unitSize) == NULL){
+    if(OBC_initStack(stack,unitSize) == OBC_ERROR_FAILURE){
         free(stack);
         return NULL;
     }
 
-    return (void **)OBC_FROM_RAY_VAL(stack->stack);
+    return OBC_StackGetDataPointer(stack);
 
 }
-void *OBC_initStack(OBC_Stack *stack, size_t unitSize){
+OBC_ERROR_ENUM OBC_initStack(OBC_Stack *stack, size_t unitSize){
 
-    if(OBC_initRay(& stack->stack,0,unitSize) == NULL){
-        return NULL;
+    if(OBC_initRay(& stack->stack,0,unitSize) == OBC_ERROR_FAILURE){
+        return OBC_ERROR_FAILURE;
     }
 
-    return stack;
+    return OBC_ERROR_SUCCESS;
 }
 void **OBC_StackGetDataPointer(OBC_Stack *stack){
     return (void **)OBC_FROM_RAY_VAL(stack->stack);

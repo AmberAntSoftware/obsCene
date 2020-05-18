@@ -1,7 +1,7 @@
 #ifndef DEQUEUE_H_INCLUDED
 #define DEQUEUE_H_INCLUDED
 
-#include "OBC.h"
+#include "../obc.h"
 #include "queue.h"
 
 #define _OBC_DEQUEUE_PTR_CAST(rawPtr) ((OBC_Dequeue *)(rawPtr))
@@ -18,7 +18,8 @@ typedef struct OBC_Dequeue{
 }OBC_Dequeue;
 
 void **OBC_newDequeue(size_t elementSize);
-void *OBC_initDequeue(OBC_Dequeue *dequeue, size_t unitSize);
+OBC_ERROR_ENUM OBC_initDequeue(OBC_Dequeue *dequeue, size_t unitSize);
+void **OBC_DequeueGetDataPointer(OBC_Dequeue *queue);
 
 void OBC_freeDequeue(void *arr);
 void OBC_freeDequeueData(OBC_Dequeue *dequeue);

@@ -14,11 +14,7 @@
     #define OBC_NULL_INDEX (~((size_t)0))
 #endif // NULL
 
-#ifndef OBC_MEMORY_FAILURE
-    #define OBC_MEMORY_FAILURE 1
-#endif // NULL
-
-#if DEBUG
+#ifdef DEBUG
     #define debug(...) printf(__VA_ARGS__)
 #else
     #define debug(...) do{}while(0);
@@ -46,9 +42,23 @@ typedef struct OBC_ErrorPointer{
     void *realValue;
 }OBC_ErrorPointer;
 
-typedef int OBC_SpaceshipValue;
-typedef size_t OBC_Offset;
+typedef signed int OBC_SpaceshipValue;
+typedef unsigned int OBC_Offset;
 typedef OBC_Offset OBC_Iterator;
+
+typedef struct OBC_LargeOffset{
+    OBC_Offset row;
+    OBC_Offset col;
+}OBC_LargeOffset;
+
+typedef void** OBC_Data;
+
+#define obc(shortOffset) 0][shortOffset
+#define OBC(largeOffset) 0][largeOffset.row][largeOffset.col
+
+#define OBC_(shortOffset) 0][shortOffset
+#define OBC__(largeOffset) 0][largeOffset.row][largeOffset.col
+
 
 void *OBC_memset (void *ptr, int c, size_t len);
 

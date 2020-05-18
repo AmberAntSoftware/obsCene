@@ -1,10 +1,10 @@
 #ifndef HASHMAP_H_INCLUDED
 #define HASHMAP_H_INCLUDED
 
-#include "OBC.h"
-#include "allocfastbit.h"
-#include "hash.h"
-#include "memswap.h"
+#include "../obc.h"
+#include "../allocators/allocfastbit.h"
+#include "../obc_stdlib/hash.h"
+#include "../obc_stdlib/memswap.h"
 
 #define _OBC_HASHMAP_PTR_CAST(rawPtr) ((OBC_HashMap *)(rawPtr))
 #define _OBC_HASHMAP_OFFSET ((size_t)(&((OBC_HashMap *)NULL)->values.rawData))
@@ -86,8 +86,8 @@ typedef struct OBC_HashMapPointer{
 
 void **OBC_newHashMap(size_t keySize, size_t valueSize);
 void **OBC_newHashMapComplex(size_t keySize, size_t valueSize, size_t maxBucketDepth);
-void *OBC_initHashMap(OBC_HashMap *map, size_t keySize, size_t valueSize);
-void *OBC_initHashMapComplex(OBC_HashMap *map, size_t keySize, size_t valueSize, size_t initBuckets);
+OBC_ERROR_ENUM OBC_initHashMap(OBC_HashMap *map, size_t keySize, size_t valueSize);
+OBC_ERROR_ENUM OBC_initHashMapComplex(OBC_HashMap *map, size_t keySize, size_t valueSize, size_t initBuckets);
 void **OBC_HashMapGetDataPointer(OBC_HashMap *map);
 
 void **OBC_HashMapGetKeyPointerRaw(OBC_HashMap *map);

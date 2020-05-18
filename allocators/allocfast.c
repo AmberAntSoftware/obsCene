@@ -18,11 +18,11 @@ void **OBC_newAllocFast(size_t unitSize){
 }
 void *OBC_initAllocFast(OBC_AllocFast *allocator, size_t unitSize){
 
-    if(OBC_initRay(&allocator->backed,0,unitSize) == NULL){
+    if(OBC_initRay(&allocator->backed,0,unitSize) == OBC_ERROR_FAILURE){
         return NULL;
     }
 
-    if(OBC_initRay(&allocator->meta,0,sizeof(OBC_ALLOCFAST_META)) == NULL){
+    if(OBC_initRay(&allocator->meta,0,sizeof(OBC_ALLOCFAST_META)) == OBC_ERROR_FAILURE){
         OBC_freeRayData(&allocator->backed);
         return NULL;
     }
@@ -92,7 +92,7 @@ OBC_ERROR_ENUM OBC_AllocFastFree(void *allocator, size_t data){
 
     return OBC_ERROR_SUCCESS;
 }
-
+/*
 size_t OBC_AllocRayGetFreeLocation(void *allocator);
 OBC_ERROR_ENUM OBC_AllocFastExpand(void *allocator);
 
@@ -102,3 +102,4 @@ OBC_ERROR_ENUM OBC_AllocFastMarkAllocated(void *allocator, size_t pos);
 ///UTILITY
 ///utility -- marks the location bit as free
 OBC_ERROR_ENUM OBC_AllocFastMarkFreed(void *allocator, size_t pos);
+*/

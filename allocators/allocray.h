@@ -1,9 +1,9 @@
 #ifndef ALLOCRAY_H_INCLUDED
 #define ALLOCRAY_H_INCLUDED
 
-#include "OBC.h"
+#include "../obc.h"
+#include "../containers/ray.h"
 #include "allocators.h"
-#include "ray.h"
 
 #define _OBC_ALLOCRAY_PTR_CAST(rawPtr) ((OBC_AllocRay *)(rawPtr))
 #define _OBC_ALLOCRAY_OFFSET ((size_t)(&((OBC_AllocRay *)NULL)->backed.rawData))
@@ -27,7 +27,6 @@ size_t OBC_AllocRayMalloc(void *allocator);
 OBC_ERROR_ENUM OBC_AllocRayFree(void *allocator, size_t data);
 
 size_t OBC_AllocRayGetFreeLocation(void *allocator);
-OBC_ERROR_ENUM OBC_AllocRayFree(void *allocator, size_t data);
 OBC_ERROR_ENUM OBC_AllocRayExpand(void *allocator);
 
 ///UTILITY

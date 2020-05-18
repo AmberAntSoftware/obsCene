@@ -20,11 +20,11 @@ void **OBC_newAllocRay(size_t unitSize){
 
 void *OBC_initAllocRay(OBC_AllocRay *allocator, size_t unitSize){
 
-    if(OBC_initRay(&allocator->backed,0,unitSize) == NULL){
+    if(OBC_initRay(&allocator->backed,0,unitSize) == OBC_ERROR_FAILURE){
         return NULL;
     }
 
-    if(OBC_initRay(&allocator->meta,0,sizeof(OBC_ALLOC_META_TYPE)) == NULL){
+    if(OBC_initRay(&allocator->meta,0,sizeof(OBC_ALLOC_META_TYPE)) == OBC_ERROR_FAILURE){
         OBC_freeRayData(&allocator->backed);
         return NULL;
     }
@@ -112,7 +112,7 @@ size_t OBC_AllocRayGetFreeLocation(void *allocator){
 
 int OBC_AllocRayFindFirstEmptyBit(OBC_ALLOC_META_TYPE rraw){
 
-    int j;
+    unsigned int j;
     for(j = 0; j < OBC_ALLOC_META_BITS; j++){
         if( (rraw & OBC_ALLOC_META_MASK) == 0 ){
             break;
@@ -136,7 +136,7 @@ OBC_ERROR_ENUM OBC_AllocRayExpand(void *allocator){
 
     if(metaMaxUnits < backedMaxUnits){
 
-        size_t start = allocRay->meta.maxLength;
+        size_t start = allocRay->meta.maxUnitLength*allocRay->meta.unitSize;
 
         if(OBC_RayExpand(& allocRay->meta.rawData) == OBC_ERROR_FAILURE){
             for(i = 0; i < OBC_ALLOC_MAX_CONTRACT_TRIES; i++){
@@ -149,7 +149,7 @@ OBC_ERROR_ENUM OBC_AllocRayExpand(void *allocator){
             return OBC_ERROR_FAILURE;
         }
 
-        memset(allocRay->meta.rawData+start,0,((allocRay->meta.maxLength)-start));
+        memset(allocRay->meta.rawData+start,0,((allocRay->meta.maxUnitLength*allocRay->meta.unitSize)-start));
 
     }
 
