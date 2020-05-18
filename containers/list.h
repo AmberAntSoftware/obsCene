@@ -2,7 +2,7 @@
 #define LIST_H_INCLUDED
 
 #include "../obc.h"
-#include "../allocators/allocfastbit.h"
+#include "../allocators/allocfastbitcache.h"
 
 #define _OBC_LIST_PTR_CAST(arrPtr) ((OBC_List *)(arrPtr))
 #define _OBC_LIST_OFFSET ((size_t)(&((OBC_List *)NULL)->allocator.backed.rawData))
@@ -13,7 +13,7 @@
 
 typedef struct OBC_List{
 
-    OBC_AllocFastBit allocator;
+    OBC_AllocFastBitCache allocator;
     OBC_Ray links;
     OBC_Offset last;
     OBC_Offset first;

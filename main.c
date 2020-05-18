@@ -9,7 +9,7 @@
 #include "containers/ray.h"
 #include "allocators/allocator.h"
 #include "allocators/allocfast.h"
-#include "allocators/allocfastbit.h"
+#include "allocators/allocfastbitcache.h"
 #include "containers/list.h"
 #include "containers/stack.h"
 #include "containers/queue.h"
@@ -514,228 +514,6 @@ int allocfastTest(){
 
 }
 
-int allocfastbitTest(){
-
-    size_t i;
-
-    long long int accu = 0;
-
-    int size = ALLOC_SIZE;
-    size_t *stores = malloc(ALLOC_SIZE*sizeof(size_t));
-    toTest **datas = (toTest**)OBC_newAllocFastBit(sizeof(toTest));
-
-
-    //*
-    printf("START\n");
-    volatile clock_t t1 = clock();
-    size_t prev = 0,cur = 0;
-    for(i = 0; i < ALLOC_SIZE; i++){
-        cur = OBC_AllocFastBitMalloc(datas);
-        OBC_AllocFastBitGetValue(datas,cur)=rgei;
-        if(cur-prev != 1){
-            printf("FAILURE: %u     PREV: %u\n",cur,prev);
-        }
-        prev = cur;
-    }
-    volatile clock_t t2 = clock();
-
-
-
-    accu=0;
-    srand(6464);
-    volatile clock_t a1 = clock();
-    for(i = 0; i < ALLOC_SIZE; i++){
-        size_t dar = rand()%ALLOC_SIZE;
-        accu+=OBC_AllocFastBitGetPointer(datas,dar)->we34;
-        accu+=OBC_AllocFastBitGetPointer(datas,dar)->baz[3];
-    }
-    volatile clock_t a2 = clock();
-
-
-    srand(6464);
-    volatile clock_t t3 = clock();
-    for(i = 0; i < ALLOC_SIZE; i++){
-        size_t dar = rand()%ALLOC_SIZE;
-        OBC_AllocFastBitFree(datas,dar);
-        size_t allc = OBC_AllocFastBitMalloc(datas);
-        if(allc!=dar){
-            printf("FAIL_RAND ALLOC: %u     DAR: %u\n",allc,dar);
-        }
-        OBC_AllocFastBitGetValue(datas,dar) = rgei;
-    }
-    volatile clock_t t4 = clock();
-
-
-    accu=0;
-    srand(6464);
-    volatile clock_t a3 = clock();
-    for(i = 0; i < ALLOC_SIZE; i++){
-        size_t dar = rand()%ALLOC_SIZE;
-        accu+=OBC_AllocFastBitGetPointer(datas,dar)->we34;
-        accu+=OBC_AllocFastBitGetPointer(datas,dar)->baz[3];
-    }
-    volatile clock_t a4 = clock();
-
-
-    printf("Deallocation\n");
-    printf("BackedSize: %u\n",OBC_TO_RAW_ALLOCFASTBIT(datas)->backed.curUnitLength);
-    printf("BackedNoFreeAvailable: %u\n",OBC_TO_RAW_ALLOCFASTBIT(datas)->available.curUnitLength);
-    volatile clock_t t5 = clock();
-
-    for(i = 0; i < ALLOC_SIZE; i++){
-        OBC_AllocFastBitFree(datas,i);
-    }
-    printf("BackedAvailable: %u\n",OBC_TO_RAW_ALLOCFASTBIT(datas)->available.curUnitLength);
-    //*
-    for(i = 0; i < ALLOC_SIZE; i++){
-        size_t allc = OBC_AllocFastBitMalloc(datas);
-        /*
-        if(allc!=ALLOC_SIZE-i){
-            printf("FAIL_ALL ALLOC: %u     EXPECT: %u\n",allc,i);
-        }
-        /*/
-        if(allc >= ALLOC_SIZE){
-            printf("FAIL_ALL ALLOC: %u     FROM: %u\n",allc,i);
-        }
-        //*/
-    }
-    printf("BackedAvailable: %u\n",OBC_TO_RAW_ALLOCFASTBIT(datas)->available.curUnitLength);
-    printf("MAxAvailable: %u\n",OBC_TO_RAW_ALLOCFASTBIT(datas)->available.maxUnitLength);
-    /*/
-        OBC_freeAllocFastBit(datas);
-    //*/
-    volatile clock_t t6 = clock();
-
-    puts("\n\n");
-    printf("AllocCopy Time: %f\n",1000.0*(t2-t1)/CLOCKS_PER_SEC);
-    printf("RandomAlloc Time: %f\n",1000.0*(t4-t3)/CLOCKS_PER_SEC);
-    printf("Deallocation Time: %f\n",1000.0*(t6-t5)/CLOCKS_PER_SEC);
-    printf("InitRead Time: %f\n",1000.0*(a2-a1)/CLOCKS_PER_SEC);
-    printf("RandomRead Time: %u\n",a4-a3);
-
-    OBC_AllocFastBit *fast = OBC_TO_RAW_ALLOCFASTBIT(datas);
-
-    printf("BackedDataSize: %u\n",OBC_RayCurByteLength(OBC_FROM_RAY_VAL(fast->backed)));
-    printf("BackedMetaSize: %u\n",OBC_RayCurByteLength(OBC_FROM_RAY_VAL(fast->meta)));
-    printf("BackedAvailableSize: %u\n",OBC_RayCurByteLength(OBC_FROM_RAY_VAL(fast->available)));
-    printf("MAxAvailable: %u\n",OBC_RayMaxByteLength(OBC_FROM_RAY_VAL(fast->available)));
-    printf("BackedTotalSize: %u\n",
-           OBC_RayCurByteLength(OBC_FROM_RAY_VAL(fast->available))+OBC_RayCurByteLength(OBC_FROM_RAY_VAL(fast->meta))+OBC_RayCurByteLength(OBC_FROM_RAY_VAL(fast->backed)) );
-printf("ALLOC NEXT: %u \n",OBC_AllocFastBitMalloc(datas));
-printf("BackedDataSize: %u\n",fast->backed.curUnitLength);
-
-    return 0;
-    //*/
-
-}
-
-int allocfastbit2Test(){
-
-    size_t i;
-
-    long long int accu = 0;
-
-    int size = ALLOC_SIZE;
-    size_t *stores = malloc(ALLOC_SIZE*sizeof(size_t));
-    toTest **datas = (toTest**)OBC_newAllocFastBit2(sizeof(toTest));
-
-
-    //*
-    printf("START\n");
-    volatile clock_t t1 = clock();
-    size_t prev = 0,cur = 0;
-    for(i = 0; i < ALLOC_SIZE; i++){
-        cur = OBC_AllocFastBit2Malloc(datas);
-        if(cur-prev != 1){
-            printf("FAILURE: %u     PREV: %u\n",cur,prev);
-        }
-        prev = cur;
-    }
-    volatile clock_t t2 = clock();
-
-
-
-    accu=0;
-    srand(6464);
-    volatile clock_t a1 = clock();
-    for(i = 0; i < ALLOC_SIZE; i++){
-        size_t dar = rand()%ALLOC_SIZE;
-        accu+=OBC_AllocFastBit2GetPointer(datas,dar)->we34;
-        accu+=OBC_AllocFastBit2GetPointer(datas,dar)->baz[3];
-    }
-    volatile clock_t a2 = clock();
-
-    /*
-    srand(6464);
-    volatile clock_t t3 = clock();
-    for(i = 0; i < ALLOC_SIZE; i++){
-        size_t dar = rand()%ALLOC_SIZE;
-        OBC_AllocFastBit2Free(datas,dar);
-        size_t allc = OBC_AllocFastBit2Malloc(datas);
-        if(allc!=dar){
-            printf("FAIL_RAND ALLOC: %u     DAR: %u\n",allc,dar);
-        }
-        OBC_AllocFastBitGetValue(datas,dar) = rgei;
-    }
-    volatile clock_t t4 = clock();
-
-
-    accu=0;
-    srand(6464);
-    volatile clock_t a3 = clock();
-    for(i = 0; i < ALLOC_SIZE; i++){
-        size_t dar = rand()%ALLOC_SIZE;
-        accu+=OBC_AllocFastBit2GetPointer(datas,dar)->we34;
-        accu+=OBC_AllocFastBit2GetPointer(datas,dar)->baz[3];
-    }
-    volatile clock_t a4 = clock();
-
-
-    printf("Deallocation\n");
-    printf("BackedSize: %u\n",OBC_TO_RAW_ALLOCFASTBIT(datas)->backed.curUnitLength);
-    printf("BackedNoFreeAvailable: %u\n",OBC_TO_RAW_ALLOCFASTBIT(datas)->available.curUnitLength);
-    volatile clock_t t5 = clock();
-
-    for(i = 0; i < ALLOC_SIZE; i++){
-        OBC_AllocFastBit2Free(datas,i);
-    }
-    printf("BackedAvailable: %u\n",OBC_TO_RAW_ALLOCFASTBIT(datas)->available.curUnitLength);
-    /*
-    for(i = 0; i < ALLOC_SIZE; i++){
-        size_t allc = OBC_AllocFastMalloc(datas);
-        if(allc!=ALLOC_SIZE-i){
-            printf("FAIL_ALL ALLOC: %u     EXPECT: %u\n",allc,i);
-        }
-    }
-    printf("BackedAvailable: %u\n",OBC_TO_RAW_ALLOCFASTBIT(datas)->available.curUnitLength);
-    printf("MAxAvailable: %u\n",OBC_TO_RAW_ALLOCFASTBIT(datas)->available.maxUnitLength);
-    /*/
-        OBC_freeAllocFastBit2(datas);
-    //*/
-    volatile clock_t t6 = clock();
-
-    puts("\n\n");
-    printf("AllocCopy Time: %f\n",1000.0*(t2-t1)/CLOCKS_PER_SEC);
-    //printf("RandomAlloc Time: %f\n",1000.0*(t4-t3)/CLOCKS_PER_SEC);
-   // printf("Deallocation Time: %f\n",1000.0*(t6-t5)/CLOCKS_PER_SEC);
-    printf("InitRead Time: %f\n",1000.0*(a2-a1)/CLOCKS_PER_SEC);
-    //printf("RandomRead Time: %u\n",a4-a3);
-
-    OBC_AllocFastBit2 *fast = OBC_TO_RAW_ALLOCFASTBIT2(datas);
-
-    printf("BackedDataSize: %u\n",OBC_RayCurByteLength(OBC_FROM_RAY_VAL(fast->backed)));
-    printf("BackedDataSize_units: %u\n",OBC_RayCurByteLength(OBC_FROM_RAY_VAL(fast->backed)));
-    printf("BackedDataSize_max_units: %u\n",OBC_RayMaxByteLength(OBC_FROM_RAY_VAL(fast->backed)));
-    printf("BackedMetaSize: %u\n",OBC_RayCurByteLength(OBC_FROM_RAY_VAL(fast->meta)));
-    printf("BackedTotalSize: %u\n",
-           OBC_RayCurByteLength(OBC_FROM_RAY_VAL(fast->meta))+OBC_RayCurByteLength(OBC_FROM_RAY_VAL(fast->backed)));
-
-
-    return 0;
-    //*/
-
-}
-
 
 
 
@@ -784,9 +562,9 @@ void listTests(){
     for(i = 0; i < ALLOC_SIZE; i++){
         //*
         item = OBC_ListNewItem(strs);
-        OBC_GetPointer(strs,item)->length = 15;
-        OBC_GetPointer(strs,item)->data = "wkebgkwgek";
-        OBC_GetPointer(strs,item)->small[OBC_GetPointer(strs,item)->length] = 'k';
+        ///OBC_GetPointer(strs,item)->length = 15;
+        ///OBC_GetPointer(strs,item)->data = "wkebgkwgek";
+        ///OBC_GetPointer(strs,item)->small[OBC_GetPointer(strs,item)->length] = 'k';
         /*/
         OBC_ListAddRawFast(strs,rrgei);
         //if(OBC_ListAddRaw(strs,&rrgei)==OBC_ERROR_FAILURE){
@@ -1122,7 +900,8 @@ int mainXZ(int argc, char** argv){
 #include "allocators/allocfastbitcache.h"
 int main(int argc, char** argv){
 
-    allocfastTest();
+    listTests();
+    //allocfastTest();
     //allocfastbitTest();
     //allocfastbit2Test();
 

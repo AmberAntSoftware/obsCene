@@ -2,7 +2,7 @@
 #define TREE_H_INCLUDED
 
 #include "../obc.h"
-#include "../allocators/allocfastbit.h"
+#include "../allocators/allocfastbitcache.h"
 
 #define _OBC_TREE_PTR_CAST(rawPtr) ((OBC_Tree *)(rawPtr))
 #define _OBC_TREE_OFFSET ((size_t)(&((OBC_Tree *)NULL)->allocator.backed.rawData))
@@ -13,7 +13,7 @@
 
 typedef struct OBC_Tree{
 
-    OBC_AllocFastBit allocator;
+    OBC_AllocFastBitCache allocator;
     OBC_Ray links;
     OBC_Offset root;
 

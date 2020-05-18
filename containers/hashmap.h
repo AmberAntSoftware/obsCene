@@ -2,7 +2,7 @@
 #define HASHMAP_H_INCLUDED
 
 #include "../obc.h"
-#include "../allocators/allocfastbit.h"
+#include "../allocators/allocfastbitcache.h"
 #include "../obc_stdlib/hash.h"
 #include "../obc_stdlib/memswap.h"
 
@@ -58,7 +58,7 @@ typedef struct OBC_HashMap{
     ///maximum value at any given time is depth*buckets
     size_t count;
 
-    OBC_AllocFastBit sparseStorage;
+    //OBC_AllocFastBitCache sparseStorage;
 
 }OBC_HashMap;
 
@@ -247,7 +247,7 @@ typedef struct OBC_OOPHashMap{
 
 typedef struct OBC_HashMapStatic{
 
-    OBC_AllocFastBit backed;
+    OBC_AllocFastBitCache backed;
     OBC_HashMap indirection;
 
 }OBC_HashMapStatic;
