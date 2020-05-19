@@ -14,7 +14,7 @@ void **OBC_newQueue(size_t unitSize){
 }
 OBC_ERROR_ENUM OBC_initQueue(OBC_Queue *queue, size_t unitSize){
 
-    if(OBC_initRay(& queue->backed,0,unitSize) == OBC_ERROR_FAILURE){
+    if(OBC_initRayComplex(& queue->backed,0,unitSize) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
 

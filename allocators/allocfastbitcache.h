@@ -47,6 +47,7 @@ OBC_ALLOCFASTBITCACHE_ADDR OBC_AllocFastBitCacheXetHeadLink(OBC_AllocFastBitCach
 
 void **OBC_newAllocFastBitCache(size_t unitSize);
 OBC_ERROR_ENUM OBC_initAllocFastBitCache(OBC_AllocFastBitCache *allocator, size_t unitSize);
+OBC_ERROR_ENUM OBC_initAllocFastBitCacheComplex(OBC_AllocFastBitCache *allocator, unsigned int initialReserveCount , unsigned int unitSize);
 void OBC_freeAllocFastBitCache(void *allocator);
 void OBC_freeAllocFastBitCacheData(void *allocator);
 
@@ -56,6 +57,9 @@ unsigned int OBC_AllocFastBitCacheMalloc(void *allocator);
 OBC_ERROR_ENUM OBC_AllocFastBitCacheFree(void *allocator, size_t pos);
 
 unsigned int OBC_AllocFastBitCacheMallocRaw(OBC_AllocFastBitCache *allocator);
+OBC_ERROR_ENUM OBC_AllocFastBitCacheFreeRaw(OBC_AllocFastBitCache *allocator, size_t pos);
+
+
 
 
 OBC_ERROR_ENUM OBC_AllocFastBitCacheExpand(void *allocator);

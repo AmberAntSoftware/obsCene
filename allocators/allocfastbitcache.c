@@ -17,12 +17,16 @@ void **OBC_newAllocFastBitCache(size_t unitSize){
 
 }
 OBC_ERROR_ENUM OBC_initAllocFastBitCache(OBC_AllocFastBitCache *allocator, size_t unitSize){
+    return OBC_initAllocFastBitCacheComplex(allocator,0,unitSize);
+}
 
-    if(OBC_initRay(&allocator->backed,0,unitSize) == OBC_ERROR_FAILURE){
+OBC_ERROR_ENUM OBC_initAllocFastBitCacheComplex(OBC_AllocFastBitCache *allocator, unsigned int initialReserveCount , unsigned int unitSize){
+
+    if(OBC_initRayComplex(&allocator->backed,initialReserveCount,unitSize) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
 
-    if(OBC_initRay(& allocator->meta,0,sizeof(OBC_ALLOCFASTBITCACHE_META)*2) == OBC_ERROR_FAILURE){
+    if(OBC_initRayComplex(& allocator->meta,initialReserveCount,sizeof(OBC_ALLOCFASTBITCACHE_META)*2) == OBC_ERROR_FAILURE){
         OBC_freeRayData(&allocator->backed);
         return OBC_ERROR_FAILURE;
     }
@@ -35,6 +39,8 @@ OBC_ERROR_ENUM OBC_initAllocFastBitCache(OBC_AllocFastBitCache *allocator, size_
     return OBC_ERROR_SUCCESS;
 
 }
+
+
 
 
 void OBC_freeAllocFastBitCache(void *allocator){
@@ -84,20 +90,23 @@ unsigned int OBC_AllocFastBitCacheMallocRaw(OBC_AllocFastBitCache *allocator){
 }
 
 OBC_ERROR_ENUM OBC_AllocFastBitCacheFree(void *allocator, unsigned int pos){
+    OBC_AllocFastBitCache *allocator_ = OBC_TO_RAW_ALLOCFASTBITCACHE(allocator);
+    return OBC_AllocFastBitCacheFreeRaw(allocator_,pos);
+}
 
+OBC_ERROR_ENUM OBC_AllocFastBitCacheFreeRaw(OBC_AllocFastBitCache *allocator, size_t pos){
     const unsigned int UNITS_PER_META = sizeof(OBC_ALLOCFASTBITCACHE_META)*CHAR_BIT;
     const unsigned int UNIT = pos/UNITS_PER_META;
     const unsigned int REM = pos&(UNITS_PER_META-1);
-    OBC_AllocFastBitCache *allocator_ = OBC_TO_RAW_ALLOCFASTBITCACHE(allocator);
 
-    if(UNIT == allocator_->metaCachePos){
-        ((unsigned char*)&allocator_->metaCache)[REM/CHAR_BIT] &= (unsigned char)~(1<<(REM&(CHAR_BIT-1)));
+    if(UNIT == allocator->metaCachePos){
+        ((unsigned char*)&allocator->metaCache)[REM/CHAR_BIT] &= (unsigned char)~(1<<(REM&(CHAR_BIT-1)));
         return OBC_ERROR_SUCCESS;
     }
 
-    OBC_ALLOCFASTBITCACHE_META *meta = (OBC_ALLOCFASTBITCACHE_META*)allocator_->meta.rawData;
+    OBC_ALLOCFASTBITCACHE_META *meta = (OBC_ALLOCFASTBITCACHE_META*)allocator->meta.rawData;
 
-    OBC_AllocFastBitCacheFlushToMem(allocator_);
+    OBC_AllocFastBitCacheFlushToMem(allocator);
 
     OBC_ALLOCFASTBITCACHE_META localCache = meta[UNIT*2];
     OBC_ALLOCFASTBITCACHE_META toWrite = localCache;
@@ -105,18 +114,19 @@ OBC_ERROR_ENUM OBC_AllocFastBitCacheFree(void *allocator, unsigned int pos){
 
     if(localCache == OBC_ALLOCFASTBITCACHE_META_FULL){
 
-        if(allocator_->metaCache != OBC_ALLOCFASTBITCACHE_META_FULL){
-            allocator_->maxHead++;
-            OBC_AllocFastBitCacheSetHeadLink(allocator_, allocator_->metaCachePos);
+        if(allocator->metaCache != OBC_ALLOCFASTBITCACHE_META_FULL){
+            allocator->maxHead++;
+            OBC_AllocFastBitCacheSetHeadLink(allocator, allocator->metaCachePos);
         }
 
-        allocator_->metaCache = toWrite;
-        allocator_->metaCachePos = UNIT;
+        allocator->metaCache = toWrite;
+        allocator->metaCachePos = UNIT;
     }
     meta[UNIT*2] = toWrite;
 
     return OBC_ERROR_SUCCESS;
 }
+
 
 
 
@@ -202,13 +212,9 @@ void OBC_AllocFastBitCacheSetHeadLink(OBC_AllocFastBitCache *allocator, OBC_ALLO
 unsigned int OBC_AllocFastBitCacheGetNextFree(OBC_AllocFastBitCache *allocator){
 
     const unsigned int UNITS_PER_META = sizeof(OBC_ALLOCFASTBITCACHE_META)*CHAR_BIT;
-    //const unsigned char NODES_PER_META = sizeof(OBC_ALLOCFASTBITCACHE_META)/sizeof(OBC_ALLOCFASTBITCACHE_ADDR);
-
     OBC_ALLOCFASTBITCACHE_META *meta = (OBC_ALLOCFASTBITCACHE_META*)allocator->meta.rawData;
 
     if(allocator->maxHead == OBC_NULL_INDEX){
-        //allocator->maxHead = 0;
-        //**
         if(allocator->metaCachePos*UNITS_PER_META + UNITS_PER_META >= allocator->backed.curUnitLength){
             allocator->backed.curUnitLength = allocator->metaCachePos*UNITS_PER_META + UNITS_PER_META;
         }
@@ -235,34 +241,6 @@ unsigned int OBC_AllocFastBitCacheGetNextFree(OBC_AllocFastBitCache *allocator){
 
 }
 
-/*
-unsigned int OBC_AllocFastBitCacheBitPos(OBC_ALLOCFASTBITCACHE_META meta){
-    unsigned char *raw = (unsigned int*)(&meta);
-    unsigned int i;
-    for(i = 0; i < sizeof(OBC_ALLOCFASTBITCACHE_META); i+=sizeof(unsigned int)){
-        if(((unsigned int *)raw)[i] != (~((unsigned int)0))){
-            break;
-        }
-    }
-    raw = (unsigned char *)(((unsigned int *)raw)[i]);
-    for(i = 0; i < sizeof(unsigned int); i+=sizeof(unsigned char)){
-        if(raw[i] != (~((unsigned char)0))){
-            break;
-        }
-    }
-    raw = raw+i;
-    i = CHAR_BIT;
-    do{
-        i--;
-        if(((*raw)&(((CHAR_BIT-1)>>i))) != 0){
-            break;
-        }
-    }while(i != 0);
-
-    return (((size_t)raw) - ((size_t)&meta))+i;
-}
-/*/
-
 unsigned int OBC_AllocFastBitCacheBitPos(OBC_ALLOCFASTBITCACHE_META meta){
     unsigned char *raw = (unsigned char*)(&meta);
     unsigned int i;
@@ -285,5 +263,3 @@ unsigned int OBC_AllocFastBitCacheBitPos(OBC_ALLOCFASTBITCACHE_META meta){
     }
     return ((((size_t)(&(*raw))) - ((size_t)(&meta)))*CHAR_BIT)+i;
 }
-
-//*/

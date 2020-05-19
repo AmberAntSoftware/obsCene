@@ -20,11 +20,11 @@ void **OBC_newAllocRay(size_t unitSize){
 
 void *OBC_initAllocRay(OBC_AllocRay *allocator, size_t unitSize){
 
-    if(OBC_initRay(&allocator->backed,0,unitSize) == OBC_ERROR_FAILURE){
+    if(OBC_initRayComplex(&allocator->backed,0,unitSize) == OBC_ERROR_FAILURE){
         return NULL;
     }
 
-    if(OBC_initRay(&allocator->meta,0,sizeof(OBC_ALLOC_META_TYPE)) == OBC_ERROR_FAILURE){
+    if(OBC_initRayComplex(&allocator->meta,0,sizeof(OBC_ALLOC_META_TYPE)) == OBC_ERROR_FAILURE){
         OBC_freeRayData(&allocator->backed);
         return NULL;
     }

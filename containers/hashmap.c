@@ -23,18 +23,18 @@ OBC_ERROR_ENUM OBC_initHashMap(OBC_HashMap *map, size_t keySize, size_t valueSiz
 }
 OBC_ERROR_ENUM OBC_initHashMapComplex(OBC_HashMap *map, size_t keySize, size_t valueSize, size_t initBuckets){
 
-    if(OBC_initRay(& map->values, initBuckets, valueSize ) == OBC_ERROR_FAILURE){
+    if(OBC_initRayComplex(& map->values, initBuckets, valueSize ) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
 
-    if(OBC_initRay(& map->keys, initBuckets, keySize) == OBC_ERROR_FAILURE){
+    if(OBC_initRayComplex(& map->keys, initBuckets, keySize) == OBC_ERROR_FAILURE){
         if(map->values.rawData != NULL){
             OBC_freeRayData(& map->values);
         }
         return OBC_ERROR_FAILURE;
     }
 
-    if(OBC_initRay(& map->keyHashes, initBuckets, sizeof(OBC_Hash)) == OBC_ERROR_FAILURE){
+    if(OBC_initRayComplex(& map->keyHashes, initBuckets, sizeof(OBC_Hash)) == OBC_ERROR_FAILURE){
         if(map->values.rawData != NULL){
             OBC_freeRayData(& map->values);
         }
@@ -84,18 +84,18 @@ OBC_ERROR_ENUM OBC_X_HashMapExpandEmpty(OBC_HashMap *map){
 
     const size_t mapCount = OBC_X_HASHMAP_INIT_RESERVE_COUNT;
 
-    if(OBC_initRay(& map->values, mapCount, map->values.unitSize) == OBC_ERROR_FAILURE){
+    if(OBC_initRayComplex(& map->values, mapCount, map->values.unitSize) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
 
-    if(OBC_initRay(& map->keys, mapCount, map->keys.unitSize) == OBC_ERROR_FAILURE){
+    if(OBC_initRayComplex(& map->keys, mapCount, map->keys.unitSize) == OBC_ERROR_FAILURE){
         if(map->values.rawData != NULL){
             OBC_freeRayData(& map->values);
         }
         return OBC_ERROR_FAILURE;
     }
 
-    if(OBC_initRay(& map->keyHashes, mapCount, map->keyHashes.unitSize) == OBC_ERROR_FAILURE){
+    if(OBC_initRayComplex(& map->keyHashes, mapCount, map->keyHashes.unitSize) == OBC_ERROR_FAILURE){
         if(map->values.rawData != NULL){
             OBC_freeRayData(& map->values);
         }

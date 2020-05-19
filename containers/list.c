@@ -22,7 +22,7 @@ void **OBC_newList(size_t unitSize){
 }
 OBC_ERROR_ENUM OBC_initList(OBC_List *list,size_t unitSize){
 
-    if(OBC_initRay(& list->links,0,sizeof(size_t)*OBC_LIST_LINK_COUNT) == OBC_ERROR_FAILURE){
+    if(OBC_initRayComplex(& list->links,0,sizeof(size_t)*OBC_LIST_LINK_COUNT) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
 

@@ -18,11 +18,11 @@ void **OBC_newAllocFast(size_t unitSize){
 }
 void *OBC_initAllocFast(OBC_AllocFast *allocator, size_t unitSize){
 
-    if(OBC_initRay(&allocator->backed,0,unitSize) == OBC_ERROR_FAILURE){
+    if(OBC_initRayComplex(&allocator->backed,0,unitSize) == OBC_ERROR_FAILURE){
         return NULL;
     }
 
-    if(OBC_initRay(&allocator->meta,0,sizeof(OBC_ALLOCFAST_META)) == OBC_ERROR_FAILURE){
+    if(OBC_initRayComplex(&allocator->meta,0,sizeof(OBC_ALLOCFAST_META)) == OBC_ERROR_FAILURE){
         OBC_freeRayData(&allocator->backed);
         return NULL;
     }

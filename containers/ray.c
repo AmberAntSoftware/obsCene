@@ -1,12 +1,17 @@
 #include "ray.h"
 
-void **OBC_newRay(size_t initialReserveCount, size_t unitSize){
+
+void **OBC_newRay(size_t unitSize){
+    return OBC_newRayComplex(0, unitSize);
+}
+
+void **OBC_newRayComplex(size_t initialReserveCount, size_t unitSize){
     OBC_Ray *ray = malloc(sizeof(OBC_Ray));
     if(ray==NULL){
         return NULL;
     }
 
-    if(OBC_initRay(ray,initialReserveCount, unitSize) == OBC_ERROR_FAILURE){
+    if(OBC_initRayComplex(ray,initialReserveCount, unitSize) == OBC_ERROR_FAILURE){
         free(ray);
         return NULL;
     }
@@ -14,7 +19,11 @@ void **OBC_newRay(size_t initialReserveCount, size_t unitSize){
     return OBC_RayGetDataPointer(ray);
 }
 
-OBC_ERROR_ENUM OBC_initRay(OBC_Ray *ray, size_t initialReserveCount, size_t unitSize){
+OBC_ERROR_ENUM OBC_initRay(OBC_Ray *ray, size_t unitSize){
+    return OBC_initRayComplex(ray, 0, unitSize);
+}
+
+OBC_ERROR_ENUM OBC_initRayComplex(OBC_Ray *ray, size_t initialReserveCount, size_t unitSize){
 
     if(initialReserveCount==0 || unitSize == 0 || initialReserveCount == 0){
         ray->rawData=NULL;
@@ -107,36 +116,54 @@ size_t OBC_RayNewElement(void *rawPtr){
     }
     /*/
 
-    size_t where = OBC_RayCurUnitLength(rawPtr);
+    OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
+    return OBC_RayNewElementRaw(ray);
+}
 
-    if(OBC_RayDoExpand(rawPtr) == OBC_ERROR_FAILURE){
+size_t OBC_RayNewElementRaw(OBC_Ray *ray){
+
+    size_t where = ray->curUnitLength;
+    if(OBC_RayDoExpandRaw(ray) == OBC_ERROR_FAILURE){
         return OBC_NULL_INDEX;
     }
 
-    OBC_RayPushElement(rawPtr);
-
+    OBC_RayPushElementRaw(ray);
     return where;
 }
 
 void OBC_RayPushElement(void *rawPtr){
-    OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
 
+    OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
+    OBC_RayPushElementRaw(ray);
+}
+
+void OBC_RayPushElementRaw(OBC_Ray *ray){
     ray->curUnitLength++;
 }
 
-void OBC_RayPopElement(void *rawPtr){
-    OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
 
+void OBC_RayPopElement(void *rawPtr){
+
+    OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
+    OBC_RayPopElementRaw(ray);
+}
+
+void OBC_RayPopElementRaw(OBC_Ray *ray){
     ray->curUnitLength--;
 }
 
 
+
 OBC_ERROR_ENUM OBC_RayDoExpand(void *rawPtr){
+
     OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
+    return OBC_RayDoExpandRaw(ray);
+}
+
+OBC_ERROR_ENUM OBC_RayDoExpandRaw(OBC_Ray *ray){
+
     if(ray->curUnitLength>=ray->maxUnitLength){
-
-        OBC_ERROR_PROPAGATE(OBC_RayExpand(rawPtr));
-
+        OBC_ERROR_PROPAGATE(OBC_RayExpandRaw(ray));
         return OBC_ERROR_SUCCESS;
     }
     return OBC_ERROR_NO_OP;
@@ -145,7 +172,10 @@ OBC_ERROR_ENUM OBC_RayDoExpand(void *rawPtr){
 OBC_ERROR_ENUM OBC_RayExpand(void *rawPtr){
 
     OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
+    return OBC_RayExpandRaw(ray);
+}
 
+OBC_ERROR_ENUM OBC_RayExpandRaw(OBC_Ray *ray){
     if(ray->unitSize == 0){
         return OBC_ERROR_NO_OP;
     }
@@ -174,12 +204,18 @@ OBC_ERROR_ENUM OBC_RayExpand(void *rawPtr){
     ///}
 
     return OBC_ERROR_SUCCESS;
-
 }
+
+
 ///https://stackoverflow.com/questions/12125308/can-realloc-fail-return-null-when-trimming
 OBC_ERROR_ENUM OBC_RayContract(void *rawPtr){
 
     OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
+    return OBC_RayContractRaw(ray);
+}
+
+OBC_ERROR_ENUM OBC_RayContractRaw(OBC_Ray *ray){
+
     size_t newSize = ray->maxUnitLength*ray->unitSize/2;//<<1;
     if(newSize < ray->unitSize){
         newSize=ray->unitSize;
@@ -202,12 +238,18 @@ OBC_ERROR_ENUM OBC_RayContract(void *rawPtr){
     }
 
     return OBC_ERROR_SUCCESS;
-
 }
-OBC_ERROR_ENUM OBC_RayShrinkToFit(void *rawPtr){
-    OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
-    size_t newSize = ray->maxUnitLength*ray->unitSize;//<<1;
 
+
+OBC_ERROR_ENUM OBC_RayShrinkToFit(void *rawPtr){
+
+    OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
+    return OBC_RayShrinkToFitRaw(ray);
+}
+
+OBC_ERROR_ENUM OBC_RayShrinkToFitRaw(OBC_Ray *ray){
+
+    size_t newSize = ray->maxUnitLength*ray->unitSize;//<<1;
     char *newData;
     if(ray->rawData==NULL){
         return OBC_ERROR_NO_OP;
@@ -225,17 +267,20 @@ OBC_ERROR_ENUM OBC_RayShrinkToFit(void *rawPtr){
     return OBC_ERROR_SUCCESS;
 }
 
+
 OBC_ERROR_ENUM OBC_RaySetLast(void *rawPtr, void *data){
 
-    OBC_ERROR_PROPAGATE(OBC_RayDoExpand(rawPtr));
-
     OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
-    rawPtr = ray->rawData;
+    return OBC_RaySetLastRaw(ray, data);
+}
+
+OBC_ERROR_ENUM OBC_RaySetLastRaw(OBC_Ray *ray, void *data){
+
+    OBC_ERROR_PROPAGATE(OBC_RayDoExpandRaw(ray));
 
     size_t size = ray->unitSize;
-
     unsigned char *tcpy = (unsigned char *)data;
-    unsigned char *unit = (unsigned char *)(ray->rawData+(ray->curUnitLength*ray->unitSize));//OBC_RayGetLast(rawPtr);
+    unsigned char *unit = (unsigned char *)(ray->rawData+(ray->curUnitLength*ray->unitSize));
     do{
         *unit=*tcpy;
         tcpy++;
@@ -243,13 +288,18 @@ OBC_ERROR_ENUM OBC_RaySetLast(void *rawPtr, void *data){
     }while(--size);
 
     return OBC_ERROR_SUCCESS;
-
 }
 
 void* OBC_RayGetLast(void *rawPtr){
+
     OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
-    if(ray->curUnitLength==ray->maxUnitLength){
-        return ray->rawData+((ray->curUnitLength-1)*ray->unitSize);
+    return OBC_RayGetLastRaw(ray);
+}
+
+void* OBC_RayGetLastRaw(OBC_Ray *ray){
+
+    if(ray->curUnitLength == ray->maxUnitLength){
+        return ray->rawData +((ray->curUnitLength-1)*ray->unitSize);
     }
     //unsigned char *unit = (unsigned char *)(ray->rawData+ray->curLength);
     return ray->rawData+(ray->curUnitLength*ray->unitSize);

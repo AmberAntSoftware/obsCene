@@ -1,9 +1,8 @@
 #include "random.h"
 
 
-#define RANDOM_MASK ((int)~0)
-
 static unsigned int RNG_X_state = 0;
+static unsigned long long int RNG_X_stateLLU = 0;
 
 ///https://rosettacode.org/wiki/Linear_congruential_generator#C
 ///https://en.wikipedia.org/wiki/Linear_congruential_generator
@@ -11,10 +10,29 @@ void RNG_seed(int seed){
     RNG_X_state = seed;
 }
 int RNG_rand(){
+
+    const signed int RANDOM_MASK = ((signed int)~0);
+
     RNG_X_state = (RNG_X_state * 1103515245 + 12345) & RANDOM_MASK;
 
     signed int srand = 0;
     srand ^= RNG_X_state;
+
+    return srand;
+}
+
+void RNG_seedLLU(unsigned long long int seedLLU){
+    RNG_X_stateLLU = seedLLU;
+}
+
+unsigned long long int RNG_rand64(){
+
+    const unsigned long long int RANDOM_MASK = ~((unsigned long long int)0);
+
+    RNG_X_stateLLU = (RNG_X_stateLLU * 6364136223846793005 + 1442695040888963407) & RANDOM_MASK;
+
+    unsigned long long int srand = 0;
+    srand ^= RNG_X_stateLLU;
 
     return srand;
 }

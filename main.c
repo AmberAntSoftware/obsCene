@@ -408,6 +408,8 @@ int lazyStressTest(){
     printf("InitRead Time: %f\n",1000.0*(a2-a1)/CLOCKS_PER_SEC);
     printf("RandomRead Time: %f\n",1000.0*(a4-a3)/CLOCKS_PER_SEC);
 
+    free(stores);
+
     return 0;
 }
 
@@ -901,6 +903,7 @@ int mainXZ(int argc, char** argv){
 int main(int argc, char** argv){
 
     listTests();
+    lazyStressTest();
     //allocfastTest();
     //allocfastbitTest();
     //allocfastbit2Test();
@@ -1126,8 +1129,6 @@ int mainQUEUE(int argc, char** argv){
     //stackExamples();
     //listTests();
     //queueTests();
-    allocfastbit2Test();
-    allocfastbitTest();
 
     return 0;
 }

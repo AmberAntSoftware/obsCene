@@ -32,12 +32,14 @@ typedef struct OBC_Ray{
 
 
 ///NULL on failed allocation
-void **OBC_newRay(size_t initialReserveCount, size_t unitSize);
-///NULL on error
-OBC_ERROR_ENUM OBC_initRay(OBC_Ray *ray, size_t initialReserveCount, size_t unitSize);
-///Frees the heap ray allocation and the owned data
+void **OBC_newRay(size_t unitSize);
+void **OBC_newRayComplex(size_t initialReserveCount, size_t unitSize);
+///FAIL on error
+OBC_ERROR_ENUM OBC_initRay(OBC_Ray *ray, size_t unitSize);
+OBC_ERROR_ENUM OBC_initRayComplex(OBC_Ray *ray, size_t initialReserveCount, size_t unitSize);
+///Frees the dynamic ray allocation and the owned dynamic data owned
 void OBC_freeRay(void *rawPtr);
-///Frees only the stack data owned by the ray
+///Frees only the owned dynamic data owned
 void OBC_freeRayData(OBC_Ray *ray);
 
 void **OBC_RayGetDataPointer(OBC_Ray *ray);
