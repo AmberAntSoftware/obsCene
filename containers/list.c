@@ -12,7 +12,7 @@ void **OBC_newList(size_t unitSize){
         return NULL;
     }
 
-    if(OBC_initList(list,unitSize) == OBC_ERROR_FAILURE){
+    if(OBC_initList(list, unitSize) == OBC_ERROR_FAILURE){
         free(list);
         return NULL;
     }
@@ -20,13 +20,13 @@ void **OBC_newList(size_t unitSize){
     return OBC_ListGetDataPointer(list);
 
 }
-OBC_ERROR_ENUM OBC_initList(OBC_List *list,size_t unitSize){
+OBC_ERROR_ENUM OBC_initList(OBC_List *list, size_t unitSize){
 
-    if(OBC_initRayComplex(& list->links,0,sizeof(size_t)*OBC_LIST_LINK_COUNT) == OBC_ERROR_FAILURE){
+    if(OBC_initRayComplex(& list->links, 0, sizeof(size_t)*OBC_LIST_LINK_COUNT) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
 
-    if(OBC_initAllocFastBitCache(& list->allocator, unitSize ) == OBC_ERROR_FAILURE){
+    if(OBC_initAllocListBit(& list->allocator, unitSize) == OBC_ERROR_FAILURE){
         OBC_freeRayData(& list->links);
         return OBC_ERROR_FAILURE;
     }
@@ -36,8 +36,9 @@ OBC_ERROR_ENUM OBC_initList(OBC_List *list,size_t unitSize){
 
     return OBC_ERROR_SUCCESS;
 }
+
 void **OBC_ListGetDataPointer(OBC_List *list){
-    return OBC_AllocFastBitCacheGetDataPointer(&list->allocator);
+    return OBC_AllocListBitGetDataPointer(&list->allocator);
 }
 
 void OBC_freeList(void *raw){
@@ -49,14 +50,14 @@ void OBC_freeList(void *raw){
 }
 void OBC_freeListData(OBC_List *list){
 
-    OBC_freeAllocFastBitCacheData(& list->allocator);
+    OBC_freeAllocListBitData(& list->allocator);
     OBC_freeRayData(& list->links);
 
 }
 
 OBC_Offset OBC_ListNewItemRaw(OBC_List *list){
 
-    size_t place = OBC_AllocFastBitCacheMallocRaw(& list->allocator);
+    size_t place = OBC_AllocListBitMallocRaw(& list->allocator);
     if(place == OBC_NULL_INDEX){
         return OBC_NULL_INDEX;
     }
@@ -87,7 +88,14 @@ OBC_Offset OBC_ListNewItem(void *raw){
     return OBC_ListNewItemRaw(OBC_TO_LIST_PTR(raw));
 }
 
+
+OBC_ERROR_ENUM OBC_ListAdd(void *raw, void *item){
+
+    return OBC_ListAddRaw(OBC_TO_LIST_PTR(raw),item);
+}
+
 OBC_ERROR_ENUM OBC_ListAddRaw(OBC_List *list, void *item){
+
     const size_t pos = OBC_ListNewItemRaw(list);
     if(pos == OBC_NULL_INDEX){
         return OBC_ERROR_FAILURE;
@@ -99,15 +107,13 @@ OBC_ERROR_ENUM OBC_ListAddRaw(OBC_List *list, void *item){
     return OBC_ERROR_SUCCESS;
 }
 
-OBC_ERROR_ENUM OBC_ListAdd(void *raw, void *item){
-    return OBC_ListAddRaw(OBC_TO_LIST_PTR(raw),item);
-}
+
 
 OBC_ERROR_ENUM OBC_ListRemoveRaw(OBC_List *list, OBC_Offset freeItem){
 
     size_t *data = ((size_t *)(list->links.rawData))+freeItem*OBC_LIST_LINK_COUNT;
 
-    if(OBC_AllocFastBitCacheFree(OBC_FROM_ALLOCFASTBITCACHE_VAL(list->allocator),freeItem) == OBC_ERROR_FAILURE){
+    if(OBC_AllocListBitFreeRaw(& list->allocator,freeItem) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
 

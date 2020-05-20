@@ -36,7 +36,7 @@
 
 typedef struct OBC_AllocatorPointer{
     void **allocator;
-    size_t where;
+    OBC_Offset where;
 }OBC_AllocatorPointer;
 
 #endif // ALLOCATORS_H_INCLUDED

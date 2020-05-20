@@ -20,16 +20,28 @@
     #define debug(...) do{}while(0);
 #endif // 1
 
-//https://stackoverflow.com/questions/2100331/c-macro-definition-to-determine-big-endian-or-little-endian-machine
-///TODO may need to supply PDP endianess later
-#if 16777216 & 0x00000001 != 0
-    #define ENDIAN_BIG 1
-#else
-    #define ENDIAN_LITTLE 1
-#endif // 1
 
+//https://stackoverflow.com/questions/2100331/c-macro-definition-to-determine-big-endian-or-little-endian-machine
+#define OBC_ENDIAN_ORDER  ('ABCD')
+#define OBC_LITTLE_ENDIAN 0x41424344UL
+#define OBC_BIG_ENDIAN    0x44434241UL
+#if OBC_ENDIAN_ORDER == OBC_LITTLE_ENDIAN
+    #undef OBC_ENDIAN_ORDER
+    #undef OBC_LITTLE_ENDIAN
+    #undef OBC_BIG_ENDIAN
+    #define ENDIAN_LITTLE 1
+#elif OBC_ENDIAN_ORDER == OBC_BIG_ENDIAN
+    #undef OBC_ENDIAN_ORDER
+    #undef OBC_LITTLE_ENDIAN
+    #undef OBC_BIG_ENDIAN
+    #define ENDIAN_BIG 1
+#endif
 
 #define OBC_X_ITERATOR(arrPtr, iter, startFunction, incrmentFunction) for(iter = startFunction(arrPtr); iter != OBC_NULL_INDEX; iter = incrmentFunction(arrPtr, iter))
+
+typedef signed int OBC_SpaceshipValue;
+typedef unsigned int OBC_Offset;
+typedef unsigned int OBC_Iterator;
 
 typedef enum OBC_ERROR_ENUM{
     OBC_ERROR_NO_OP = 0,
@@ -41,10 +53,6 @@ typedef struct OBC_ErrorPointer{
     OBC_ERROR_ENUM errorValue;
     void *realValue;
 }OBC_ErrorPointer;
-
-typedef signed int OBC_SpaceshipValue;
-typedef unsigned int OBC_Offset;
-typedef OBC_Offset OBC_Iterator;
 
 typedef struct OBC_LargeOffset{
     OBC_Offset row;

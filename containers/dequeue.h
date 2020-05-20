@@ -17,7 +17,11 @@ typedef struct OBC_Dequeue{
 
 }OBC_Dequeue;
 
-void **OBC_newDequeue(size_t elementSize);
+/*************************************
+Initialization / Deallocation
+*************************************/
+
+void **OBC_newDequeue(size_t unitSize);
 OBC_ERROR_ENUM OBC_initDequeue(OBC_Dequeue *dequeue, size_t unitSize);
 void **OBC_DequeueGetDataPointer(OBC_Dequeue *queue);
 

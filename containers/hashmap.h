@@ -2,7 +2,7 @@
 #define HASHMAP_H_INCLUDED
 
 #include "../obc.h"
-#include "../allocators/allocfastbitcache.h"
+#include "../allocators/alloclistbit.h"
 #include "../obc_stdlib/hash.h"
 #include "../obc_stdlib/memswap.h"
 
@@ -83,6 +83,9 @@ typedef struct OBC_HashMapPointer{
 
 }OBC_HashMapPointer;
 
+/*************************************
+Initialization / Deallocation
+*************************************/
 
 void **OBC_newHashMap(size_t keySize, size_t valueSize);
 void **OBC_newHashMapComplex(size_t keySize, size_t valueSize, size_t maxBucketDepth);
@@ -247,7 +250,7 @@ typedef struct OBC_OOPHashMap{
 
 typedef struct OBC_HashMapStatic{
 
-    OBC_AllocFastBitCache backed;
+    OBC_AllocListBit backed;
     OBC_HashMap indirection;
 
 }OBC_HashMapStatic;

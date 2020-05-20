@@ -1,58 +1,63 @@
 #include "allocray.h"
 
-
 void **OBC_newAllocRay(size_t unitSize){
 
-    OBC_AllocRay *allocator = calloc(1,sizeof(OBC_AllocRay));
+    OBC_AllocRay *allocRay = calloc(1,sizeof(OBC_AllocRay));
 
-    if(allocator == NULL){
+    if(allocRay == NULL){
         return NULL;
     }
 
-    if(OBC_initAllocRay(allocator, unitSize) == NULL){
-        free(allocator);
+    if(OBC_initAllocRay(allocRay, unitSize) == OBC_ERROR_FAILURE){
+        free(allocRay);
         return NULL;
     }
 
-    return (void**)&allocator->backed.rawData;
+    return OBC_AllocRayGetDataPointer(allocRay);
 
 }
 
-void *OBC_initAllocRay(OBC_AllocRay *allocator, size_t unitSize){
+OBC_ERROR_ENUM OBC_initAllocRay(OBC_AllocRay *allocRay, size_t unitSize){
 
-    if(OBC_initRayComplex(&allocator->backed,0,unitSize) == OBC_ERROR_FAILURE){
-        return NULL;
+    if(OBC_initRayComplex(&allocRay->backed, 0, unitSize) == OBC_ERROR_FAILURE){
+        return OBC_ERROR_FAILURE;
     }
 
-    if(OBC_initRayComplex(&allocator->meta,0,sizeof(OBC_ALLOC_META_TYPE)) == OBC_ERROR_FAILURE){
-        OBC_freeRayData(&allocator->backed);
-        return NULL;
+    if(OBC_initRayComplex(&allocRay->meta, 0, sizeof(OBC_ALLOC_META_TYPE)) == OBC_ERROR_FAILURE){
+        OBC_freeRayData(&allocRay->backed);
+        return OBC_ERROR_FAILURE;
     }
 
-    return allocator;
+    return OBC_ERROR_SUCCESS;
+}
 
+void **OBC_AllocRayGetDataPointer(OBC_AllocRay *allocator){
+    return (void**)OBC_FROM_RAY_VAL(allocator->backed);
 }
 
 void OBC_freeAllocRay(void *allocator){
     OBC_AllocRay *allocRay = OBC_TO_RAW_ALLOCRAY(allocator);
-    OBC_freeAllocRayData(allocator);
+    OBC_freeAllocRayData(allocRay);
     free(allocRay);
 }
 
-void OBC_freeAllocRayData(void *allocator){
-    OBC_AllocRay *allocRay = OBC_TO_RAW_ALLOCRAY(allocator);
+void OBC_freeAllocRayData(OBC_AllocRay *allocRay){
     OBC_freeRayData(& allocRay->backed);
     OBC_freeRayData(& allocRay->meta);
 }
 
 
-size_t OBC_AllocRayMalloc(void *allocator){
+OBC_Offset OBC_AllocRayMalloc(void *allocator){
 
     OBC_AllocRay *allocRay = OBC_TO_RAW_ALLOCRAY(allocator);
+    return OBC_AllocRayMallocRaw(allocRay);
+}
 
-    size_t place = OBC_AllocRayGetFreeLocation(allocator);
+OBC_Offset OBC_AllocRayMallocRaw(OBC_AllocRay *allocRay){
+
+    OBC_Offset place = OBC_AllocRayGetFreeLocationRaw(allocRay);
     if(place == OBC_NULL_INDEX){
-        if(OBC_AllocRayExpand(allocator) == OBC_ERROR_FAILURE){
+        if(OBC_AllocRayExpandRaw(allocRay) == OBC_ERROR_FAILURE){
             return OBC_NULL_INDEX;
         }
 
@@ -60,28 +65,36 @@ size_t OBC_AllocRayMalloc(void *allocator){
     }
 
     if(place >= allocRay->backed.curUnitLength){
-        OBC_RayNewElement(& (allocRay->backed.rawData));
+        OBC_RayNewElementRaw(& allocRay->backed);
     }
 
-    OBC_AllocRayMarkAllocated(allocator,place);
+    OBC_AllocRayMarkAllocatedRaw(allocRay,place);
 
     return place;
 }
 
-OBC_ERROR_ENUM OBC_AllocRayFree(void *allocator, size_t data){
-
-    OBC_AllocRayMarkFreed(allocator,data);
-
-    return OBC_ERROR_NO_OP;
-
-}
-
-size_t OBC_AllocRayGetFreeLocation(void *allocator){
+OBC_ERROR_ENUM OBC_AllocRayFree(void *allocator, OBC_Offset index){
 
     OBC_AllocRay *allocRay = OBC_TO_RAW_ALLOCRAY(allocator);
+    return OBC_AllocRayFreeRaw(allocRay, index);
+}
 
-    size_t max = allocRay->meta.maxUnitLength;
-    size_t i;
+OBC_ERROR_ENUM OBC_AllocRayFreeRaw(OBC_AllocRay *allocRay, OBC_Offset index){
+
+    OBC_AllocRayMarkFreedRaw(allocRay, index);
+    return OBC_ERROR_NO_OP;
+}
+
+OBC_Offset OBC_AllocRayGetFreeLocation(void *allocator){
+
+    OBC_AllocRay *allocRay = OBC_TO_RAW_ALLOCRAY(allocator);
+    return OBC_AllocRayGetFreeLocationRaw(allocRay);
+}
+
+OBC_Offset OBC_AllocRayGetFreeLocationRaw(OBC_AllocRay *allocRay){
+
+    OBC_Offset max = allocRay->meta.maxUnitLength;
+    OBC_Offset i;
     size_t place = OBC_NULL_INDEX;
 
     OBC_ALLOC_META_TYPE *raw = (OBC_ALLOC_META_TYPE *)allocRay->meta.rawData;
@@ -125,6 +138,11 @@ int OBC_AllocRayFindFirstEmptyBit(OBC_ALLOC_META_TYPE rraw){
 OBC_ERROR_ENUM OBC_AllocRayExpand(void *allocator){
 
     OBC_AllocRay *allocRay = OBC_TO_RAW_ALLOCRAY(allocator);
+    return OBC_AllocRayExpandRaw(allocRay);
+}
+
+OBC_ERROR_ENUM OBC_AllocRayExpandRaw(OBC_AllocRay *allocRay){
+
     size_t i;
 
     if(OBC_RayDoExpand(& allocRay->backed.rawData) == OBC_ERROR_FAILURE){
@@ -138,9 +156,9 @@ OBC_ERROR_ENUM OBC_AllocRayExpand(void *allocator){
 
         size_t start = allocRay->meta.maxUnitLength*allocRay->meta.unitSize;
 
-        if(OBC_RayExpand(& allocRay->meta.rawData) == OBC_ERROR_FAILURE){
+        if(OBC_RayExpandRaw(& allocRay->meta) == OBC_ERROR_FAILURE){
             for(i = 0; i < OBC_ALLOC_MAX_CONTRACT_TRIES; i++){
-                if(OBC_RayContract(& allocRay->backed.rawData) != OBC_ERROR_FAILURE){
+                if(OBC_RayContractRaw(& allocRay->backed) != OBC_ERROR_FAILURE){
                     return OBC_ERROR_FAILURE;
                 }else{
                     break;
@@ -149,32 +167,44 @@ OBC_ERROR_ENUM OBC_AllocRayExpand(void *allocator){
             return OBC_ERROR_FAILURE;
         }
 
-        memset(allocRay->meta.rawData+start,0,((allocRay->meta.maxUnitLength*allocRay->meta.unitSize)-start));
+        memset(allocRay->meta.rawData+start, 0,
+               ((allocRay->meta.maxUnitLength*allocRay->meta.unitSize)-start));
 
     }
 
     return OBC_ERROR_SUCCESS;
 }
 
-OBC_ERROR_ENUM OBC_AllocRayMarkAllocated(void *allocator, size_t pos){
+
+OBC_ERROR_ENUM OBC_AllocRayMarkAllocated(void *allocator, OBC_Offset index){
 
     OBC_AllocRay *allocRay = OBC_TO_RAW_ALLOCRAY(allocator);
+    return OBC_AllocRayMarkAllocatedRaw(allocRay, index);
+}
+
+OBC_ERROR_ENUM OBC_AllocRayMarkAllocatedRaw(OBC_AllocRay *allocRay, OBC_Offset index){
+
     OBC_ALLOC_META_TYPE *raw = (OBC_ALLOC_META_TYPE *)allocRay->meta.rawData;
-    size_t unit = pos/OBC_ALLOC_META_BITS;
-    size_t bits = (pos-(unit*OBC_ALLOC_META_BITS));
+    size_t unit = index/OBC_ALLOC_META_BITS;
+    size_t bits = (index-(unit*OBC_ALLOC_META_BITS));
     OBC_ALLOC_META_TYPE unitMask = 1<<((OBC_ALLOC_META_BITS-bits)-1);
     raw[unit] = raw[unit] | unitMask;
 
     return OBC_ERROR_NO_OP;
 }
 
-OBC_ERROR_ENUM OBC_AllocRayMarkFreed(void *allocator, size_t pos){
+OBC_ERROR_ENUM OBC_AllocRayMarkFreed(void *allocator, OBC_Offset index){
 
     OBC_AllocRay *allocRay = OBC_TO_RAW_ALLOCRAY(allocator);
+    return OBC_AllocRayMarkFreedRaw(allocRay, index);
+}
+
+OBC_ERROR_ENUM OBC_AllocRayMarkFreedRaw(OBC_AllocRay *allocRay, OBC_Offset index){
+
     OBC_ALLOC_META_TYPE *raw = (OBC_ALLOC_META_TYPE *)allocRay->meta.rawData;
 
-    size_t unit = pos/OBC_ALLOC_META_BITS;
-    size_t bits = (pos-(unit*OBC_ALLOC_META_BITS));
+    size_t unit = index/OBC_ALLOC_META_BITS;
+    size_t bits = (index-(unit*OBC_ALLOC_META_BITS));
     OBC_ALLOC_META_TYPE unitMask = 1<<((OBC_ALLOC_META_BITS-bits)-1);
     unitMask=~unitMask;
 

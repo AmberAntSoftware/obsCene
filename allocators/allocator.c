@@ -3,37 +3,15 @@
 
 #include "allocator.h"
 
+void **OBC_newAllocator(size_t unitSize){
 
-OBC_ERROR_ENUM OBC_metaMarkBit0(OBC_ALLOC_META_TYPE *meta, const size_t pos){
-
-    const size_t unit = pos/OBC_ALLOC_META_BITS;
-    const size_t bits = (pos-(unit*OBC_ALLOC_META_BITS));
-    OBC_ALLOC_META_TYPE unitMask = 1<<((OBC_ALLOC_META_BITS-bits)-1);
-    unitMask=~unitMask;
-    meta[unit] &= unitMask;
-
-    return OBC_ERROR_NO_OP;
-}
-
-/*
-char OBC_metaGetBit(OBC_ALLOC_META_TYPE *meta, const size_t pos){
-
-    const size_t unit = pos/OBC_ALLOC_META_BITS;
-    const size_t bits = (pos-(unit*OBC_ALLOC_META_BITS));
-
-    return (char)(((meta[unit])>>bits)&1);
-}
-*/
-
-void **OBC_newAllocator2(size_t unitSize){
-
-    OBC_Allocator2 *allocator = calloc(1,sizeof(OBC_Allocator2));
+    OBC_Allocator *allocator = calloc(1,sizeof(OBC_Allocator));
 
     if(allocator == NULL){
         return NULL;
     }
 
-    if(OBC_initAllocator2(allocator, unitSize) == NULL){
+    if(OBC_initAllocator(allocator, unitSize) == NULL){
         free(allocator);
         return NULL;
     }
@@ -42,7 +20,7 @@ void **OBC_newAllocator2(size_t unitSize){
 
 }
 
-void *OBC_initAllocator2(OBC_Allocator2 *allocator, size_t unitSize){
+void *OBC_initAllocator(OBC_Allocator *allocator, size_t unitSize){
 
     if(OBC_initRayComplex(
            OBC_TO_RAY_PTR(& allocator->backed.rawData)
@@ -79,18 +57,17 @@ void *OBC_initAllocator2(OBC_Allocator2 *allocator, size_t unitSize){
 
 }
 
-void OBC_freeAllocator2(void *allocator){
-    OBC_Allocator2 *allocator_ = OBC_TO_RAW_ALLOCATOR2(allocator);
-    OBC_freeAllocator2Data(allocator);
+void OBC_freeAllocator(void *allocator){
+    OBC_Allocator *allocator_ = OBC_TO_RAW_ALLOCATOR(allocator);
+    OBC_freeAllocatorData(allocator_);
     free(allocator_);
 }
 
-void OBC_freeAllocator2Data(void *allocator){
-    OBC_Allocator2 *allocator_ = OBC_TO_RAW_ALLOCATOR2(allocator);
-    OBC_freeRayData(&allocator_->backed);
+void OBC_freeAllocatorData(OBC_Allocator *allocator){
+    OBC_freeRayData(&allocator->backed);
     unsigned int i;
-    for(i = 0; i <= allocator_->metaUnits; i++){
-        OBC_freeRayData(& allocator_->meta[i]);
+    for(i = 0; i <= allocator->metaUnits; i++){
+        OBC_freeRayData(& allocator->meta[i]);
     }
 }
 
@@ -128,9 +105,9 @@ size_t OBC_metaFirst0Bit(OBC_ALLOC_META_TYPE *data, size_t unitsToCheck){
 
 }
 
-OBC_ERROR_ENUM OBC_Allocator2MarkAllocated3(void *allocator, size_t pos){
+OBC_ERROR_ENUM OBC_AllocatorMarkAllocated(void *allocator, size_t pos){
 
-    OBC_Allocator2 *allocator_ = OBC_TO_RAW_ALLOCATOR2(allocator);
+    OBC_Allocator *allocator_ = OBC_TO_RAW_ALLOCATOR(allocator);
 
     const unsigned int units = allocator_->metaUnits;
 
@@ -166,12 +143,12 @@ OBC_ERROR_ENUM OBC_Allocator2MarkAllocated3(void *allocator, size_t pos){
     return OBC_ERROR_SUCCESS;
 }
 
-OBC_ERROR_ENUM OBC_Allocator2Expand3(void *allocator){
+OBC_ERROR_ENUM OBC_AllocatorExpand(void *allocator){
 
     const size_t expansionLimits[OBC_ALLOC_META_ADDRESSING] =
         OBC_ALLOC_META_LIMITS;
 
-    OBC_Allocator2 *allocator_ = OBC_TO_RAW_ALLOCATOR2(allocator);
+    OBC_Allocator *allocator_ = OBC_TO_RAW_ALLOCATOR(allocator);
 
     unsigned int units = allocator_->metaUnits;
     size_t curUnits = allocator_->backed.curUnitLength;
@@ -215,9 +192,9 @@ OBC_ERROR_ENUM OBC_Allocator2Expand3(void *allocator){
 
 }
 
-size_t OBC_Allocator2GetFreeLocation3(void *allocator){
+size_t OBC_AllocatorGetFreeLocation(void *allocator){
 
-    OBC_Allocator2 *allocator_ = OBC_TO_RAW_ALLOCATOR2(allocator);
+    OBC_Allocator *allocator_ = OBC_TO_RAW_ALLOCATOR(allocator);
 
     unsigned int units = allocator_->metaUnits;
     size_t found =
@@ -253,18 +230,18 @@ size_t OBC_Allocator2GetFreeLocation3(void *allocator){
     return found;
 }
 
-size_t OBC_Allocator2Malloc3(void *allocator){
+size_t OBC_AllocatorMalloc(void *allocator){
 
-    OBC_Allocator2 *allocator_ = OBC_TO_RAW_ALLOCATOR2(allocator);
+    OBC_Allocator *allocator_ = OBC_TO_RAW_ALLOCATOR(allocator);
 
-    size_t place = OBC_Allocator2GetFreeLocation3(allocator);
+    size_t place = OBC_AllocatorGetFreeLocation(allocator);
     if(place==OBC_NULL_INDEX){
-        if(OBC_Allocator2Expand3(allocator) == OBC_ERROR_FAILURE){
+        if(OBC_AllocatorExpand(allocator) == OBC_ERROR_FAILURE){
             return OBC_NULL_INDEX;
         }
         place = allocator_->backed.curUnitLength;
         if(place>0){
-            OBC_Allocator2MarkAllocated3(allocator,place-1);
+            OBC_AllocatorMarkAllocated(allocator,place-1);
         }
     }
 
@@ -276,19 +253,19 @@ size_t OBC_Allocator2Malloc3(void *allocator){
 
     }
 
-    OBC_Allocator2MarkAllocated3(allocator,place);
+    OBC_AllocatorMarkAllocated(allocator,place);
 
 
     return place;
 
 }
 
-OBC_ERROR_ENUM OBC_Allocator2Free3(void *allocator, size_t pos){
-    return OBC_Allocator2MarkFreed3(allocator,pos);
+OBC_ERROR_ENUM OBC_AllocatorFree(void *allocator, size_t pos){
+    return OBC_AllocatorMarkFreed(allocator,pos);
 }
 
-OBC_ERROR_ENUM OBC_Allocator2MarkFreed3(void *allocator, size_t pos){
-    OBC_Allocator2 *allocator_ = OBC_TO_RAW_ALLOCATOR2(allocator);
+OBC_ERROR_ENUM OBC_AllocatorMarkFreed(void *allocator, size_t pos){
+    OBC_Allocator *allocator_ = OBC_TO_RAW_ALLOCATOR(allocator);
 
     unsigned int units = allocator_->metaUnits;
     unsigned int i;
@@ -322,3 +299,25 @@ OBC_ERROR_ENUM OBC_metaMarkBit0__(OBC_ALLOC_META_TYPE *meta, const size_t pos){
 
     return OBC_ERROR_NO_OP;
 }
+
+
+OBC_ERROR_ENUM OBC_metaMarkBit0(OBC_ALLOC_META_TYPE *meta, const size_t pos){
+
+    const size_t unit = pos/OBC_ALLOC_META_BITS;
+    const size_t bits = (pos-(unit*OBC_ALLOC_META_BITS));
+    OBC_ALLOC_META_TYPE unitMask = 1<<((OBC_ALLOC_META_BITS-bits)-1);
+    unitMask=~unitMask;
+    meta[unit] &= unitMask;
+
+    return OBC_ERROR_NO_OP;
+}
+
+/*
+char OBC_metaGetBit(OBC_ALLOC_META_TYPE *meta, const size_t pos){
+
+    const size_t unit = pos/OBC_ALLOC_META_BITS;
+    const size_t bits = (pos-(unit*OBC_ALLOC_META_BITS));
+
+    return (char)(((meta[unit])>>bits)&1);
+}
+*/

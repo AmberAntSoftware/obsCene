@@ -56,7 +56,7 @@ size_t OBC_RayMaxByteLength(void *rawPtr);
 ///gets the size in bytes of each element stored
 size_t OBC_RayUnitSize(void *rawPtr);
 ///gets the total allocated units
-size_t OBC_RayUnitMaxLength(void *rawPtr);
+size_t OBC_RayMaxUnitLength(void *rawPtr);
 
 #define OBC_RayGetPointer(rawPtr, index) ((*(rawPtr))+index)
 #define OBC_RayGetValue(rawPtr, index) ((*(rawPtr))[index])

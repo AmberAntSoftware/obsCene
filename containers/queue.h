@@ -20,7 +20,11 @@ typedef struct OBC_Queue{
 
 }OBC_Queue;
 
-void **OBC_newQueue(size_t elementSize);
+/*************************************
+Initialization / Deallocation
+*************************************/
+
+void **OBC_newQueue(size_t unitSize);
 OBC_ERROR_ENUM OBC_initQueue(OBC_Queue *queue, size_t unitSize);
 void **OBC_QueueGetDataPointer(OBC_Queue *queue);
 
