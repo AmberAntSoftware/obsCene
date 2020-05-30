@@ -2,11 +2,26 @@
 #define LIST_H_INCLUDED
 
 #include "../obc.h"
-#include "../allocators/alloclistbit.h"
+
+
+
+/**
+#define OBC_LIST_FAST
+/**/
+
+#ifdef OBC_LIST_FAST
+    #include "../allocators/alloclist.h"
+#else
+    #include "../allocators/alloclistbit.h"
+#endif
 
 typedef struct OBC_List{
 
+#ifdef OBC_LIST_FAST
+    OBC_AllocList allocator;
+#else
     OBC_AllocListBit allocator;
+#endif
     OBC_Ray links;
     OBC_Offset last;
     OBC_Offset first;

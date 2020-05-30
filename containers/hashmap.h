@@ -58,6 +58,9 @@ typedef struct OBC_HashMap{
     ///maximum value at any given time is depth*buckets
     size_t count;
 
+    unsigned char depthBits;
+    unsigned char listBits;
+
     //OBC_AllocFastBitCache sparseStorage;
 
 }OBC_HashMap;
@@ -88,16 +91,21 @@ Initialization / Deallocation
 *************************************/
 
 void **OBC_newHashMap(size_t keySize, size_t valueSize);
-void **OBC_newHashMapComplex(size_t keySize, size_t valueSize, size_t maxBucketDepth);
+void **OBC_newHashMapComplex(size_t keySize, size_t valueSize, size_t initBucketCount, size_t initBucketSize);
 OBC_ERROR_ENUM OBC_initHashMap(OBC_HashMap *map, size_t keySize, size_t valueSize);
-OBC_ERROR_ENUM OBC_initHashMapComplex(OBC_HashMap *map, size_t keySize, size_t valueSize, size_t initBuckets);
+OBC_ERROR_ENUM OBC_initHashMapComplex(OBC_HashMap *map, size_t keySize, size_t valueSize, size_t initBucketCount, size_t initBucketSize);
 void **OBC_HashMapGetDataPointer(OBC_HashMap *map);
 
 void **OBC_HashMapGetKeyPointerRaw(OBC_HashMap *map);
 void **OBC_HashMapGetKeyPointer(void *arr);
 
+void **OBC_HashMapGetHashPointer(void *arr);
+void **OBC_HashMapGetHashPointerRaw(OBC_HashMap *map);
+
 void OBC_freeHashMap(void *arr);
 void OBC_freeHashMapData(OBC_HashMap *map);
+
+OBC_Offset OBC_Hashmap_count(void *arr);
 
 /*
 OBC_Offset OBC_HashMapNewRaw(OBC_HashMap *map, void *key, OBC_Hash hash);
@@ -130,7 +138,9 @@ void OBC_HashMapSetIterStart(void *arr, OBC_HashMapIterator *iter);
 
 void OBC_HashMapPutIterNextRaw(OBC_HashMap *map, OBC_HashMapIterator *iter);
 void OBC_HashMapPutIterNext(void *arr, OBC_HashMapIterator *iter);
+
 void OBC_HashMapPutIterStart(void *arr, OBC_HashMapIterator *iter);
+void OBC_HashMapPutIterStartRaw(OBC_HashMap *map, OBC_HashMapIterator *iter);
 
 OBC_ERROR_ENUM OBC_HashMapExpandBucketSize(OBC_HashMap *map);
 OBC_ERROR_ENUM OBC_HashMapExpandBucketCount(OBC_HashMap *map);
@@ -150,17 +160,17 @@ void OBC_HashMapGetIterStart(void *arr, OBC_HashMapIterator *iter);
 /************************************************/
 
 
+
 #define OBC___X___HASHMAP_ITER_LOOP_TEMPLATE(arrPtr, HashMapIteratorPtr, keyPtr, keyHash, valuePtr, START_FUNC, INCREMENT_FUNC) \
-OBC_HashMapIterator->hash = keyHash;\
-OBC_HashMapIterator->key = keyPtr;\
-OBC_HashMapIterator->value = valuePtr;\
-for(START_FUNC(arrPtr, HashMapIteratorPtr); (HashMapIteratorPtr)->iter <= OBC_X_HASHMAP_HASH_FREED; INCREMENT_FUNC(arrPtr, HashMapIteratorPtr)) \
-if( (((OBC_Hash *)OBC_HashMap->keyHashes.rawData)[(HashMapIteratorPtr)->iter] |1) == OBC_X_HASHMAP_HASH_EMPTY){\
-\
-(HashMapIteratorPtr)->X_storage = (HashMapIteratorPtr)->iter; continue;\
-\
-}else\
-if( ((OBC_Hash *)OBC_HashMap->keyHashes.rawData)[(HashMapIteratorPtr)->iter] == (HashMapIteratorPtr)->hash )
+(HashMapIteratorPtr)->hash = /**keyHash;/**/ /**/OBC_HashMapFitHash(arrPtr,keyHash);/**/ \
+(HashMapIteratorPtr)->key = keyPtr; \
+(HashMapIteratorPtr)->value = valuePtr; \
+for( START_FUNC(arrPtr, (HashMapIteratorPtr)); (HashMapIteratorPtr)->iter < (HashMapIteratorPtr)->X_endIter && (HashMapIteratorPtr)->iter <= OBC_X_HASHMAP_HASH_FREED; INCREMENT_FUNC(arrPtr, (HashMapIteratorPtr)) ) \
+if( (((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(HashMapIteratorPtr)->iter] |1) == OBC_X_HASHMAP_HASH_EMPTY){ \
+(HashMapIteratorPtr)->X_storage = (HashMapIteratorPtr)->iter; \
+/**puts("CONTINUE, iter hash is EMPTY Node");/**/\
+continue;\
+}else if( ((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(HashMapIteratorPtr)->iter] == (HashMapIteratorPtr)->hash )
 
 
 
@@ -222,9 +232,8 @@ void OBC_HashMapNewIterNextRaw(OBC_HashMap *map, OBC_HashMapIterator *iter);
 void OBC_HashMapNewIterNext(void *arr, OBC_HashMapIterator *iter);
 
 
-
-
-
+OBC_Hash OBC_HashMapFitHash(void *arr, OBC_Hash hash);
+OBC_Hash OBC_HashMapFitHashRaw(OBC_HashMap *map, OBC_Hash hash);
 
 
 

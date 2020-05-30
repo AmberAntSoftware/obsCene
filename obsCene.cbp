@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="obsCene" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/obsCene" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-mavx2" />
+					<Add option="-mavx" />
+					<Add option="-mbmi2" />
+					<Add option="-mpopcnt" />
+					<Add option="-mfma" />
+					<Add option="-mcx16" />
+					<Add option="-mavx512f" />
+					<Add option="-mavx512cd" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/obsCene" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-flto" />
+					<Add option="-O2" />
+					<Add option="-fdata-sections" />
+					<Add option="-ffunction-sections" />
+					<Add option="-Wl,--gc-sections" />
+					<Add option="-march=native" />
+					<Add option="-mavx2" />
+					<Add option="-mavx" />
+					<Add option="-mbmi2" />
+					<Add option="-mpopcnt" />
+					<Add option="-mfma" />
+					<Add option="-mcx16" />
+					<Add option="-mtune=native" />
+					<Add option="-mavx512f" />
+					<Add option="-mavx512cd" />
+					<Add directory="./" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="./" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="-flto" />
+					<Add directory="./" />
+				</Linker>
+			</Target>
+			<Target title="Debug64">
+				<Option output="bin/Debug/obsCene" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-mavx2" />
+					<Add option="-mavx" />
+					<Add option="-mbmi2" />
+					<Add option="-mpopcnt" />
+					<Add option="-mfma" />
+					<Add option="-mcx16" />
+					<Add option="-mavx512f" />
+					<Add option="-mavx512cd" />
+				</Compiler>
+			</Target>
+			<Target title="Release64">
+				<Option output="bin/Release/obsCene" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-flto" />
+					<Add option="-O2" />
+					<Add option="-fdata-sections" />
+					<Add option="-ffunction-sections" />
+					<Add option="-Wl,--gc-sections" />
+					<Add option="-march=native" />
+					<Add option="-mavx2" />
+					<Add option="-mavx" />
+					<Add option="-mbmi2" />
+					<Add option="-mpopcnt" />
+					<Add option="-mfma" />
+					<Add option="-mcx16" />
+					<Add option="-mtune=native" />
+					<Add option="-mavx512f" />
+					<Add option="-mavx512cd" />
+					<Add directory="./" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="./" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="-flto" />
+					<Add directory="./" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-Wno-pointer-arith" />
+		</Compiler>
+		<Unit filename="allocators/allocator.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="allocators/allocator.h" />
+		<Unit filename="allocators/allocators.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="allocators/allocators.h" />
+		<Unit filename="allocators/alloclist.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="allocators/alloclist.h" />
+		<Unit filename="allocators/alloclistbit.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="allocators/alloclistbit.h" />
+		<Unit filename="allocators/allocray.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="allocators/allocray.h" />
+		<Unit filename="containers/dequeue.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="containers/dequeue.h" />
+		<Unit filename="containers/hashmap.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="containers/hashmap.h" />
+		<Unit filename="containers/list.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="containers/list.h" />
+		<Unit filename="containers/obclarge.h" />
+		<Unit filename="containers/queue.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="containers/queue.h" />
+		<Unit filename="containers/ray.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="containers/ray.h" />
+		<Unit filename="containers/sethash.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="containers/sethash.h" />
+		<Unit filename="containers/stack.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="containers/stack.h" />
+		<Unit filename="containers/tests/hashmap.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="containers/tests/hashmap.h" />
+		<Unit filename="containers/tree.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="containers/tree.h" />
+		<Unit filename="large/allocators/large_chunk.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="large/allocators/large_chunk.h" />
+		<Unit filename="large/containers/large_ray.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="large/containers/large_ray.h" />
+		<Unit filename="main.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="obc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="obc.h" />
+		<Unit filename="obc_natives.h" />
+		<Unit filename="obc_stdlib/hash.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="obc_stdlib/hash.h" />
+		<Unit filename="obc_stdlib/memswap.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="obc_stdlib/memswap.h" />
+		<Unit filename="obc_stdlib/random.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="obc_stdlib/random.h" />
+		<Unit filename="testing/testing.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

@@ -11,7 +11,7 @@
 #endif // NULL
 
 #ifndef OBC_NULL_INDEX
-    #define OBC_NULL_INDEX (~((size_t)0))
+    #define OBC_NULL_INDEX (~((OBC_Offset)0))
 #endif // NULL
 
 #ifdef DEBUG

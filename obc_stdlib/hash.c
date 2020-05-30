@@ -6,7 +6,8 @@
 //2039              0x7F7
 //536870909         0x1FFFFFFD
 //4294967291        0xFFFFFFFB
-#define HASH_PRIME ((OBC_Hash)0x1FFFFFFD)
+//2654435769 [40503] https://en.wikipedia.org/wiki/Hash_function -- fib multiplier
+#define HASH_PRIME (40503)
 #define HASH_MAX_GENERATION_ATTEMPTS 500
 #define HASH_MAX_RABINMILLER_ATTEMPTS 100
 
