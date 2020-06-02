@@ -1031,7 +1031,7 @@ void testHashMap(){
         dump.x = i;
         dump.y = i;
         printf("POS %i\n",i);
-        hash = OBC_hash(&i, sizeof(unsigned int));
+        hash = /**/OBC_hash(&i, sizeof(unsigned int));/*/i;//*/
         OBC_HashMapPutLoop(map,&iter,&i,hash,&dump){
             iter.keyCmpr = (keys[obc(iter.iter)] == i);
         }
@@ -1041,7 +1041,7 @@ void testHashMap(){
     for(i = 0; i < 32; i++){
         dump.x = i;
         dump.y = i;
-        hash = OBC_hash(&i, sizeof(unsigned int));
+        hash = /**/OBC_hash(&i, sizeof(unsigned int));/*/i;//*/
         puts("==========");
         OBC_HashMapGetLoop(map,&iter,&i,hash,&dump){
             printf(">>> KEY_READ: %u  :: CHECK: %u\n",keys[obc(iter.iter)], i);
@@ -1083,7 +1083,7 @@ void testHashMap(){
 
     clock_t t0 = clock();
     for(i = 0; i < SIZE; i++){
-        hash = OBC_hash(&i, sizeof(unsigned int));
+        hash = /**/OBC_hash(&i, sizeof(unsigned int));/*/i;//*/
         //zeroBigData.dump[0] = rand();
         OBC_HashMapPutLoop(mmap,&iter,&i,hash,&dump){
             iter.keyCmpr = (keys[obc(iter.iter)] == i);
@@ -1105,7 +1105,7 @@ void testHashMap(){
     unsigned int accu,j;
     clock_t t2 = clock();
     for(i = 0; i < SIZE; i++){
-        hash = OBC_hash(&i, sizeof(unsigned int));
+        hash = /**/OBC_hash(&i, sizeof(unsigned int));/*/i;//*/
         OBC_HashMapGetLoop(mmap,&iter,&i,hash,&dump){
             iter.keyCmpr = (keys[obc(iter.iter)] == i);
         }
@@ -1139,7 +1139,8 @@ printf("RCOUNT: %u\n",accu);
 
 int main(int argc, char** argv){
 
-    listTests();
+    testHashMap();
+    //listTests();
 
     printf("AllocSize: %u\n",sizeof(OBC_AllocListBit));
     printf("int size: %u  :: OFFSET SIZE: %u\n",(unsigned int)sizeof(unsigned int),(unsigned int)sizeof(OBC_Offset));

@@ -7,7 +7,7 @@
 //536870909         0x1FFFFFFD
 //4294967291        0xFFFFFFFB
 //2654435769 [40503] https://en.wikipedia.org/wiki/Hash_function -- fib multiplier
-#define HASH_PRIME (40503)
+#define HASH_PRIME (2654435769)
 #define HASH_MAX_GENERATION_ATTEMPTS 500
 #define HASH_MAX_RABINMILLER_ATTEMPTS 100
 
@@ -19,8 +19,25 @@ OBC_Hash OBC_hash(const void *const data, const size_t sizeInBytes){
     const unsigned char *const bytes = (const unsigned char *const)data;
 
     for(i = 0; i < sizeInBytes; i++){
-        hash = HASH_PRIME * hash + bytes[i];
+        hash = (HASH_PRIME * hash) + bytes[i];
     }
+    //hash ^= OBC_hashReverse(hash);
+    //hash ^= 0x55555555;
+    return hash;
+}
+
+OBC_Hash OBC_hashReverse(OBC_Hash hash){
+
+    // swap odd and even bits
+    hash = ((hash >> 1) & 0x55555555) | ((hash & 0x55555555) << 1);
+    // swap consecutive pairs
+    hash = ((hash >> 2) & 0x33333333) | ((hash & 0x33333333) << 2);
+    // swap nibbles ...
+    hash = ((hash >> 4) & 0x0F0F0F0F) | ((hash & 0x0F0F0F0F) << 4);
+    // swap bytes
+    hash = ((hash >> 8) & 0x00FF00FF) | ((hash & 0x00FF00FF) << 8);
+    // swap 2-byte long pairs
+    hash = ( hash >> 16             ) | ( hash               << 16);
 
     return hash;
 }
@@ -52,6 +69,30 @@ OBC_Hash OBC_hash2(const void *const data, const size_t sizeInBytes){
 
     for(; i <sizeInBytes; i++) {
         hash+=bytes[i]*bytes[i];
+    }
+
+    return hash;
+}
+
+OBC_Hash OBC_hash3(const void *const data, const size_t sizeInBytes, unsigned char hashLimPoT){
+
+    const unsigned char HASH_SHIFT = ( sizeof(unsigned char)*CHAR_BIT - hashLimPoT );
+
+    OBC_Hash hash = 0;
+    size_t i;
+    if(sizeInBytes >= sizeof(unsigned int)){
+        for(i = 0; i < sizeInBytes; i+=sizeof(unsigned int)){
+            hash ^= (((const unsigned int *const)data)[i/sizeof(unsigned int)]) >> HASH_SHIFT;
+            hash = (HASH_PRIME * hash) >> (HASH_SHIFT);
+        }
+        if(i > sizeInBytes){
+            i-=sizeof(unsigned int);
+        }
+    }
+
+    for(; i < sizeInBytes; i+=sizeof(unsigned char)){
+        hash ^= (((const unsigned char *const)data)[i]) >> HASH_SHIFT;
+        hash = (HASH_PRIME * hash) >> (HASH_SHIFT);
     }
 
     return hash;

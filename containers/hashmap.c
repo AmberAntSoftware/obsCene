@@ -52,6 +52,7 @@ OBC_ERROR_ENUM OBC_initHashMapComplex(OBC_HashMap *map, size_t keySize, size_t v
     map->count = 0;
     map->depthBits = 1;
     map->listBits = 0;
+    map->expandFlag = 0;
 
     return OBC_ERROR_SUCCESS;
 }
@@ -221,9 +222,12 @@ OBC_ERROR_ENUM OBC_X_HashMapExpand(OBC_HashMap *map){
     OBC_Offset newOff;
 
     OBC_Offset cuckooMask = map->itemsPerBucket-1;
-    OBC_Offset internal;
+    //OBC_Offset internal;
 
+    ///FIXME DEBUG
+    /**
     printf("BucketSize: %u\n",map->itemsPerBucket);
+    //*/
 
     size_t i;
     for(i = 0; i < old_size; i++){
@@ -243,30 +247,58 @@ OBC_ERROR_ENUM OBC_X_HashMapExpand(OBC_HashMap *map){
             newOff += internal;
 
             /*/
-            internal = 0;
+
+            /**if(newOff/2 != offset-i){
+                continue;
+            }*/
+
+            //internal = 0;
             if(hashes[newOff] < OBC_X_HASHMAP_HASH_FREED){
                 do{
-                    newOff++;
-                    internal++;
-                    if(internal >= map->itemsPerBucket){
-                        puts("LINEAR OPEN ADDRESSING");
-                        printf("NEXT: %u    CUR_OFF: %u\n",(size_t)((OBC_X_HASHMAP_HASH_TO_POSITION(hashes[offset-i],map)+1) * map->itemsPerBucket),(size_t)(newOff));
+                    //*
+                    if(hashes[offset-i] == hashes[newOff/*+internal*/]){
+                        //newOff = offset-i;
+                        //puts("SELF BUCKET POS");
+                        goto CONTINUE;
                     }
+                    /*/
+                    //*/
+                    newOff++;
+                    //internal++;
+                    ///FIXME DEBUG
+                    /**
+                    if(internal >= map->itemsPerBucket){
+                            puts("LINEAR_ADDRESS_OVERFLOW");
+                            /*
+                            OBC_HashMapExpandBucketSize(map);
+                            /* /
+                            OBC_HashMapExpandBucketCount(map);
+                            //* /
+                            return;
+                        ///puts("LINEAR OPEN ADDRESSING");
+                        //printf("IS OVERFLOW?? %u\n", (unsigned int)(OBC_X_HASHMAP_HASH_TO_POSITION(hashes[offset-i],map) * map->itemsPerBucket == (offset - i)) );
+                        //printf("NEXT: %u    CUR_OFF: %u\n",(size_t)((OBC_X_HASHMAP_HASH_TO_POSITION(hashes[offset-i],map)+1) * map->itemsPerBucket),(size_t)(newOff));
+                    }
+
+                    //**/
                 }while(hashes[newOff] < OBC_X_HASHMAP_HASH_FREED);
+
+                //newOff+=internal;
             }
 
             //*/
 
-            if( (offset-i) == newOff ){
-                continue;
-            }
+            //if( (offset-i) == newOff ){
+                //NO_ADD:continue;
+            //}
 
             //printf("HASH: %u ;; at: %u\n",hashes[newOff], offset-i);
             hashes[newOff] = hashes[offset-i];
-            hashes[offset-i] = OBC_X_HASHMAP_HASH_EMPTY;
+            hashes[offset-i] = OBC_X_HASHMAP_HASH_FREED;
             memcpy(keys + (keySize*newOff), keys + ((offset-i)*keySize), keySize);
             memcpy(values + (valueSize*newOff), values + ((offset-i)*valueSize), valueSize);
             //printf("NEW HASH: %u ;; at: %u\n",hashes[newOff], newOff);
+        CONTINUE:;
         }
 
     }
@@ -332,6 +364,7 @@ void OBC_HashMapSetIterNext(void *arr, OBC_HashMapIterator *iter){
 
 void OBC_HashMapSetIterStartRaw(OBC_HashMap *map, OBC_HashMapIterator *iter){
 
+    //map->expandFlag = 0;
     iter->keyCmpr = 1;
     iter->X_storage = OBC_NULL_INDEX;
 
@@ -375,7 +408,6 @@ void OBC_HashMapPutIterNextRaw(OBC_HashMap *map, OBC_HashMapIterator *iter){
         //*
         iter->iter = iter->X_endIter;
         iter->X_storage = OBC_NULL_INDEX;
-        //puts("DUPLICATE KEY");
         /*/
         iter->X_endIter = iter->iter;
         iter->X_storage = iter->iter;
@@ -392,7 +424,8 @@ void OBC_HashMapPutIterNextRaw(OBC_HashMap *map, OBC_HashMapIterator *iter){
         }
         */
         if(iter->X_storage == OBC_NULL_INDEX){
-            if(OBC_X_HASHMAP_THRESHOLD_CALCULATION(map->values.maxUnitLength) <= map->count /*|| map->itemsPerBucket > 8*/){
+            if(map->expandFlag < 3 || OBC_X_HASHMAP_THRESHOLD_CALCULATION(map->values.maxUnitLength) <= map->count /*|| map->itemsPerBucket > 8*/){
+                map->expandFlag++;
                 if(OBC_HashMapExpandBucketCount(map) == OBC_ERROR_FAILURE){
                     iter->iter = OBC_NULL_INDEX;
                     iter->X_storage = OBC_NULL_INDEX;
@@ -429,6 +462,7 @@ void OBC_HashMapPutIterNextRaw(OBC_HashMap *map, OBC_HashMapIterator *iter){
                     */
                     OBC_HashMapPutIterStartRaw(map,iter);
                 }
+                map->expandFlag = 0;
             }
         }else{
             //printf("ADDED VALUE: %u\n",map->count);
@@ -538,11 +572,11 @@ void OBC_HashMapNewIterNextRaw(OBC_HashMap *map, OBC_HashMapIterator *iter){
 }
 
 void OBC_HashMapNewIterNext(void *arr, OBC_HashMapIterator *iter){
-     OBC_HashMapNewIterNextRaw(OBC_TO_HASHMAP_PTR(arr),iter);
+     OBC_HashMapNewIterNextRaw(OBC_TO_HASHMAP_PTR(arr), iter);
 }
 
 void OBC_HashMapNewIterStart(void *arr, OBC_HashMapIterator *iter){
-    OBC_HashMapSetIterStartRaw(OBC_TO_HASHMAP_PTR(arr),iter);
+    OBC_HashMapSetIterStartRaw(OBC_TO_HASHMAP_PTR(arr), iter);
 }
 
 
@@ -552,6 +586,13 @@ void OBC_HashMapNewIterStart(void *arr, OBC_HashMapIterator *iter){
 
 
 
+OBC_Hash OBC_X_HashMapHashKeyRaw(OBC_HashMap *map, void *keyPtr){
+    return OBC_hash3(keyPtr, map->keys.unitSize, OBC_X_HashMapLiteralBits(map->buckets) );
+}
+
+OBC_Hash OBC_X_HashMapHashKey(void *arr, void *keyPtr){
+    return OBC_X_HashMapHashKeyRaw(OBC_TO_HASHMAP_PTR(arr), keyPtr);
+}
 
 
 unsigned int OBC_X_HashMapLowerBitCount(OBC_Offset value){
@@ -571,6 +612,26 @@ unsigned int OBC_X_HashMapLowerBitCount(OBC_Offset value){
     }
 
     return i;
+}
+
+unsigned int OBC_X_HashMapLiteralBits(OBC_Offset value){
+
+    if(value == 0){
+        return 0;
+    }
+
+    unsigned int i;
+    for(i = 0; i < CHAR_BIT*sizeof(OBC_Offset); i++){
+        if( (value & (((OBC_Offset)1)<<i)) != 0 ){
+            break;
+        }
+    }
+
+    if(i == CHAR_BIT*sizeof(OBC_Offset)){
+        return CHAR_BIT*sizeof(OBC_Offset);
+    }
+
+    return i+1;
 }
 
 OBC_Hash OBC_HashMapFitHash(void *arr, OBC_Hash hash){

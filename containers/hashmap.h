@@ -5,6 +5,7 @@
 #include "../allocators/alloclistbit.h"
 #include "../obc_stdlib/hash.h"
 #include "../obc_stdlib/memswap.h"
+#include "../obc_stdlib/hash.h"
 
 #define _OBC_HASHMAP_PTR_CAST(rawPtr) ((OBC_HashMap *)(rawPtr))
 #define _OBC_HASHMAP_OFFSET ((size_t)(&((OBC_HashMap *)NULL)->values.rawData))
@@ -49,17 +50,18 @@ typedef struct OBC_HashMap{
     OBC_Ray keyHashes;
 
     ///buckets is the N keys that can be stored in each layer
-    size_t buckets;
-    size_t itemsPerBucket;
+    OBC_Offset buckets;
+    OBC_Offset itemsPerBucket;
     //if
-    size_t rowMax;
+    OBC_Offset rowMax;
 
     ///the living elements in this container
     ///maximum value at any given time is depth*buckets
-    size_t count;
+    OBC_Offset count;
 
     unsigned char depthBits;
     unsigned char listBits;
+    unsigned char expandFlag;
 
     //OBC_AllocFastBitCache sparseStorage;
 
@@ -175,7 +177,22 @@ continue;\
 
 
 
+#define OBC___X___HASHMAP_ITER_LOOP_TEMPLATE_MIN(arrPtr, HashMapIteratorPtr, keyPtr, valuePtr, START_FUNC, INCREMENT_FUNC) \
+(HashMapIteratorPtr)->hash = /**keyHash;/**/ /**/OBC_HashMapFitHash(arrPtr,keyHash);/**/ \
+(HashMapIteratorPtr)->key = keyPtr; \
+(HashMapIteratorPtr)->value = valuePtr; \
+for( START_FUNC(arrPtr, (HashMapIteratorPtr)); (HashMapIteratorPtr)->iter < (HashMapIteratorPtr)->X_endIter && (HashMapIteratorPtr)->iter <= OBC_X_HASHMAP_HASH_FREED; INCREMENT_FUNC(arrPtr, (HashMapIteratorPtr)) ) \
+if( (((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(HashMapIteratorPtr)->iter] |1) == OBC_X_HASHMAP_HASH_EMPTY){ \
+(HashMapIteratorPtr)->X_storage = (HashMapIteratorPtr)->iter; \
+/**puts("CONTINUE, iter hash is EMPTY Node");/**/\
+continue;\
+}else if( ((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(HashMapIteratorPtr)->iter] == (HashMapIteratorPtr)->hash )
 
+
+
+OBC_Hash OBC_X_HashMapHashKey(void *arr, void *keyPtr);
+OBC_Hash OBC_X_HashMapHashKeyRaw(OBC_HashMap *map, void *keyPtr);
+unsigned int OBC_X_HashMapLiteralBits(OBC_Offset value);
 
 
 
