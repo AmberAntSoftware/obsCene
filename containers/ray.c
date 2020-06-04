@@ -102,29 +102,6 @@ OBC_ERROR_ENUM OBC_RayRemoveFastRaw(OBC_Ray *ray, OBC_Offset index){
 
 OBC_Offset OBC_RayNewElement(void *rawPtr){
 
-
-    /*
-    if(OBC_RayDoExpand(rawPtr) == OBC_ERROR_FAILURE){
-        return OBC_ERROR_FAILURE;
-    }
-    OBC_RayPushElement(rawPtr);
-    return OBC_ERROR_SUCCESS;
-    */
-
-    /*
-    OBC_ERROR_ENUM err = OBC_RayDoExpand(rawPtr);
-    switch(err){
-    case(OBC_ERROR_NO_OP):
-        OBC_RayPushElement(rawPtr);
-        break;
-    case(OBC_ERROR_SUCCESS):
-        OBC_RayPushElement(rawPtr);
-        break;
-    case(OBC_ERROR_FAILURE):
-        return OBC_ERROR_FAILURE;
-    }
-    /*/
-
     OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
     return OBC_RayNewElementRaw(ray);
 }
@@ -227,11 +204,20 @@ OBC_ERROR_ENUM OBC_RayContractRaw(OBC_Ray *ray){
 
     size_t newSize = ((size_t)ray->maxUnitLength)*ray->unitSize/2;//<<1;
     if(newSize < ray->unitSize){
-        newSize=ray->unitSize;
+        /*
+        newSize = 0;
+        OBC_freeRayData(ray);
+        ray->rawData = NULL;
+        ray->curUnitLength = 0;
+        ray->maxUnitLength = 0;
+        return;
+        /*/
+        ray->unitSize = ray->unitSize;
+        //*/
     }
 
     char *newData;
-    if(ray->rawData==NULL){
+    if(ray->rawData==NULL || ray->unitSize == 0){
         newData = malloc(newSize);
     }else{
         newData = realloc(ray->rawData,newSize);
@@ -260,7 +246,7 @@ OBC_ERROR_ENUM OBC_RayShrinkToFitRaw(OBC_Ray *ray){
 
     size_t newSize = ((size_t)ray->maxUnitLength)*ray->unitSize;//<<1;
     char *newData;
-    if(ray->rawData==NULL){
+    if(ray->rawData==NULL || ray->unitSize == 0){
         return OBC_ERROR_NO_OP;
     }else{
         newData = realloc(ray->rawData,newSize);
@@ -314,52 +300,66 @@ void* OBC_RayGetLastRaw(OBC_Ray *ray){
     return ray->rawData+(((size_t)ray->curUnitLength)*ray->unitSize);
 }
 
-OBC_Offset OBC_RayCurUnitLength(void *rawPtr){
+OBC_Offset OBC_Ray_CurUnitLength(void *rawPtr){
 
     OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
-    return OBC_RayCurUnitLengthRaw(ray);
+    return OBC_Ray_CurUnitLengthRaw(ray);
 }
 
-OBC_Offset OBC_RayCurUnitLengthRaw(OBC_Ray *ray){
+OBC_Offset OBC_Ray_CurUnitLengthRaw(OBC_Ray *ray){
     return ray->curUnitLength;
 }
 
-size_t OBC_RayCurByteLength(void *rawPtr){
+size_t OBC_Ray_CurByteLength(void *rawPtr){
 
     OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
-    return OBC_RayCurByteLengthRaw(ray);
+    return OBC_Ray_CurByteLengthRaw(ray);
 }
 
-size_t OBC_RayCurByteLengthRaw(OBC_Ray *ray){
+size_t OBC_Ray_CurByteLengthRaw(OBC_Ray *ray){
     return ((size_t)ray->curUnitLength) * ray->unitSize;
 }
 
-size_t OBC_RayMaxByteLength(void *rawPtr){
+size_t OBC_Ray_MaxByteLength(void *rawPtr){
 
     OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
-    return OBC_RayMaxByteLengthRaw(ray);
+    return OBC_Ray_MaxByteLengthRaw(ray);
 }
 
-size_t OBC_RayMaxByteLengthRaw(OBC_Ray *ray){
+size_t OBC_Ray_MaxByteLengthRaw(OBC_Ray *ray){
     return ((size_t)ray->maxUnitLength) * ray->unitSize;
 }
 
-OBC_Offset OBC_RayUnitSize(void *rawPtr){
+OBC_Offset OBC_Ray_UnitSize(void *rawPtr){
 
     OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
-    return OBC_RayUnitSizeRaw(ray);
+    return OBC_Ray_UnitSizeRaw(ray);
 }
 
-OBC_Offset OBC_RayUnitSizeRaw(OBC_Ray *ray){
+OBC_Offset OBC_Ray_UnitSizeRaw(OBC_Ray *ray){
     return ray->unitSize;
 }
 
-OBC_Offset OBC_RayMaxUnitLength(void *rawPtr){
+OBC_Offset OBC_Ray_MaxUnitLength(void *rawPtr){
 
     OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
-    return OBC_RayMaxUnitLengthRaw(ray);
+    return OBC_Ray_MaxUnitLengthRaw(ray);
 }
 
-OBC_Offset OBC_RayMaxUnitLengthRaw(OBC_Ray *ray){
+OBC_Offset OBC_Ray_MaxUnitLengthRaw(OBC_Ray *ray){
     return ray->maxUnitLength;
+}
+
+void OBC_RayIterStart(void *arr, OBC_RayIterator *iter){
+    OBC_RayIterStartRaw(OBC_TO_RAY_PTR(arr),iter);
+}
+void OBC_RayIterStartRaw(OBC_Ray *ray, OBC_RayIterator *iter){
+    iter->iter = 0;
+    iter->endIter = OBC_Ray_CurUnitLengthRaw(ray);
+}
+void OBC_RayIterNext(void *arr, OBC_RayIterator *iter){
+    OBC_RayIterNextRaw(OBC_TO_RAY_PTR(arr),iter);
+}
+void OBC_RayIterNextRaw(OBC_Ray *ray, OBC_RayIterator *iter){
+    iter->iter++;
 }

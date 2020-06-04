@@ -15,11 +15,15 @@ int RNG_rand(){
 
     RNG_X_state = (RNG_X_state * 1103515245 + 12345) & RANDOM_MASK;
 
+    //*
     signed int srand = 0;
     srand ^= RNG_X_state;
-
     return srand;
+    /*/
+    return RNG_X_state;
+    //*/
 }
+
 
 void RNG_seedLLU(unsigned long long int seedLLU){
     RNG_X_stateLLU = seedLLU;

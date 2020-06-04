@@ -1,10 +1,12 @@
 #ifndef OBC_H_INCLUDED
 #define OBC_H_INCLUDED
 
+#include <stddef.h>
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdio.h>
 
 #ifndef NULL
     #define NULL 0
@@ -70,44 +72,11 @@ typedef void** OBC_Data;
 
 void *OBC_memset (void *ptr, int c, size_t len);
 
-#define OBC_GetPointer(arrPtr, index) ((*(arrPtr))+index)
-#define OBC_GetValue(arrPtr, index) ((*(arrPtr))[index])
-
-/*
-typedef struct OBC_BigTimer{
-
-}OBC_BigTimer;
-
-typedef size_t OBC_BigMilliseconds;
-
-size_t OBC_BigClock(clock_t start, clock_t end);
-*/
 typedef clock_t OBC_Timer;
 #define OBC_newTimer() clock()
 unsigned int OBC_timerMillis(const OBC_Timer start, const OBC_Timer end);
 unsigned int OBC_timerSeconds(const OBC_Timer start, const OBC_Timer end);
 
-/*
-#define INTERFACE(returnValue, functionName, argsListWithParenthesis)\
-    returnValue (* functionName) argsListWithParenthesis
-
-#define IMPLEMENT_INTERFACE(interface,typename)
-
-typedef union I_Allocator{
-
-    INTERFACE(void**,New,(size_t unitSize));
-    INTERFACE(void*,init,(void *allocator, size_t unitSize));
-    INTERFACE(void,free,(void *allocator));
-    INTERFACE(void,freeData,(void *allocator));
-    INTERFACE(OBC_ERROR_ENUM,markAllocated,(void *allocator, size_t pos));
-    INTERFACE(OBC_ERROR_ENUM,expand,(void *allocator));
-    INTERFACE(size_t,getFreeLocation,(void *allocator));
-    INTERFACE(size_t,malloc,(void *allocator));
-    INTERFACE(OBC_ERROR_ENUM,allocatorFree,(void *allocator, size_t pos));
-    INTERFACE(OBC_ERROR_ENUM,markFreed,(void *allocator, size_t pos));
-
-}I_Allocator;
-*/
 
 #define OBC_X_MEMCPY(voidCharDataPtr,unitSize, unit, itemPtr)\
 if(unitSize > 512){\
@@ -156,48 +125,5 @@ size_t where = 0;\
         }while(where < unitSize);\
     }\
 }
-
-/**
-interface Allocator{
-
-void **new(size_t unitSize);
-void *init (interface *allocator, size_t unitSize);
-void freeAllocator(interface *allocator);
-void freeAllocatorData(interface *allocator);
-size_t malloc(interface *allocator);
-OBC_ERROR_ENUM free(interface *allocator, size_t data);
-
-};
-
-implement Allocator{
-
-    ///required named functions, must match prototypes
-    Allocator:new = OBC_newAllocFast;
-    Allocator:init = OBC_initAllocFast;
-    Allocator:freeAllocator = OBC_freeAllocFast;
-    Allocator:freeAllocatorData = OBC_freeAllocFastData;
-    Allocator:malloc = OBC_AllocFastMalloc;
-    Allocator:free = OBC_AllocFastFree;
-
-    ///other functions accessible from type
-    markAllocated = OBC_AllocFastMarkAllocated;
-    markFreed = OBC_AllocFastMarkFreed;
-
-}FreeListAllocator;
-
-void foobar(){
-
-    FreeListAllocator allocator;
-
-    allocator:init(& allocator);
-    size_t item = allocator:malloc();
-
-    //32bit print
-    printf("Allocated At Position: %u\n", item);
-
-    allocator:freeAllocatorData(& allocator);
-
-}
-**/
 
 #endif // OBC_H_INCLUDED

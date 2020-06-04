@@ -39,20 +39,20 @@ void OBC_freeRayData(OBC_Ray *ray);
 void **OBC_RayGetDataPointer(OBC_Ray *ray);
 
 ///gets the number of units stored in this ray
-OBC_Offset OBC_RayCurUnitLength(void *rawPtr);
-OBC_Offset OBC_RayCurUnitLengthRaw(OBC_Ray *ray);
+OBC_Offset OBC_Ray_CurUnitLength(void *rawPtr);
+OBC_Offset OBC_Ray_CurUnitLengthRaw(OBC_Ray *ray);
 ///gets the total bytes this ray is using
-size_t OBC_RayCurByteLength(void *rawPtr);
-size_t OBC_RayCurByteLengthRaw(OBC_Ray *ray);
+size_t OBC_Ray_CurByteLength(void *rawPtr);
+size_t OBC_Ray_CurByteLengthRaw(OBC_Ray *ray);
 ///gets the total allocated bytes
-size_t OBC_RayMaxByteLength(void *rawPtr);
-size_t OBC_RayMaxByteLengthRaw(OBC_Ray *ray);
+size_t OBC_Ray_MaxByteLength(void *rawPtr);
+size_t OBC_Ray_MaxByteLengthRaw(OBC_Ray *ray);
 ///gets the size in bytes of each element stored
-OBC_Offset OBC_RayUnitSize(void *rawPtr);
-OBC_Offset OBC_RayUnitSizeRaw(OBC_Ray *ray);
+OBC_Offset OBC_Ray_UnitSize(void *rawPtr);
+OBC_Offset OBC_Ray_UnitSizeRaw(OBC_Ray *ray);
 ///gets the total allocated units
-OBC_Offset OBC_RayMaxUnitLength(void *rawPtr);
-OBC_Offset OBC_RayMaxUnitLengthRaw(OBC_Ray *ray);
+OBC_Offset OBC_Ray_MaxUnitLength(void *rawPtr);
+OBC_Offset OBC_Ray_MaxUnitLengthRaw(OBC_Ray *ray);
 
 
 
@@ -92,6 +92,28 @@ OBC_ERROR_ENUM OBC_RayRemoveFastRaw(OBC_Ray *ray, OBC_Offset index);
 ///returns the last index address
 void* OBC_RayGetLast(void *rawPtr);
 void* OBC_RayGetLastRaw(OBC_Ray *ray);
+
+
+
+
+
+typedef struct OBC_RayIterator{
+    OBC_Offset iter;
+    OBC_Offset endIter;
+}OBC_RayIterator;
+#define OBC_RayForEach(arrPtr, iterPtr) \
+for(OBC_RayIterStart(arrPtr, iterPtr); (iterPtr)->iter < (iterPtr)->endIter; OBC_RayIterNext(arrPtr, iterPtr))
+
+#define OBC_RayForEachSub(arrPtr, iterPtr, startOffset, endOffset) \
+OBC_RayIterStart(arrPtr, iterPtr); \
+(iterPtr)->iter += startOffset; \
+(iterPtr)->endIter -= endOffset; \
+for(; (iterPtr)->iter < (iterPtr)->endIter; OBC_RayIterNext(arrPtr, iterPtr))
+
+void OBC_RayIterStart(void *rawPtr, OBC_RayIterator *iter);
+void OBC_RayIterStartRaw(OBC_Ray *ray, OBC_RayIterator *iter);
+void OBC_RayIterNext(void *rawPtr, OBC_RayIterator *iter);
+void OBC_RayIterNextRaw(OBC_Ray *ray, OBC_RayIterator *iter);
 
 /*************************************
 Alternate Utilities

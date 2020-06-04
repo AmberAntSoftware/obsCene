@@ -6,6 +6,8 @@
 typedef OBC_Offset OBC_Hash;
 
 OBC_Hash OBC_hash(const void *const data, const size_t sizeInBytes);
+OBC_Hash OBC_hashX(const void *const data, const size_t sizeInBytes);
+
 OBC_Hash OBC_hash2(const void *const data, const size_t sizeInBytes);
 
 OBC_Hash OBC_hashReverse(OBC_Hash hash);

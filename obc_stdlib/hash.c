@@ -20,6 +20,7 @@ OBC_Hash OBC_hash(const void *const data, const size_t sizeInBytes){
 
     for(i = 0; i < sizeInBytes; i++){
         hash = (HASH_PRIME * hash) + bytes[i];
+        //hash = OBC_hashReverse(hash);
     }
     //hash ^= OBC_hashReverse(hash);
     //hash ^= 0x55555555;
@@ -38,6 +39,21 @@ OBC_Hash OBC_hashReverse(OBC_Hash hash){
     hash = ((hash >> 8) & 0x00FF00FF) | ((hash & 0x00FF00FF) << 8);
     // swap 2-byte long pairs
     hash = ( hash >> 16             ) | ( hash               << 16);
+
+    return hash;
+}
+
+
+///http://www.cse.yorku.ca/~oz/hash.html
+OBC_Hash OBC_hashX(const void *const data, const size_t sizeInBytes){
+
+    OBC_Hash hash = 5381;
+    size_t i;
+    const unsigned char *const bytes = (const unsigned char *const)data;
+
+    for(i = 0; i < sizeInBytes; i++){
+        hash = ((hash << 5) + hash) + bytes[i];
+    }
 
     return hash;
 }

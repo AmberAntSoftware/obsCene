@@ -48,15 +48,15 @@ void **OBC_RayGetDataPointer(OBC_Ray *ray);
 gets the values associated with the dealigned ray
 ***************************************/
 ///gets the number of units stored in this ray
-size_t OBC_RayCurUnitLength(void *rawPtr);
+size_t OBC_Ray_CurUnitLength(void *rawPtr);
 ///gets the total bytes this ray is using
-size_t OBC_RayCurByteLength(void *rawPtr);
+size_t OBC_Ray_CurByteLength(void *rawPtr);
 ///gets the total allocated bytes
-size_t OBC_RayMaxByteLength(void *rawPtr);
+size_t OBC_Ray_MaxByteLength(void *rawPtr);
 ///gets the size in bytes of each element stored
-size_t OBC_RayUnitSize(void *rawPtr);
+size_t OBC_Ray_UnitSize(void *rawPtr);
 ///gets the total allocated units
-size_t OBC_RayMaxUnitLength(void *rawPtr);
+size_t OBC_Ray_MaxUnitLength(void *rawPtr);
 
 #define OBC_RayGetPointer(rawPtr, index) ((*(rawPtr))+index)
 #define OBC_RayGetValue(rawPtr, index) ((*(rawPtr))[index])
