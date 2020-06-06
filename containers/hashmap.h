@@ -20,13 +20,15 @@
 #define OBC_X_HASHMAP_HASH_EMPTY (~((OBC_Offset)0))
 #define OBC_X_HASHMAP_HASH_FREED (OBC_X_HASHMAP_HASH_EMPTY-1)
 
-#define OBC_X_HASHMAP_HASH_TO_POSITION(hash, hashmapPtr) (( ((hash) ) & ((hashmapPtr)->buckets - 1)))
+//( (( ((hash) ) & (((hashmapPtr)->buckets) - 1))/2)*2 + ((((hash >> ((sizeof(OBC_Hash)*CHAR_BIT)-4))))&1) )
+#define OBC_X_HASHMAP_HASH_TO_POSITION(hash, hashmapPtr) ( (hash) & (((hashmapPtr)->buckets)-1) )
+//(( ((hash) ) & ((hashmapPtr)->buckets - 1)))
 
 #define OBC_X_HASHMAP_CUCKOO_MASK(hashmapPtr) ((hashmapPtr)->itemsPerBucket-1)
 #define OBC_X_HASHMAP_CUCKOO_SHIFT(hashmapPtr) ((sizeof(OBC_Hash)*CHAR_BIT) - ((hashmapPtr)->listBits))
 
 //85% threshold before expanding
-#define OBC_X_HASHMAP_THRESHOLD_CALCULATION(value) (((value)*65)/100)
+#define OBC_X_HASHMAP_THRESHOLD_CALCULATION(value) (((value)*15)/100)
 
 /**
 SPEC
@@ -133,8 +135,8 @@ OBC___X___HASHMAP_ITER_LOOP_TEMPLATE(arrPtr, hashMapIteratorPtr, keyPtr, keyHash
 #define OBC_HashMapPutLoop(arrPtr, hashMapIteratorPtr, keyPtr, keyHash, valuePtr) \
 OBC___X___HASHMAP_ITER_LOOP_TEMPLATE(arrPtr, hashMapIteratorPtr, keyPtr, keyHash, valuePtr, OBC_HashMapPutIterStart, OBC_HashMapPutIterNext)
 
-#define OBC_HashMapGetLoop(arrPtr, hashMapIteratorPtr, keyPtr, keyHash, valuePtr) \
-OBC___X___HASHMAP_ITER_LOOP_TEMPLATE(arrPtr, hashMapIteratorPtr, keyPtr, keyHash, valuePtr, OBC_HashMapGetIterStart, OBC_HashMapGetIterNext)
+#define OBC_HashMapGetLoop(arrPtr, hashMapIteratorPtr, keyHash) \
+OBC___X___HASHMAP_ITER_LOOP_TEMPLATE(arrPtr, hashMapIteratorPtr, NULL, keyHash, NULL, OBC_HashMapGetIterStart, OBC_HashMapGetIterNext)
 
 
 /************************************************/
@@ -155,7 +157,7 @@ void OBC_HashMapPutIterStartRaw(OBC_HashMap *map, OBC_HashMapIterator *iter);
 OBC_ERROR_ENUM OBC_HashMapExpandBucketSize(OBC_HashMap *map);
 OBC_ERROR_ENUM OBC_HashMapExpandBucketCount(OBC_HashMap *map);
 
-OBC_ERROR_ENUM OBC_X_HashMapExpand(OBC_HashMap *map);
+OBC_ERROR_ENUM OBC_X_HashMapExpand(OBC_HashMap *map, OBC_Offset oldBucketCount, OBC_Offset oldBucketDepth);
 OBC_ERROR_ENUM OBC_X_HashMapHowExpand(OBC_HashMap *map);
 OBC_ERROR_ENUM OBC_X_HashMapExpandEmpty(OBC_HashMap *map);
 OBC_ERROR_ENUM OBC_X_HashMapExpandNonEmpty(OBC_HashMap *map);
@@ -177,14 +179,47 @@ continue;\
 }else
 
 
+unsigned char OBC_HashMapGetIterContinue(OBC_HashMapIterator *iter);
+
+//#define OBC_HashMapGetLoop__(arrPtr, hashMapIteratorPtr, keyHash) OBC_HashMapGetLoop(arrPtr, hashMapIteratorPtr, keyHash)
+#define OBC_HashMapGetLoop__(arrPtr, hashMapIteratorPtr, keyHash) \
+(hashMapIteratorPtr)->hash = OBC_HashMapFitHash(arrPtr,keyHash); \
+for( OBC_HashMapGetIterStart(arrPtr, hashMapIteratorPtr); \
+    /**OBC_HashMapGetIterContinue(hashMapIteratorPtr)/**/ (hashMapIteratorPtr)->iter < (hashMapIteratorPtr)->X_endIter && (hashMapIteratorPtr)->iter < OBC_X_HASHMAP_HASH_FREED; \
+    OBC_HashMapGetIterNext(arrPtr, (hashMapIteratorPtr)) ) \
+if( (((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(hashMapIteratorPtr)->iter]) >= OBC_X_HASHMAP_HASH_FREED){ \
+if((hashMapIteratorPtr)->X_storage == OBC_NULL_INDEX){(hashMapIteratorPtr)->X_storage = (hashMapIteratorPtr)->iter;}\
+continue;\
+}else if( (((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(hashMapIteratorPtr)->iter]) != (hashMapIteratorPtr)->hash ){ \
+continue; \
+}else
+
+
+
+#define OBC_HashMapPutLoop__(arrPtr, hashMapIteratorPtr, keyPtr, keyHash, valuePtr) \
+(hashMapIteratorPtr)->hash = OBC_HashMapFitHash(arrPtr,keyHash);/**/ \
+(hashMapIteratorPtr)->key = keyPtr; \
+(hashMapIteratorPtr)->value = valuePtr; \
+for( OBC_HashMapPutIterStart(arrPtr, hashMapIteratorPtr); \
+    (hashMapIteratorPtr)->iter < (hashMapIteratorPtr)->X_endIter && (hashMapIteratorPtr)->iter < OBC_X_HASHMAP_HASH_FREED; \
+    OBC_HashMapPutIterNext(arrPtr, hashMapIteratorPtr) \
+) \
+if( (((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(hashMapIteratorPtr)->iter]) >= OBC_X_HASHMAP_HASH_FREED){ \
+if((hashMapIteratorPtr)->X_storage == OBC_NULL_INDEX){(hashMapIteratorPtr)->X_storage = (hashMapIteratorPtr)->iter;}\
+continue;\
+}else if( (((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(hashMapIteratorPtr)->iter]) != (hashMapIteratorPtr)->hash ){ \
+continue; \
+}else
+
+
 #define OBC___X___HASHMAP_ITER_LOOP_TEMPLATE(arrPtr, hashMapIteratorPtr, keyPtr, keyHash, valuePtr, START_FUNC, INCREMENT_FUNC) \
 (hashMapIteratorPtr)->hash = /**keyHash;/**/ /**/OBC_HashMapFitHash(arrPtr,keyHash);/**/ \
 (hashMapIteratorPtr)->key = keyPtr; \
 (hashMapIteratorPtr)->value = valuePtr; \
 for( START_FUNC(arrPtr, (hashMapIteratorPtr)); (hashMapIteratorPtr)->iter < (hashMapIteratorPtr)->X_endIter && (hashMapIteratorPtr)->iter <= OBC_X_HASHMAP_HASH_FREED; INCREMENT_FUNC(arrPtr, (hashMapIteratorPtr)) ) \
 if( (((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(hashMapIteratorPtr)->iter] |1) == OBC_X_HASHMAP_HASH_EMPTY){ \
-/**if((hashMapIteratorPtr)->X_storage == OBC_NULL_INDEX){(hashMapIteratorPtr)->X_storage = (hashMapIteratorPtr)->iter;} \**/\
-(hashMapIteratorPtr)->X_storage = (hashMapIteratorPtr)->iter;\
+/**/if((hashMapIteratorPtr)->X_storage == OBC_NULL_INDEX){(hashMapIteratorPtr)->X_storage = (hashMapIteratorPtr)->iter;} /**/\
+/**(hashMapIteratorPtr)->X_storage = (hashMapIteratorPtr)->iter;/**/\
 /**puts("CONTINUE, iter hash is EMPTY Node");/**/\
 continue;\
 }else if( ((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(hashMapIteratorPtr)->iter] == (hashMapIteratorPtr)->hash )

@@ -1043,7 +1043,7 @@ void testHashMap(){
         dump.y = i;
         printf("POS %i\n",i);
         hash = /**/OBC_hash(&i, sizeof(unsigned int));/*/i;//*/
-        OBC_HashMapPutLoop(map,&iter,&i,hash,&dump){
+        OBC_HashMapPutLoop__(map,&iter,&i,hash,&dump){
             iter.keyCmpr = (keys[obc(iter.iter)] == i);
         }
 
@@ -1054,7 +1054,7 @@ void testHashMap(){
         dump.y = i;
         hash = /**/OBC_hash(&i, sizeof(unsigned int));/*/i;//*/
         puts("==========");
-        OBC_HashMapGetLoop(map,&iter,&i,hash,&dump){
+        OBC_HashMapGetLoop__(map,&iter,hash){
             printf(">>> KEY_READ: %u  :: CHECK: %u\n",keys[obc(iter.iter)], i);
             iter.keyCmpr = (keys[obc(iter.iter)] == i);
             printf(">>> CMPR: %u   :: CHECK= %u\n",iter.keyCmpr, (keys[obc(iter.iter)] == i));
@@ -1096,7 +1096,7 @@ void testHashMap(){
     for(i = 0; i < SIZE; i++){
         hash = /**OBC_hash(&i, sizeof(unsigned int));/*/i;//*/
         //zeroBigData.dump[0] = rand();
-        OBC_HashMapPutLoop(mmap,&iter,&i,hash,&dump){
+        OBC_HashMapPutLoop__(mmap,&iter,&i,hash,&dump){
             iter.keyCmpr = (keys[obc(iter.iter)] == i);
             /*if(iter.keyCmpr != 0){
                 printf("SAAME %u :: %u\n",i, keys[obc(iter.iter)]);
@@ -1117,7 +1117,7 @@ void testHashMap(){
     clock_t t2 = clock();
     for(i = 0; i < SIZE; i++){
         hash = /**OBC_hash(&i, sizeof(unsigned int));/*/i;//*/
-        OBC_HashMapGetLoop(mmap,&iter,&i,hash,&dump){
+        OBC_HashMapGetLoop__(mmap,&iter,hash){
             iter.keyCmpr = (keys[obc(iter.iter)] == i);
         }
         /*if(iter.iter == OBC_NULL_INDEX){
@@ -1192,7 +1192,7 @@ printf("RCOUNT: %u\n",accu);
         }*/
 
         hash = OBC_hash(& s_dump[obc(i)].str, sizeof(garbo.str));
-        OBC_HashMapPutLoop(s_data,&iter,&s_dump[obc(i)],hash,&i){
+        OBC_HashMapPutLoop__(s_data,&iter,&s_dump[obc(i)],hash,&i){
             ///if(i != 3786857 || i == 6671693 || i == 8363730){
             ///    printf("N: %u   KEY: %s   PUT: %s\n", i, &s_keys[obc(iter.iter)].str, &s_dump[obc(i)].str);
             ///}
@@ -1216,7 +1216,7 @@ printf("RCOUNT: %u\n",accu);
     t2 = clock();
     for(i = 0; i < KLA_SIZE; i++){
         hash = OBC_hash(& s_dump[obc(i)].str, sizeof(garbo.str));
-        OBC_HashMapGetLoop(s_data,&iter,&s_dump[obc(i)],hash,&i){
+        OBC_HashMapGetLoop__(s_data,&iter,hash){
             /*
             for(j = 0; j < 7; j++){
                 iter.keyCmpr = (s_keys[obc(iter.iter)].str[j] == s_dump[obc(i)].str[j] );
@@ -1229,7 +1229,7 @@ printf("RCOUNT: %u\n",accu);
             //*/
         }
         if(iter.keyCmpr == 0){
-            ///printf("FAILIED TO FIND:: %u\n",i);
+            printf("FAILIED TO FIND:: %u\n",i);
         }
         //accu+=mmap[obc(iter.iter)].x;
     }

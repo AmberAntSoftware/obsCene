@@ -24,6 +24,7 @@ OBC_Hash OBC_hash(const void *const data, const size_t sizeInBytes){
     }
     //hash ^= OBC_hashReverse(hash);
     //hash ^= 0x55555555;
+    //hash = ((hash>>15)^hash);
     return hash;
 }
 
