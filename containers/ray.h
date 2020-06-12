@@ -22,7 +22,7 @@ typedef struct OBC_Ray{
 }OBC_Ray;
 
 /*************************************
-Initialization / Deallocation
+Initialization
 *************************************/
 
 ///NULL on failed allocation
@@ -31,10 +31,19 @@ void **OBC_newRayComplex(OBC_Offset initialReserveCount, size_t unitSize);
 ///FAIL on error
 OBC_ERROR_ENUM OBC_initRay(OBC_Ray *ray, size_t unitSize);
 OBC_ERROR_ENUM OBC_initRayComplex(OBC_Ray *ray, OBC_Offset initialReserveCount, size_t unitSize);
+
+/*************************************
+Deallocation
+*************************************/
+
 ///Frees the dynamic ray allocation and the owned dynamic data owned
 void OBC_freeRay(void *rawPtr);
 ///Frees only the owned dynamic data owned
 void OBC_freeRayData(OBC_Ray *ray);
+
+/*************************************
+Data Accessors
+*************************************/
 
 void **OBC_RayGetDataPointer(OBC_Ray *ray);
 
@@ -54,7 +63,9 @@ OBC_Offset OBC_Ray_UnitSizeRaw(OBC_Ray *ray);
 OBC_Offset OBC_Ray_MaxUnitLength(void *rawPtr);
 OBC_Offset OBC_Ray_MaxUnitLengthRaw(OBC_Ray *ray);
 
-
+/*************************************
+Operations
+*************************************/
 
 ///expands if necessary
 OBC_ERROR_ENUM OBC_RayDoExpand(void *rawPtr);
@@ -94,13 +105,15 @@ void* OBC_RayGetLast(void *rawPtr);
 void* OBC_RayGetLastRaw(OBC_Ray *ray);
 
 
-
-
+/*************************************
+Iteration
+*************************************/
 
 typedef struct OBC_RayIterator{
     OBC_Offset iter;
     OBC_Offset endIter;
 }OBC_RayIterator;
+
 #define OBC_RayForEach(arrPtr, iterPtr) \
 for(OBC_RayIterStart(arrPtr, iterPtr); (iterPtr)->iter < (iterPtr)->endIter; OBC_RayIterNext(arrPtr, iterPtr))
 
@@ -116,7 +129,7 @@ void OBC_RayIterNext(void *rawPtr, OBC_RayIterator *iter);
 void OBC_RayIterNextRaw(OBC_Ray *ray, OBC_RayIterator *iter);
 
 /*************************************
-Alternate Utilities
+Alternate Operations
 *************************************/
 /*
 https://en.cppreference.com/w/cpp/container/vector

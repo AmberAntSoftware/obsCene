@@ -3,8 +3,6 @@
 
 #include "../obc.h"
 
-
-
 /**
 #define OBC_LIST_FAST
 /**/
@@ -26,12 +24,18 @@ typedef struct OBC_List{
     OBC_Offset last;
     OBC_Offset first;
 
-    size_t count;
+    OBC_Offset count;
 
 }OBC_List;
 
+typedef struct OBC_ListIterator{
+
+    OBC_Offset iter;
+
+}OBC_ListIterator;
+
 /*************************************
-Initialization / Deallocation
+Initialization
 *************************************/
 
 void **OBC_newList(size_t unitSize);
@@ -39,10 +43,22 @@ void **OBC_newList(size_t unitSize);
 OBC_ERROR_ENUM OBC_initList(OBC_List *list, size_t unitSize);
 //OBC_ERROR_ENUM OBC_initListComplex(OBC_List *list, size_t unitSize, OBC_LIST_ALLOC allocChoice);
 
-void **OBC_ListGetDataPointer(OBC_List *list);
+/*************************************
+Deallocation
+*************************************/
 
 void OBC_freeList(void *arr);
 void OBC_freeListData(OBC_List *list);
+
+/*************************************
+Data Accessors
+*************************************/
+
+void **OBC_ListGetDataPointer(OBC_List *list);
+
+/*************************************
+Operations
+*************************************/
 
 OBC_Offset OBC_ListNewItemRaw(OBC_List *list);
 OBC_Offset OBC_ListNewItem(void *arr);
@@ -61,13 +77,12 @@ OBC_ERROR_ENUM OBC_ListAdd(void *arr, void *item);
 Iteration
 *************************************/
 
-typedef OBC_Offset OBC_ListIterator;
 #define OBC_ListForEach(arrPtr, iter) for(iter = OBC_ListIterStart(arrPtr); iter != OBC_NULL_INDEX; iter = OBC_ListIterNext(arrPtr, iter))
 #define OBC_ListForEachRaw(listPtr, iter) for(iter = OBC_ListIterStartRaw(listPtr); iter != OBC_NULL_INDEX; iter = OBC_ListIterNextRaw(listPtr, iter))
 
 
 /*************************************
-Alternate Utilities
+Alternate Operations
 *************************************/
 
 #define OBC_ListAddRawFast(arrPtr, itemValue)\

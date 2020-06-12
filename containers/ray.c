@@ -201,6 +201,9 @@ OBC_ERROR_ENUM OBC_RayContract(void *rawPtr){
 }
 
 OBC_ERROR_ENUM OBC_RayContractRaw(OBC_Ray *ray){
+    if(ray->unitSize == 0){
+        return OBC_ERROR_NO_OP;
+    }
 
     size_t newSize = ((size_t)ray->maxUnitLength)*ray->unitSize/2;//<<1;
     if(newSize < ray->unitSize){

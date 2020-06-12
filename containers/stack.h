@@ -11,15 +11,20 @@ typedef struct OBC_Stack{
 }OBC_Stack;
 
 /*************************************
-Initialization / Deallocation
+Initialization
 *************************************/
 
 void **OBC_newStack(size_t unitSize);
 OBC_ERROR_ENUM OBC_initStack(OBC_Stack *stack, size_t unitSize);
-void **OBC_StackGetDataPointer(OBC_Stack *stack);
+
+/*************************************
+Deallocation
+*************************************/
 
 void OBC_freeStack(void *raw);
 void OBC_freeStackData(OBC_Stack *stack);
+
+void **OBC_StackGetDataPointer(OBC_Stack *stack);
 
 OBC_Offset OBC_StackPushRaw(OBC_Stack *stack);
 OBC_Offset OBC_StackPush(void *raw);
@@ -41,7 +46,7 @@ typedef OBC_Offset OBC_StackIterator;
 
 
 /*************************************
-Alternate Utilities
+Alternate Operations
 *************************************/
 
 #define OBC_StackPushNewFast(rawPtr, itemValue)\

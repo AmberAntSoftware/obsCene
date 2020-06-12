@@ -14,7 +14,10 @@
 #include "containers/stack.h"
 #include "containers/queue.h"
 #include "containers/tree.h"
+
 #include "containers/hashmap.h"
+#include "containers/indirectmap.h"
+
 #include "allocators/allocray.h"
 
 #include "allocators/alloclistbit.h"
@@ -1086,7 +1089,7 @@ void testHashMap(){
 
     puts("\n\nStarting Benchmarking\n\n");
 
-    Point **mmap = OBC_newHashMap(sizeof(unsigned int), sizeof(Point));
+    Point **mmap = OBC_newHashMapThreshold(sizeof(unsigned int), sizeof(Point),95);
     keys = OBC_HashMapGetKeyPointer(mmap);
     OBC_Hash** hhashes = OBC_HashMapGetHashPointer(mmap);
 
@@ -1128,6 +1131,9 @@ void testHashMap(){
                 printf("KEY: %u\n",keys[obc(kiter+j)]);
             }
         }*/
+        if(iter.keyCmpr == 0){
+            printf("FAILIED TO FIND:: %u\n",i);
+        }
         //accu+=mmap[obc(iter.iter)].dump[0];
         accu+=mmap[obc(iter.iter)].x;
     }
@@ -1152,27 +1158,39 @@ printf("RCOUNT: %u\n",accu);
     garbo.str[7] = '\0';
 
     OBC_HashMap raww;
-    OBC_initHashMap(&raww, sizeof(Garbo), sizeof(unsigned int));
+    OBC_initHashMapThreshold(&raww, sizeof(Garbo), sizeof(unsigned int), 15);
     unsigned int **s_data = (unsigned int**)OBC_HashMapGetDataPointer(&raww);
     Garbo **s_keys = (Garbo**)OBC_HashMapGetKeyPointerRaw(&raww);
     OBC_Hash **s_hash_dump = (OBC_Hash**)OBC_HashMapGetHashPointerRaw(&raww);
 
     size_t KLA_SIZE = 10000000;//1374259;
-    Garbo **s_dump = OBC_newRay(sizeof(Garbo));
+    Garbo **s_dump = OBC_newRayComplex(10000000,sizeof(Garbo));
     RNG_seed(8787);
     RNG_seed(RNG_rand());
     srand(8787);
+    t1 = clock();
     for(i = 0; i < KLA_SIZE; i++){
+        /*
         for(j = 0; j < 7; j++){
             garbo.str[j] = (RNG_rand()%26)+'a';
         }
-        /*OBC_Offset next = OBC_RayNewElement(s_dump);
-        if(next == OBC_NULL_INDEX){
-            puts("STRING FAILURE");
-        }
-        s_dump[obc(next)] = garbo;*/
+        //OBC_Offset next = OBC_RayNewElement(s_dump);
+        //if(next == OBC_NULL_INDEX){
+        //    puts("STRING FAILURE");
+        //}
+        //s_dump[obc(next)] = garbo;
         OBC_RayAddValue(s_dump,garbo);
+        /*/
+        OBC_Offset pos = OBC_RayNewElement(s_dump);
+        for(j = 0; j < 7; j++){
+            s_dump[obc(pos)].str[j] = (RNG_rand()%26)+'a';
+        }
+        s_dump[obc(pos)].str[7] = '\0';
+        //*/
     }
+    t2 = clock();
+    printf("0_STR = %s\n",&s_dump[obc(0)].str);
+    printf("Generation Time Taken: %u\n",t2-t1);
 
     t0 = clock();
     for(i = 0; i < KLA_SIZE; i++){
@@ -1250,7 +1268,7 @@ printf("RCOUNT: %u\n",accu);
     puts("==================");
 
     //OBC_freeHashMapData(&raww);
-    OBC_freeRay(s_dump);
+    //OBC_freeRay(s_dump);
 
     Garbo **u_set = OBC_newRay(sizeof(Garbo));
 
@@ -1260,13 +1278,16 @@ printf("RCOUNT: %u\n",accu);
     }
 
 
+OBC_RayIterator riter;
+    ///REDUNDANCY CHECK
+    /**
     printf("Unsorted Ray Size: %u\n", OBC_Ray_CurUnitLength(u_set));
     t0 = clock();
     qsort(*u_set, OBC_Ray_CurUnitLength(u_set), sizeof(Garbo), GarboCmpr);
     t1 = clock();
     printf("Sort Time: %ums\n",t1-t0);
 
-    OBC_RayIterator riter;
+
     OBC_RayForEachSub(u_set, &riter, 0, 1){
         if(GarboCmpr(&u_set[obc(riter.iter)], &u_set[obc(riter.iter+1)]) == 0){
             printf("DUPLICATE: %u   ITEM: %s   NEXT: %s\n", riter.iter, & u_set[obc(riter.iter)].str, & u_set[obc(riter.iter+1)].str );
@@ -1288,9 +1309,45 @@ printf("RCOUNT: %u\n",accu);
             //}
         }
     }
-
+    **/
     OBC_freeHashMapData(&raww);
+
+    puts("\n===============");
+    puts("STARTING INDIRECTION");
+    clock_t i_start = clock();
+    OBC_IndirectMapIterator indIter;
+    unsigned int **ind = OBC_newIndirectMapThreshold(sizeof(Garbo), sizeof(unsigned int), 15);
+    Garbo **indKeys = OBC_IndirectMapGetKeyPtr(ind);
+    /*
+    OBC_RayForEach(s_dump, &riter){
+        OBC_Hash hash = OBC_hash(& s_dump[obc(riter.iter)].str, sizeof(garbo.str));
+        OBC_IndirectMapPutLoop__(ind, &indIter, & s_dump[obc(riter.iter)], hash, &riter.iter ){
+            indIter.keyCmpr = GarboCmpr(&indKeys[obc(indIter.iter)], &s_dump[obc(riter.iter)]) == 0;
+        }
+    }
+    /*/
+    for(i = 0; i < KLA_SIZE; i++){
+        hash = OBC_hash(& s_dump[obc(i)].str, sizeof(garbo.str));
+        OBC_IndirectMapPutLoop__(ind,&indIter,&s_dump[obc(i)],hash,&i){
+            indIter.keyCmpr = GarboCmpr(&indKeys[obc(indIter.iter)], &s_dump[obc(i)]) == 0;
+        }
+    }
+    //*/
+    clock_t i_end = clock();
+    OBC_IndirectMap* imap = OBC_TO_INDIRECTMAP_PTR(ind);
+    printf("Bucket Total: %u\n",imap->indirection.buckets);
+    printf("Items Per Bucket: %u\n",imap->indirection.itemsPerBucket);
+    printf("Total Hash Units: %u\n",imap->indirection.keyHashes.maxUnitLength);
+    printf("Total Key Units: %u\n",imap->indirection.keyHashes.maxUnitLength);
+    printf("Total Value Units: %u\n",imap->indirection.values.maxUnitLength);
+    printf("Total Items Contained: %u\n",imap->indirection.count);
+    printf("PUT Time: %ums\n",i_end-i_start);
+    OBC_freeIndirectMap(ind);
+    OBC_freeRay(s_dump);
     OBC_freeRay(u_set);
+
+
+
 }
 
 int main(int argc, char** argv){

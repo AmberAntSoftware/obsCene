@@ -18,15 +18,28 @@ typedef struct OBC_Dequeue{
 }OBC_Dequeue;
 
 /*************************************
-Initialization / Deallocation
+Initialization
 *************************************/
 
 void **OBC_newDequeue(size_t unitSize);
 OBC_ERROR_ENUM OBC_initDequeue(OBC_Dequeue *dequeue, size_t unitSize);
-void **OBC_DequeueGetDataPointer(OBC_Dequeue *queue);
+
+/*************************************
+Deallocation
+*************************************/
 
 void OBC_freeDequeue(void *arr);
 void OBC_freeDequeueData(OBC_Dequeue *dequeue);
+
+/*************************************
+Data Accessors
+*************************************/
+
+void **OBC_DequeueGetDataPointer(OBC_Dequeue *queue);
+
+/*************************************
+Utilities
+*************************************/
 
 OBC_Offset OBC_DequeuePopFrontRaw(OBC_Dequeue *dequeue);
 OBC_Offset OBC_DequeuePopBackRaw(OBC_Dequeue *dequeue);

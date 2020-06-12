@@ -1,16 +1,21 @@
 #include "hashmap.h"
 
 void **OBC_newHashMap(size_t keySize, size_t valueSize){
-    return OBC_newHashMapComplex(keySize, valueSize, 0, 1);
+    return OBC_newHashMapComplex(keySize, valueSize, 0, 1, OBC_X_HASHMAP_DEFAULT_THRESHOLD);
 }
-void **OBC_newHashMapComplex(size_t keySize, size_t valueSize, size_t initBucketCount, size_t initBucketSize){
+
+void **OBC_newHashMapThreshold(size_t keySize, size_t valueSize, unsigned char threshold){
+    return OBC_newHashMapComplex(keySize, valueSize, 0, 1, threshold);
+}
+
+void **OBC_newHashMapComplex(size_t keySize, size_t valueSize, OBC_Offset initBucketCount, OBC_Offset initBucketSize, unsigned char threshold){
     OBC_HashMap *map = calloc(1, sizeof(OBC_HashMap));
 
     if(map == NULL){
         return NULL;
     }
 
-    if(OBC_initHashMapComplex(map, keySize, valueSize, initBucketCount, initBucketSize) == OBC_ERROR_FAILURE){
+    if(OBC_initHashMapComplex(map, keySize, valueSize, initBucketCount, initBucketSize, threshold) == OBC_ERROR_FAILURE){
         free(map);
         return NULL;
     }
@@ -19,10 +24,24 @@ void **OBC_newHashMapComplex(size_t keySize, size_t valueSize, size_t initBucket
 }
 
 OBC_ERROR_ENUM OBC_initHashMap(OBC_HashMap *map, size_t keySize, size_t valueSize){
-    return OBC_initHashMapComplex(map, keySize, valueSize, 0, 1);
+    return OBC_initHashMapComplex(map, keySize, valueSize, 0, 1, OBC_X_HASHMAP_DEFAULT_THRESHOLD);
 }
 
-OBC_ERROR_ENUM OBC_initHashMapComplex(OBC_HashMap *map, size_t keySize, size_t valueSize, size_t initBucketCount, size_t initBucketSize){
+OBC_ERROR_ENUM OBC_initHashMapThreshold(OBC_HashMap *map, size_t keySize, size_t valueSize, unsigned char threshold){
+    return OBC_initHashMapComplex(map, keySize, valueSize, 0, 1, threshold);
+}
+
+OBC_ERROR_ENUM OBC_initHashMapComplex(OBC_HashMap *map, size_t keySize, size_t valueSize, OBC_Offset initBucketCount, OBC_Offset initBucketSize, unsigned char threshold){
+
+    if(keySize == 0){
+        return OBC_ERROR_FAILURE;
+    }
+
+    if(threshold < 1 || threshold > 100){
+        threshold = OBC_X_HASHMAP_DEFAULT_THRESHOLD;
+    }
+
+    map->thresholdNumerator = threshold;
 
     size_t totalMem = initBucketCount*initBucketSize;
 
@@ -52,7 +71,6 @@ OBC_ERROR_ENUM OBC_initHashMapComplex(OBC_HashMap *map, size_t keySize, size_t v
     map->count = 0;
     map->depthBits = 1;
     map->listBits = 0;
-    map->expandFlag = 0;
 
     return OBC_ERROR_SUCCESS;
 }
@@ -66,11 +84,11 @@ void **OBC_HashMapGetKeyPointer(void *arr){
 void **OBC_HashMapGetKeyPointerRaw(OBC_HashMap *map){
     return (void **)OBC_FROM_RAY_VAL(map->keys);
 }
-void **OBC_HashMapGetHashPointer(void *arr){
+OBC_Hash **OBC_HashMapGetHashPointer(void *arr){
     return OBC_HashMapGetHashPointerRaw(OBC_TO_HASHMAP_PTR(arr));
 }
-void **OBC_HashMapGetHashPointerRaw(OBC_HashMap *map){
-    return (void **)OBC_FROM_RAY_VAL(map->keyHashes);
+OBC_Hash **OBC_HashMapGetHashPointerRaw(OBC_HashMap *map){
+    return (OBC_Hash **)OBC_FROM_RAY_VAL(map->keyHashes);
 }
 
 void OBC_freeHashMap(void *arr){
@@ -213,7 +231,7 @@ OBC_ERROR_ENUM OBC_HashMapExpandBucketCount(OBC_HashMap *map){
 
 OBC_ERROR_ENUM OBC_X_HashMapExpand(OBC_HashMap *map, OBC_Offset oldBucketCount, OBC_Offset oldBucketDepth){
 
-    const size_t old_size = map->values.maxUnitLength;
+    const OBC_Offset OLD_SIZE = map->keys.maxUnitLength;
 
     if(OBC_X_HashMapHowExpand(map) == OBC_ERROR_FAILURE){
         puts("FAILURE");
@@ -223,50 +241,64 @@ OBC_ERROR_ENUM OBC_X_HashMapExpand(OBC_HashMap *map, OBC_Offset oldBucketCount, 
     OBC_Hash *const hashes = (OBC_Hash *const)map->keyHashes.rawData;
     void *const values = (void *const)map->values.rawData;
     void *const keys = (void *const)map->keys.rawData;
-    const size_t keySize = map->keys.unitSize;
-    const size_t valueSize = map->values.unitSize;
-    const size_t offset = old_size-1;
+    const size_t KEY_SIZE = map->keys.unitSize;
+    const OBC_Offset VALUE_SIZE = map->values.unitSize;
+    const OBC_Offset OFFSET = OLD_SIZE-1;
+
+    /**const OBC_Offset MOVE_SHIFT = OBC_X_HashMapLiteralBits(map->itemsPerBucket)-1;
+    const OBC_Offset XOV_SHIFT = OBC_X_HashMapLiteralBits(oldBucketDepth)-1;
+    OBC_Offset dmaId[2] = {OBC_NULL_INDEX, OBC_NULL_INDEX};
+    OBC_Offset dmaMove[2] = {0, 0, 0};
+    OBC_Offset MMOV = OBC_NULL_INDEX;
+    unsigned char dmaSwitch = 0;**/
+
     OBC_Offset newOff;
-
-    /*OBC_Offset cuckooPos;
-    const OBC_Offset cuckooMask = OBC_X_HASHMAP_CUCKOO_MASK(map);
-    const OBC_Offset cuckooShift = OBC_X_HASHMAP_CUCKOO_SHIFT(map);*/
-    OBC_Offset internal;
-
-    ///FIXME DEBUG
-    /**
-    printf("BucketSize: %u\n",map->itemsPerBucket);
-    //*/
-
     size_t i,j;
-    for(i = 0; i < old_size; i++){
+    for(i = 0; i < OLD_SIZE; i++){
 
-        if(hashes[offset-i] < OBC_X_HASHMAP_HASH_FREED){
-            newOff = OBC_X_HASHMAP_HASH_TO_POSITION(hashes[offset-i],map) * map->itemsPerBucket;
+        if(hashes[OFFSET-i] < OBC_X_HASHMAP_HASH_FREED){
+            newOff = OBC_X_HASHMAP_HASH_TO_POSITION(hashes[OFFSET-i],map) * map->itemsPerBucket;
+
+
+
+            /**
+
+            if(map->itemsPerBucket == 1){
+                if( (OFFSET-i) == newOff){
+                    continue;
+                }
+                goto MOVE_DATA;
+            }
+
+            newOff+=dmaMove[0];
+            dmaMove[0]++;
+
+            if(newOff == OFFSET-i){
+                continue;
+            }
+
+
+            /*/
 
             for(j = 0; j < map->itemsPerBucket; j++){
-                /*
-                if(hashes[newOff] == hashes[offset -i]){
-                    //impossible unless 0, in which case exit anyway
-                    goto CONTINUE;
-                }
-                //*/
                 if( hashes[newOff] >= OBC_X_HASHMAP_HASH_FREED){
-                   goto MOVE;
+                   goto MOVE_DATA;
                 }
                 newOff++;
             }
-            goto CONTINUE;
-            MOVE:
-            //printf("HASH: %u ;; at: %u\n",hashes[newOff], offset-i);
-            hashes[newOff] = hashes[offset-i];
-            hashes[offset-i] = OBC_X_HASHMAP_HASH_FREED;
-            memcpy(keys + (keySize*(newOff)), keys + ((offset-i)*keySize), keySize);
-            if(map->values.unitSize){
-                memcpy(values + (valueSize*(newOff)), values + ((offset-i)*valueSize), valueSize);
+            continue;
+
+            //*/
+
+            MOVE_DATA:{
+                hashes[newOff] = hashes[OFFSET-i];
+                hashes[OFFSET-i] = OBC_X_HASHMAP_HASH_FREED;
+                memcpy(keys + (KEY_SIZE*(newOff)), keys + ((OFFSET-i)*KEY_SIZE), KEY_SIZE);
+                if(VALUE_SIZE){
+                    memcpy(values + (VALUE_SIZE*(newOff)), values + ((OFFSET-i)*VALUE_SIZE), VALUE_SIZE);
+                }
             }
-            //printf("NEW HASH: %u ;; at: %u\n",hashes[newOff], newOff);
-        CONTINUE:;
+
         }
 
     }
@@ -332,27 +364,12 @@ void OBC_HashMapSetIterNext(void *arr, OBC_HashMapIterator *iter){
 
 void OBC_HashMapSetIterStartRaw(OBC_HashMap *map, OBC_HashMapIterator *iter){
 
-    //map->expandFlag = 0;
     iter->keyCmpr = 1;
     iter->X_storage = OBC_NULL_INDEX;
 
-    if(OBC_X_HASHMAP_THRESHOLD_CALCULATION(map->values.maxUnitLength) <= map->count){
-        ///TODO change to expand allBuckets and expand internalBuckets
-        //puts("ATTEMPTING TO EXPAND BUCKETS");
-        if(OBC_HashMapExpandBucketCount(map) == OBC_ERROR_FAILURE){
-            iter->iter = OBC_NULL_INDEX;
-            ///TODO FIXME maybe allow fall through and only error on actual issue
-            ///since unlss the bucket is full, most likely valid
-            ///place to put data exists
-            //return;
-            ///break;
-        }else{
-            /*puts("EXPANDED BUCKET TOTAL");
-            printf("BUCEKT COUNT: %u\n",map->buckets);
-            printf("BUCEKTY SIZE: %u\n",map->itemsPerBucket);
-            printf("MAX VALUES: %u\n",map->values.maxUnitLength);
-            printf("MAX KEYS: %u\n",map->keyHashes.maxUnitLength);*/
-        }
+    if(OBC_X_HashMapDoThresholdExpand(map) == OBC_ERROR_FAILURE){
+        iter->iter = OBC_NULL_INDEX;
+        puts("FAILED EXPAND");
     }
 
     iter->iter = OBC_X_HASHMAP_HASH_TO_POSITION(iter->hash,map) * map->itemsPerBucket;
@@ -364,7 +381,28 @@ void OBC_HashMapSetIterStart(void *arr, OBC_HashMapIterator *iter){
 }
 
 
+OBC_ERROR_ENUM OBC_X_HashMapDoThresholdExpand(OBC_HashMap *map){
 
+    if( ((map->keys.maxUnitLength)*map->thresholdNumerator)/100 <= map->count){
+        if(OBC_HashMapExpandBucketCount(map) == OBC_ERROR_FAILURE){
+            ///TODO FIXME maybe allow fall through and only error on actual issue
+            ///since unlss the bucket is full, most likely valid
+            ///place to put data exists
+            //return;
+            ///break;
+            puts("FAILED EXPAND");
+            return OBC_ERROR_FAILURE;
+        }else{
+            //puts("EXPANDED BUCKET TOTAL");
+            //printf("BUCEKT COUNT: %u\n",map->buckets);
+            //printf("BUCEKTY SIZE: %u\n",map->itemsPerBucket);
+            //printf("MAX VALUES: %u\n",map->values.maxUnitLength);
+            //printf("MAX KEYS: %u\n",map->keyHashes.maxUnitLength);
+            return OBC_ERROR_SUCCESS;
+        }
+    }
+    return OBC_ERROR_NO_OP;
+}
 
 
 
@@ -374,9 +412,7 @@ void OBC_HashMapSetIterStart(void *arr, OBC_HashMapIterator *iter){
 void OBC_HashMapPutIterNextRaw(OBC_HashMap *map, OBC_HashMapIterator *iter){
 
     if(iter->keyCmpr != 0){
-        //iter->iter = OBC_NULL_INDEX;
         iter->X_endIter = iter->iter;
-        iter->X_storage = OBC_NULL_INDEX;
         return;
     }
 
@@ -398,7 +434,6 @@ void OBC_HashMapPutIterNextRaw(OBC_HashMap *map, OBC_HashMapIterator *iter){
                 iter->X_storage = OBC_NULL_INDEX;
                 puts("FAILURE STORAGE EXPANSION BUCKET SIZE");
             }else{
-
                 /*
                 for(i = iter->X_endIter- map->itemsPerBucket; i < iter->X_endIter; i++){
                     printf(">> POST ExHASH: %u\n",((OBC_Hash*)map->keyHashes.rawData)[i]);
@@ -417,7 +452,9 @@ void OBC_HashMapPutIterNextRaw(OBC_HashMap *map, OBC_HashMapIterator *iter){
             map->count++;
             ((OBC_Hash *)map->keyHashes.rawData)[iter->X_storage] = iter->hash;
             memcpy(map->keys.rawData + (map->keys.unitSize * iter->X_storage),iter->key, map->keys.unitSize);
-            memcpy(map->values.rawData + (map->values.unitSize * iter->X_storage),iter->value, map->values.unitSize);
+            if(map->values.unitSize){
+                memcpy(map->values.rawData + (map->values.unitSize * iter->X_storage),iter->value, map->values.unitSize);
+            }
         }
     }
     //memcpy key
