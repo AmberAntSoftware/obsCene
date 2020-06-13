@@ -50,7 +50,9 @@ void OBC_freeRay(void *rawPtr){
 }
 
 void OBC_freeRayData(OBC_Ray *ray){
-    free(ray->rawData);
+    if(ray->rawData != NULL){
+        free(ray->rawData);
+    }
 }
 
 void **OBC_RayGetDataPointer(OBC_Ray *ray){
@@ -162,9 +164,9 @@ OBC_ERROR_ENUM OBC_RayExpand(void *rawPtr){
 }
 
 OBC_ERROR_ENUM OBC_RayExpandRaw(OBC_Ray *ray){
-    if(ray->unitSize == 0){
-        return OBC_ERROR_NO_OP;
-    }
+    //if(ray->unitSize == 0){
+    //    return OBC_ERROR_NO_OP;
+    //}
 
     size_t size = ray->maxUnitLength*ray->unitSize*2;//<<1;
     if(size==0){
@@ -201,9 +203,9 @@ OBC_ERROR_ENUM OBC_RayContract(void *rawPtr){
 }
 
 OBC_ERROR_ENUM OBC_RayContractRaw(OBC_Ray *ray){
-    if(ray->unitSize == 0){
-        return OBC_ERROR_NO_OP;
-    }
+    //if(ray->unitSize == 0){
+    //    return OBC_ERROR_NO_OP;
+    //}
 
     size_t newSize = ((size_t)ray->maxUnitLength)*ray->unitSize/2;//<<1;
     if(newSize < ray->unitSize){

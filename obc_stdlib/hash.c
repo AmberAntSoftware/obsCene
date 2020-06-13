@@ -19,7 +19,7 @@ OBC_Hash OBC_hash(const void *const data, const size_t sizeInBytes){
     const unsigned char *const bytes = (const unsigned char *const)data;
 
     for(i = 0; i < sizeInBytes; i++){
-        hash = (HASH_PRIME * hash) + bytes[i];
+        hash = (HASH_PRIME * hash) + bytes[i];//(bytes[i] ^ i);
         //hash = OBC_hashReverse(hash);
     }
     //hash ^= OBC_hashReverse(hash);

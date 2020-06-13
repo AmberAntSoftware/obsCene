@@ -146,9 +146,16 @@ void OBC_IndirectMapPutIterNext(void *arr, OBC_IndirectMapIterator *iter){
 void OBC_IndirectMapPutIterNextRaw(OBC_IndirectMap *map, OBC_IndirectMapIterator *iter){
 
     iter->X_mapIter.keyCmpr = iter->keyCmpr;
-    /*if(iter->keyCmpr != 0 || iter->X_mapIter.iter+1 == iter->X_mapIter.X_endIter){
+    /*
+    if(iter->keyCmpr != 0 || iter->X_mapIter.iter+1 == iter->X_mapIter.X_endIter){
         ///printf("CMPR: %u     STORAGE: %u\n", iter->keyCmpr, iter->X_mapIter.X_storage);
-    }*/
+    }
+    /*/
+    if(iter->keyCmpr != 0){
+        OBC_AllocListBitFreeRaw(& map->keys, iter->indirectKey);
+        OBC_AllocListBitFreeRaw(& map->values, iter->indirectKey);
+    }
+    //*/
 
     OBC_HashMapPutIterNextRaw(& map->indirection, & iter->X_mapIter);
 

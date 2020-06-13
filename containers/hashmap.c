@@ -121,16 +121,12 @@ OBC_ERROR_ENUM OBC_X_HashMapExpandEmpty(OBC_HashMap *map){
     }
 
     if(OBC_initRayComplex(& map->keys, MAP_COUNT, map->keys.unitSize) == OBC_ERROR_FAILURE){
-        if(map->values.rawData != NULL){
-            OBC_freeRayData(& map->values);
-        }
+        OBC_freeRayData(& map->values);
         return OBC_ERROR_FAILURE;
     }
 
     if(OBC_initRayComplex(& map->keyHashes, MAP_COUNT, map->keyHashes.unitSize) == OBC_ERROR_FAILURE){
-        if(map->values.rawData != NULL){
-            OBC_freeRayData(& map->values);
-        }
+        OBC_freeRayData(& map->values);
         OBC_freeRayData(& map->keys);
         return OBC_ERROR_FAILURE;
     }
@@ -149,20 +145,24 @@ OBC_ERROR_ENUM OBC_X_HashMapExpandNonEmpty(OBC_HashMap *map){
 
     const size_t hashByteCount = map->keyHashes.maxUnitLength * sizeof(OBC_Hash);
 
-    if(OBC_RayExpand(OBC_FROM_RAY_VAL(map->values)) == OBC_ERROR_FAILURE){
+    if(map->values.unitSize > 0 && OBC_RayExpand(OBC_FROM_RAY_VAL(map->values)) == OBC_ERROR_FAILURE){
         puts("MAP VALUE EXPAND FAILURE");
         printf("VAL TOTAL: %u   VAL BUCKETS: %u\n", map->values.maxUnitLength, map->buckets);
         return OBC_ERROR_FAILURE;
     }
 
     if(OBC_RayExpand(OBC_FROM_RAY_VAL(map->keys)) == OBC_ERROR_FAILURE){
-        OBC_RayContract(OBC_FROM_RAY_VAL(map->values));
+        if(map->values.unitSize > 0){
+            OBC_RayContract(OBC_FROM_RAY_VAL(map->values));
+        }
         puts("MAP KEY EXPAND FAILURE");
         return OBC_ERROR_FAILURE;
     }
 
     if(OBC_RayExpand(OBC_FROM_RAY_VAL(map->keyHashes)) == OBC_ERROR_FAILURE){
-        OBC_RayContract(OBC_FROM_RAY_VAL(map->values));
+        if(map->values.unitSize > 0){
+            OBC_RayContract(OBC_FROM_RAY_VAL(map->values));
+        }
         OBC_RayContract(OBC_FROM_RAY_VAL(map->keys));
         puts("MAP KEYHASH EXPAND FAILURE");
         return OBC_ERROR_FAILURE;
