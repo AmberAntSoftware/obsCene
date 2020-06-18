@@ -168,6 +168,8 @@ OBC_ERROR_ENUM OBC_RayExpandRaw(OBC_Ray *ray){
     //    return OBC_ERROR_NO_OP;
     //}
 
+    //*
+
     ///overflow protection for 32bit or ranged
     OBC_Offset units = ray->maxUnitLength;
     if(units*2 < units){
@@ -180,6 +182,30 @@ OBC_ERROR_ENUM OBC_RayExpandRaw(OBC_Ray *ray){
     }
 
     size_t size = units*ray->unitSize;
+    if(size==0){
+        size = ray->unitSize;
+        units = 1;
+    }
+
+    ///if(ray->curLength == ray->maxLength){
+        char *newData;
+        if(ray->rawData==NULL){
+            newData = malloc(size);
+        }else{
+            newData = realloc(ray->rawData,size);
+        }
+
+        if(newData == NULL){
+            return OBC_ERROR_FAILURE;
+        }
+
+        ray->rawData = newData;
+        ray->maxUnitLength = units;
+    ///}
+
+    /*/
+
+    size_t size = ray->maxUnitLength*ray->unitSize*2;
     if(size==0){
         size = ray->unitSize;
     }
@@ -195,12 +221,12 @@ OBC_ERROR_ENUM OBC_RayExpandRaw(OBC_Ray *ray){
         if(newData == NULL){
             return OBC_ERROR_FAILURE;
         }
-        //** from 0 allocaions
 
-        //*/
         ray->rawData = newData;
-        ray->maxUnitLength = units;
+        ray->maxUnitLength = size/ray->unitSize;
     ///}
+
+    //*/
 
     return OBC_ERROR_SUCCESS;
 }

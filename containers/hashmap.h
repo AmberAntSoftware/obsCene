@@ -141,7 +141,7 @@ OBC___X___HASHMAP_ITER_LOOP_TEMPLATE(arrPtr, hashMapIteratorPtr, NULL, keyHash, 
 for( OBC_HashMapGetIterStart(arrPtr, hashMapIteratorPtr); \
     (hashMapIteratorPtr)->iter < (hashMapIteratorPtr)->X_endIter && (hashMapIteratorPtr)->iter < OBC_X_HASHMAP_HASH_FREED; \
     OBC_HashMapGetIterNext(arrPtr, (hashMapIteratorPtr)) ) \
-OBC_X_HASHMAP_LOOP_END(arrPtr, hashMapIteratorPtr, keyPtr, keyHash, valuePtr)
+OBC_X_HASHMAP_LOOP_END(arrPtr, hashMapIteratorPtr)
 
 /*
 #define OBC_HashMapPutLoop__(arrPtr, hashMapIteratorPtr, keyPtr, keyHash, valuePtr) \
@@ -165,7 +165,7 @@ for( OBC_HashMapPutIterStart(arrPtr, hashMapIteratorPtr); \
     (hashMapIteratorPtr)->iter < (hashMapIteratorPtr)->X_endIter && (hashMapIteratorPtr)->iter < OBC_X_HASHMAP_HASH_FREED; \
     OBC_HashMapPutIterNext(arrPtr, hashMapIteratorPtr) \
 ) \
-OBC_X_HASHMAP_LOOP_END(arrPtr, hashMapIteratorPtr, keyPtr, keyHash, valuePtr)
+OBC_X_HASHMAP_LOOP_END(arrPtr, hashMapIteratorPtr)
 //*/
 
 
@@ -174,7 +174,7 @@ OBC_X_HASHMAP_LOOP_END(arrPtr, hashMapIteratorPtr, keyPtr, keyHash, valuePtr)
 (hashMapIteratorPtr)->key = keyPtr; \
 (hashMapIteratorPtr)->value = valuePtr; \
 
-#define OBC_X_HASHMAP_LOOP_END(arrPtr, hashMapIteratorPtr, keyPtr, keyHash, valuePtr) \
+#define OBC_X_HASHMAP_LOOP_END(arrPtr, hashMapIteratorPtr) \
 if( (((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(hashMapIteratorPtr)->iter]) >= OBC_X_HASHMAP_HASH_FREED){ \
     if((hashMapIteratorPtr)->X_storage == OBC_NULL_INDEX){(hashMapIteratorPtr)->X_storage = (hashMapIteratorPtr)->iter;}\
     /**/if( (((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(hashMapIteratorPtr)->iter]) == OBC_X_HASHMAP_HASH_EMPTY){\
@@ -210,8 +210,10 @@ Iteration
 *************************************/
 
 #define OBC_HashMapForEach(arrPtr, hashMapIteratorPtr) \
-for( OBC_HashMapIterStart(arrPtr, hashMapIteratorPtr); (hashMapIteratorPtr)->iter < (hashMapIteratorPtr)->X_endIter && (hashMapIteratorPtr)->iter < OBC_X_HASHMAP_HASH_FREED; OBC_HashMapIterNext(arrPtr, (hashMapIteratorPtr)) ) \
-if( (((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(hashMapIteratorPtr)->iter] |1) == OBC_X_HASHMAP_HASH_EMPTY){ \
+for( OBC_HashMapIterStart(arrPtr, hashMapIteratorPtr); \
+(hashMapIteratorPtr)->iter < (hashMapIteratorPtr)->X_endIter && (hashMapIteratorPtr)->iter < OBC_X_HASHMAP_HASH_FREED; \
+OBC_HashMapIterNext(arrPtr, (hashMapIteratorPtr)) ) \
+if( (((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(hashMapIteratorPtr)->iter]) >= OBC_X_HASHMAP_HASH_FREED){ \
 continue;\
 }else
 

@@ -1336,8 +1336,21 @@ OBC_RayIterator riter;
             indIter.keyCmpr = GarboCmpr(&indKeys[obc(indIter.iter)], &s_dump[obc(i)]) == 0;
         }
     }
-    //*/
     clock_t i_end = clock();
+
+    clock_t ig_start = clock();
+    for(i = 0; i < KLA_SIZE; i++){
+        hash = OBC_hash(& s_dump[obc(i)].str, sizeof(garbo.str));
+        OBC_IndirectMapGetLoop__(ind,&indIter,hash){
+            indIter.keyCmpr = GarboCmpr(&indKeys[obc(indIter.iter)], &s_dump[obc(i)]) == 0;
+        }
+        if(indIter.keyCmpr == 0){
+            printf("KEY NOT FOUND: %u\n", i);
+        }
+    }
+    clock_t ig_end = clock();
+
+    //*/
     OBC_IndirectMap* imap = OBC_TO_INDIRECTMAP_PTR(ind);
     printf("Bucket Total: %u\n",imap->indirection.buckets);
     printf("Items Per Bucket: %u\n",imap->indirection.itemsPerBucket);
@@ -1346,6 +1359,7 @@ OBC_RayIterator riter;
     printf("Total Value Units: %u\n",imap->indirection.values.maxUnitLength);
     printf("Total Items Contained: %u\n",imap->indirection.count);
     printf("PUT Time: %ums\n",i_end-i_start);
+    printf("GET Time: %ums\n",ig_end-ig_start);
     OBC_freeIndirectMap(ind);
     OBC_freeRay(s_dump);
     OBC_freeRay(u_set);

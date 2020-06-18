@@ -190,20 +190,28 @@ void OBC_IndirectMapGetIterNextRaw(OBC_IndirectMap *map, OBC_IndirectMapIterator
 
     iter->X_mapIter.keyCmpr = iter->keyCmpr;
 
+    /*if(iter->keyCmpr != 0 || iter->X_mapIter.iter >= OBC_X_HASHMAP_HASH_FREED){
+        iter->X_mapIter.X_endIter = iter->X_mapIter.iter;
+        iter->iter = iter->X_mapIter.iter;
+        return;
+    }*/
+
     OBC_HashMapGetIterNextRaw(& map->indirection, & iter->X_mapIter);
 
     iter->iter = (iter->X_mapIter.iter < OBC_X_HASHMAP_HASH_FREED) ? iter->X_locs[obc(iter->X_mapIter.iter)] : OBC_NULL_INDEX;
 
-    if(iter->keyCmpr != 0 || iter->X_mapIter.iter >= OBC_X_HASHMAP_HASH_FREED){
-        iter->iter = iter->X_mapIter.iter;
-        return;
-    }
+    //iter->keyCmpr = 0;
+    //iter->X_mapIter.keyCmpr = 0;
 }
 
 
 void OBC_IndirectMapGetIterStartRaw(OBC_IndirectMap *map, OBC_IndirectMapIterator *iter){
 
     OBC_HashMapGetIterStartRaw(& map->indirection, & iter->X_mapIter);
+
+    if(iter->X_mapIter.iter < OBC_X_HASHMAP_HASH_FREED){
+        iter->iter = iter->X_locs[obc(iter->X_mapIter.iter)];
+    }
 
 }
 
