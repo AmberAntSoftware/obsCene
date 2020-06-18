@@ -60,6 +60,17 @@ void **OBC_IndirectMapGetKeyPtrRaw(OBC_IndirectMap *map);
 OBC_Hash **OBC_IndirectMapGetHashPtr(void *arr);
 OBC_Hash **OBC_IndirectMapGetHashPtrRaw(OBC_IndirectMap *map);
 
+#define OBC_IndirectMapMapGetLoop__(arrPtr, hashMapIteratorPtr, keyHash) \
+(indirectionMapIteratorPtr)->rawMap = OBC_HashMapGetDataPointer(& (OBC_TO_INDIRECTMAP_PTR(arrPtr)->indirection)); \
+(indirectionMapIteratorPtr)->iter = OBC_NULL_INDEX; \
+(indirectionMapIteratorPtr)->X_locs = OBC_X_IndirectMapIndirects(arrPtr); \
+OBC_X_HASHMAP_ITER_INIT(arrPtr, (& (indirectionMapIteratorPtr)->X_mapIter), NULL, keyHash, NULL) \
+for( OBC_HashMapGetIterStart(arrPtr, hashMapIteratorPtr); \
+    (hashMapIteratorPtr)->iter < (hashMapIteratorPtr)->X_endIter && (hashMapIteratorPtr)->iter < OBC_X_HASHMAP_HASH_FREED; \
+    OBC_HashMapGetIterNext(arrPtr, (hashMapIteratorPtr)) ) \
+OBC_X_HASHMAP_LOOP_END(arrPtr, hashMapIteratorPtr, keyPtr, keyHash, NULL)
+
+
 #define OBC_IndirectMapPutLoop__(arrPtr, indirectionMapIteratorPtr, keyPtr, keyHash, valuePtr) \
 (indirectionMapIteratorPtr)->rawMap = OBC_HashMapGetDataPointer(& (OBC_TO_INDIRECTMAP_PTR(arrPtr)->indirection)); \
 (indirectionMapIteratorPtr)->iter = OBC_NULL_INDEX; \
@@ -104,5 +115,10 @@ void OBC_IndirectMapPutIterNextRaw(OBC_IndirectMap *map, OBC_IndirectMapIterator
 
 void OBC_IndirectMapPutIterStart(void *arr, OBC_IndirectMapIterator *iter);
 void OBC_IndirectMapPutIterStartRaw(OBC_IndirectMap *map, OBC_IndirectMapIterator *iter);
+
+void OBC_IndirectMapGetIterNextRaw(OBC_IndirectMap *map, OBC_IndirectMapIterator *iter);
+void OBC_IndirectMapGetIterStartRaw(OBC_IndirectMap *map, OBC_IndirectMapIterator *iter);
+void OBC_IndirectMapGetIterNext(void *arr, OBC_IndirectMapIterator *iter);
+void OBC_IndirectMapGetIterStart(void *arr, OBC_IndirectMapIterator *iter);
 
 #endif // INDIRECTMAP_H_INCLUDED

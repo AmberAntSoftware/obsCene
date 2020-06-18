@@ -168,9 +168,20 @@ OBC_ERROR_ENUM OBC_RayExpandRaw(OBC_Ray *ray){
     //    return OBC_ERROR_NO_OP;
     //}
 
-    size_t size = ray->maxUnitLength*ray->unitSize*2;//<<1;
+    ///overflow protection for 32bit or ranged
+    OBC_Offset units = ray->maxUnitLength;
+    if(units*2 < units){
+        units = OBC_NULL_INDEX-1;
+        if(units == ray->maxUnitLength){
+            return OBC_ERROR_NO_OP;
+        }
+    }else{
+        units *= 2;
+    }
+
+    size_t size = units*ray->unitSize;
     if(size==0){
-        size=ray->unitSize;
+        size = ray->unitSize;
     }
 
     ///if(ray->curLength == ray->maxLength){
@@ -188,7 +199,7 @@ OBC_ERROR_ENUM OBC_RayExpandRaw(OBC_Ray *ray){
 
         //*/
         ray->rawData = newData;
-        ray->maxUnitLength = (OBC_Offset)(size/ray->unitSize);
+        ray->maxUnitLength = units;
     ///}
 
     return OBC_ERROR_SUCCESS;

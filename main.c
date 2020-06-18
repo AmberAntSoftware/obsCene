@@ -1182,6 +1182,10 @@ printf("RCOUNT: %u\n",accu);
         OBC_RayAddValue(s_dump,garbo);
         /*/
         OBC_Offset pos = OBC_RayNewElement(s_dump);
+        if(pos == OBC_NULL_INDEX){
+            puts("GENERATE STRING FAILURE");
+            continue;
+        }
         for(j = 0; j < 7; j++){
             s_dump[obc(pos)].str[j] = (RNG_rand()%26)+'a';
         }
