@@ -196,9 +196,15 @@ void OBC_IndirectMapGetIterNextRaw(OBC_IndirectMap *map, OBC_IndirectMapIterator
         return;
     }*/
 
+    //(indirectionMapIteratorPtr)->iter = ((indirectionMapIteratorPtr)->X_mapIter.iter < OBC_X_HASHMAP_HASH_FREED) ? (indirectionMapIteratorPtr)->X_locs[obc((indirectionMapIteratorPtr)->X_mapIter.iter)] : OBC_NULL_INDEX )
+
     OBC_HashMapGetIterNextRaw(& map->indirection, & iter->X_mapIter);
 
-    iter->iter = (iter->X_mapIter.iter < OBC_X_HASHMAP_HASH_FREED) ? iter->X_locs[obc(iter->X_mapIter.iter)] : OBC_NULL_INDEX;
+    if(iter->X_mapIter.iter < OBC_X_HASHMAP_HASH_FREED){
+        iter->iter = iter->X_locs[obc(iter->X_mapIter.iter)];
+    }
+//if(iter->key == 0)
+//    iter->iter = (iter->X_mapIter.iter < OBC_X_HASHMAP_HASH_FREED) ? iter->X_locs[obc(iter->X_mapIter.iter)] : OBC_NULL_INDEX;
 
     //iter->keyCmpr = 0;
     //iter->X_mapIter.keyCmpr = 0;
@@ -206,6 +212,8 @@ void OBC_IndirectMapGetIterNextRaw(OBC_IndirectMap *map, OBC_IndirectMapIterator
 
 
 void OBC_IndirectMapGetIterStartRaw(OBC_IndirectMap *map, OBC_IndirectMapIterator *iter){
+
+    iter->keyCmpr = 0;
 
     OBC_HashMapGetIterStartRaw(& map->indirection, & iter->X_mapIter);
 

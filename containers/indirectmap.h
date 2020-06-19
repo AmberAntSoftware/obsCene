@@ -67,7 +67,7 @@ OBC_Hash **OBC_IndirectMapGetHashPtrRaw(OBC_IndirectMap *map);
 OBC_X_HASHMAP_ITER_INIT((indirectionMapIteratorPtr)->rawMap, (& (indirectionMapIteratorPtr)->X_mapIter), NULL, keyHash, NULL) \
 for( OBC_IndirectMapGetIterStart(arrPtr, indirectionMapIteratorPtr); \
     (indirectionMapIteratorPtr)->X_mapIter.iter < (indirectionMapIteratorPtr)->X_mapIter.X_endIter && (indirectionMapIteratorPtr)->X_mapIter.iter < OBC_X_HASHMAP_HASH_FREED; \
-    OBC_IndirectMapGetIterNext(arrPtr, (indirectionMapIteratorPtr)), (indirectionMapIteratorPtr)->iter = ((indirectionMapIteratorPtr)->X_mapIter.iter < OBC_X_HASHMAP_HASH_FREED) ? (indirectionMapIteratorPtr)->X_locs[obc((indirectionMapIteratorPtr)->X_mapIter.iter)] : OBC_NULL_INDEX ) \
+    OBC_IndirectMapGetIterNext(arrPtr, (indirectionMapIteratorPtr)) ) \
 OBC_X_HASHMAP_LOOP_END((indirectionMapIteratorPtr)->rawMap, (&(indirectionMapIteratorPtr)->X_mapIter))
 
 
@@ -80,21 +80,7 @@ for( OBC_IndirectMapPutIterStart(arrPtr, indirectionMapIteratorPtr); \
     (indirectionMapIteratorPtr)->X_mapIter.iter < (indirectionMapIteratorPtr)->X_mapIter.X_endIter && (indirectionMapIteratorPtr)->X_mapIter.iter < OBC_X_HASHMAP_HASH_FREED; \
     OBC_IndirectMapPutIterNext(arrPtr, indirectionMapIteratorPtr), (indirectionMapIteratorPtr)->iter = ((indirectionMapIteratorPtr)->X_mapIter.iter < OBC_X_HASHMAP_HASH_FREED) ? (indirectionMapIteratorPtr)->X_locs[obc((indirectionMapIteratorPtr)->X_mapIter.iter)] : OBC_NULL_INDEX \
 ) \
-/**/OBC_X_HASHMAP_LOOP_END((indirectionMapIteratorPtr)->rawMap, (&(indirectionMapIteratorPtr)->X_mapIter)) /**/
-/** \
-if( (((OBC_Hash *)OBC_TO_INDIRECTMAP_PTR(arrPtr)->indirection.keyHashes.rawData)[(indirectionMapIteratorPtr)->X_mapIter.iter]) >= OBC_X_HASHMAP_HASH_FREED){ \
-    if((indirectionMapIteratorPtr)->X_mapIter.X_storage == OBC_NULL_INDEX){(indirectionMapIteratorPtr)->X_mapIter.X_storage = (indirectionMapIteratorPtr)->X_mapIter.iter;}\
-    if( (((OBC_Hash *)OBC_TO_INDIRECTMAP_PTR(arrPtr)->indirection.keyHashes.rawData)[(indirectionMapIteratorPtr)->X_mapIter.iter]) == OBC_X_HASHMAP_HASH_EMPTY){\
-        (indirectionMapIteratorPtr)->X_mapIter.iter = OBC_NULL_INDEX-1;\
-        (indirectionMapIteratorPtr)->X_mapIter.X_endIter = OBC_NULL_INDEX;\
-    } \
-    continue;\
-}else if( (((OBC_Hash *)OBC_TO_INDIRECTMAP_PTR(arrPtr)->indirection.keyHashes.rawData)[(indirectionMapIteratorPtr)->X_mapIter.iter]) != (indirectionMapIteratorPtr)->X_mapIter.hash ){ \
-continue; \
-}else
-//*/
-//OBC_IndirectMap.indirection
-//OBC_HashMapGetDataPointer(& (OBC_TO_INDIRECTMAP_PTR(NULL)->indirection))
+OBC_X_HASHMAP_LOOP_END((indirectionMapIteratorPtr)->rawMap, (&(indirectionMapIteratorPtr)->X_mapIter))
 
 /*************************************
 Internal Utilities

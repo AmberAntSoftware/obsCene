@@ -1341,11 +1341,9 @@ OBC_RayIterator riter;
     clock_t ig_start = clock();
     for(i = 0; i < KLA_SIZE; i++){
         hash = OBC_hash(& s_dump[obc(i)].str, sizeof(garbo.str));
+    //printf("check: %u\n" ,i);
         OBC_IndirectMapGetLoop__(ind,&indIter,hash){
             indIter.keyCmpr = GarboCmpr(&indKeys[obc(indIter.iter)], &s_dump[obc(i)]) == 0;
-        }
-        if(indIter.keyCmpr == 0){
-            printf("KEY NOT FOUND: %u\n", i);
         }
     }
     clock_t ig_end = clock();
