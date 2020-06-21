@@ -117,6 +117,10 @@ typedef struct OBC_RayIterator{
 #define OBC_RayForEach(arrPtr, iterPtr) \
 for(OBC_RayIterStart(arrPtr, iterPtr); (iterPtr)->iter < (iterPtr)->endIter; OBC_RayIterNext(arrPtr, iterPtr))
 
+#define OBC_RayForEachRaw(rayPtr, iterPtr) \
+for(OBC_RayIterStartRaw(rayPtr, iterPtr); (iterPtr)->iter < (iterPtr)->endIter; OBC_RayIterNextRaw(rayPtr, iterPtr))
+
+
 #define OBC_RayForEachSub(arrPtr, iterPtr, startOffset, endOffset) \
 OBC_RayIterStart(arrPtr, iterPtr); \
 (iterPtr)->iter += startOffset; \

@@ -13,7 +13,8 @@
 #include "containers/list.h"
 #include "containers/stack.h"
 #include "containers/queue.h"
-#include "containers/tree.h"
+
+#include "containers/btree.h"
 
 #include "containers/hashmap.h"
 #include "containers/indirectmap.h"

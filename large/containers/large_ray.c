@@ -1,13 +1,13 @@
 #include "large_ray.h"
 
 
-void **OBC_LG_newRay(size_t initialReserveCount, size_t unitSize){
-    OBC_LG_Ray *ray = malloc(sizeof(OBC_LG_Ray));
+void **OBCL_newRayComplex(size_t initialReserveCount, size_t unitSize){
+    OBCL_Ray *ray = malloc(sizeof(OBCL_Ray));
     if(ray==NULL){
         return NULL;
     }
 
-    if(OBC_LG_initRay(ray,initialReserveCount, unitSize) == OBC_ERROR_FAILURE){
+    if(OBCL_initRayComplex(ray,initialReserveCount, unitSize) == OBC_ERROR_FAILURE){
         free(ray);
         return NULL;
     }
@@ -15,38 +15,87 @@ void **OBC_LG_newRay(size_t initialReserveCount, size_t unitSize){
     return NULL;//OBC_RayGetDataPointer(ray);
 }
 
-OBC_ERROR_ENUM OBC_LG_initRay(OBC_LG_Ray *ray, size_t initialReserveCount, size_t unitSize){
+OBC_ERROR_ENUM OBCL_initRayComplex(OBCL_Ray *ray, size_t initialReserveCount, size_t unitSize){
 
-    if(initialReserveCount==0 || unitSize == 0 || initialReserveCount == 0){
-        ray->addressors.rawData=NULL;
-        ray->addressors.maxUnitLength = 0;
-        ray->containers.rawData=NULL;
-        ray->containers.maxUnitLength = 0;
-        ray->addressors.unitSize=sizeof(void*)*unitSize;
-        ray->addressors.curUnitLength = 0;
-        ray->containers.unitSize=sizeof(OBC_Ray);
-        ray->containers.curUnitLength = 0;
-    }else{
-        /*ray->rawData = malloc(unitSize*initialReserveCount);
-        if(ray->rawData==NULL){
-            return OBC_ERROR_FAILURE;
-        }
-        ray->maxUnitLength = initialReserveCount;*/
-        size_t chunk = initialReserveCount*unitSize;
-        void* data = NULL;
-        do{
-            malloc(chunk);
-        }while(data == NULL);
+    if(OBC_initRay(& ray->addressors, sizeof(char***)) == OBC_ERROR_FAILURE){
+        return OBC_ERROR_FAILURE;
     }
 
-    ray->addressors.unitSize=sizeof(void*)*unitSize;
-    ray->addressors.curUnitLength = 0;
+    if(OBC_initRay(& ray->containers, sizeof(OBC_Ray)) == OBC_ERROR_FAILURE){
+        return OBC_ERROR_FAILURE;
+    }
+    ray->unitSize = unitSize;
 
-    ray->containers.unitSize=sizeof(OBC_Ray);
-    ray->containers.curUnitLength = 0;
+    if(initialReserveCount > 0){
+
+        OBC_Offset max = (~((OBC_Offset)0));
+        OBC_Offset maxUnits;
+        if(unitSize > max){
+            maxUnits = 1;
+        }else{
+            maxUnits = max/unitSize;
+        }
+
+        do{
+
+            OBC_Offset addr = OBC_RayNewElementRaw(& ray->addressors);
+            if(addr == OBC_NULL_INDEX){
+                OBCL_freeRayData(ray);
+                return OBC_ERROR_FAILURE;
+            }
+
+            OBC_Offset cont = OBC_RayNewElementRaw(& ray->containers);
+            if(cont == OBC_NULL_INDEX){
+                OBCL_freeRayData(ray);
+                return OBC_ERROR_FAILURE;
+            }
+
+            if( OBC_initRayComplex(((OBC_Ray *)ray->containers.rawData) + addr,
+                                        maxUnits, unitSize) == OBC_ERROR_FAILURE){
+                OBCL_freeRayData(ray);
+                return OBC_ERROR_FAILURE;
+            }
+
+            ((void ***)ray->containers.rawData)[cont] =
+                OBC_RayGetDataPointer( ((OBC_Ray *)ray->containers.rawData) + addr);
+
+            if(initialReserveCount > maxUnits){
+                initialReserveCount-=maxUnits;
+            }else{
+                initialReserveCount = 0;
+            }
+
+        }while(max > 0);
+
+    }
 
     return OBC_ERROR_SUCCESS;
+}
 
+void OBCL_freeRay(void *rawPtr){
+
+    OBCL_Ray *ray = OBCL_TO_RAY_PTR(rawPtr);
+
+    OBCL_freeRayData(ray);
+
+    free(ray);
+}
+
+void OBCL_freeRayData(OBCL_Ray *ray){
+
+    OBC_RayIterator iter;
+
+    OBC_RayForEachRaw(& ray->containers, &iter){
+        OBC_freeRayData( ((OBC_Ray *)ray->containers.rawData) + iter.iter );
+    }
+
+    OBC_freeRayData(& ray->containers);
+    OBC_freeRayData(& ray->addressors);
+
+}
+
+void ***OBCL_RayGetDataPointer(OBCL_Ray *ray){
+    return OBCL_FROM_RAY_PTR(ray);
 }
 
 /*

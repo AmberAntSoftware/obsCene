@@ -24,7 +24,15 @@ Deallocation
 void OBC_freeStack(void *raw);
 void OBC_freeStackData(OBC_Stack *stack);
 
+/*************************************
+Data Accessors
+*************************************/
+
 void **OBC_StackGetDataPointer(OBC_Stack *stack);
+
+/*************************************
+Operations
+*************************************/
 
 OBC_Offset OBC_StackPushRaw(OBC_Stack *stack);
 OBC_Offset OBC_StackPush(void *raw);

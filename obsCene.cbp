@@ -6,9 +6,9 @@
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
-			<Target title="Debug">
-				<Option output="bin/Debug/obsCene" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj/Debug/" />
+			<Target title="Debug32">
+				<Option output="bin/Debug32/obsCene" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug32/" />
 				<Option type="1" />
 				<Option compiler="gnu_gcc_compiler_32bit" />
 				<Compiler>
@@ -24,15 +24,15 @@
 					<Add option="-O0" />
 				</Compiler>
 			</Target>
-			<Target title="Release">
-				<Option output="bin/Release/obsCene" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj/Release/" />
+			<Target title="Release32">
+				<Option output="bin/Release32/obsCene" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release32/" />
 				<Option type="1" />
 				<Option compiler="gnu_gcc_compiler_32bit" />
 				<Compiler>
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-flto" />
-					<Add option="-O2" />
+					<Add option="-O3" />
 					<Add option="-fdata-sections" />
 					<Add option="-ffunction-sections" />
 					<Add option="-Wl,--gc-sections" />
@@ -53,12 +53,44 @@
 				</ResourceCompiler>
 				<Linker>
 					<Add option="-flto" />
+					<Add option="-s" />
+					<Add directory="./" />
+				</Linker>
+			</Target>
+			<Target title="Release32NoArch">
+				<Option output="bin/Release32NoArch/obsCene" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release32NoArch/" />
+				<Option type="1" />
+				<Option compiler="gnu_gcc_compiler_32bit" />
+				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-flto" />
+					<Add option="-O3" />
+					<Add option="-fdata-sections" />
+					<Add option="-ffunction-sections" />
+					<Add option="-Wl,--gc-sections" />
+					<Add option="-mavx2" />
+					<Add option="-mavx" />
+					<Add option="-mbmi2" />
+					<Add option="-mpopcnt" />
+					<Add option="-mfma" />
+					<Add option="-mcx16" />
+					<Add option="-mavx512f" />
+					<Add option="-mavx512cd" />
+					<Add directory="./" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="./" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="-flto" />
+					<Add option="-s" />
 					<Add directory="./" />
 				</Linker>
 			</Target>
 			<Target title="Debug64">
-				<Option output="bin/Debug/obsCene" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj/Debug/" />
+				<Option output="bin/Debug64/obsCene" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug64/" />
 				<Option type="1" />
 				<Option compiler="gnu_gcc_compiler_64bit" />
 				<Compiler>
@@ -74,14 +106,14 @@
 				</Compiler>
 			</Target>
 			<Target title="Release64">
-				<Option output="bin/Release/obsCene" prefix_auto="1" extension_auto="1" />
-				<Option object_output="obj/Release/" />
+				<Option output="bin/Release64/obsCene" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release64/" />
 				<Option type="1" />
 				<Option compiler="gnu_gcc_compiler_64bit" />
 				<Compiler>
 					<Add option="-fexpensive-optimizations" />
 					<Add option="-flto" />
-					<Add option="-O2" />
+					<Add option="-O3" />
 					<Add option="-fdata-sections" />
 					<Add option="-ffunction-sections" />
 					<Add option="-Wl,--gc-sections" />
@@ -102,6 +134,38 @@
 				</ResourceCompiler>
 				<Linker>
 					<Add option="-flto" />
+					<Add option="-s" />
+					<Add directory="./" />
+				</Linker>
+			</Target>
+			<Target title="Release64NoArch">
+				<Option output="bin/Release64NoArch/obsCene" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release64NoArch/" />
+				<Option type="1" />
+				<Option compiler="gnu_gcc_compiler_64bit" />
+				<Compiler>
+					<Add option="-fexpensive-optimizations" />
+					<Add option="-flto" />
+					<Add option="-O3" />
+					<Add option="-fdata-sections" />
+					<Add option="-ffunction-sections" />
+					<Add option="-Wl,--gc-sections" />
+					<Add option="-mavx2" />
+					<Add option="-mavx" />
+					<Add option="-mbmi2" />
+					<Add option="-mpopcnt" />
+					<Add option="-mfma" />
+					<Add option="-mcx16" />
+					<Add option="-mavx512f" />
+					<Add option="-mavx512cd" />
+					<Add directory="./" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add directory="./" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="-flto" />
+					<Add option="-s" />
 					<Add directory="./" />
 				</Linker>
 			</Target>
@@ -130,6 +194,10 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="allocators/allocray.h" />
+		<Unit filename="containers/btree.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="containers/btree.h" />
 		<Unit filename="containers/dequeue.c">
 			<Option compilerVar="CC" />
 		</Unit>
@@ -163,10 +231,6 @@
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="containers/tests/hashmap.h" />
-		<Unit filename="containers/tree.c">
-			<Option compilerVar="CC" />
-		</Unit>
-		<Unit filename="containers/tree.h" />
 		<Unit filename="large/allocators/large_chunk.c">
 			<Option compilerVar="CC" />
 		</Unit>

@@ -1,4 +1,4 @@
-#include "tree.h"
+#include "btree.h"
 
 #define OBC_TREE_LINK_COUNT 2
 #define OBC_TREE_LEFT 0

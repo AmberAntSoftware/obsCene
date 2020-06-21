@@ -9,17 +9,10 @@
 #include "hashmap.h"
 #include "tree.h"
 
-typedef struct OBC_LargeOffset{
-
-    unsigned int index0;
-    unsigned int index1;
-
-}OBC_LargeOffset;
-
 typedef union OBC_HazardOffset{
 
     size_t combined;
-    OBC_LargeOffset val;
+    OBCL_Offset val;
 
 }OBC_HazardOffset;
 
@@ -62,7 +55,7 @@ typedef union OBC_Wrapper{
     OBC_Queue queue;
     OBC_HashMap hashmap;
     OBC_Stack stack;
-    OBC_Tree tree;
+    OBC_BTree tree;
 
 }OBC_Wrapper;
 

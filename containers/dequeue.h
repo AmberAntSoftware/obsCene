@@ -35,7 +35,7 @@ void OBC_freeDequeueData(OBC_Dequeue *dequeue);
 Data Accessors
 *************************************/
 
-void **OBC_DequeueGetDataPointer(OBC_Dequeue *queue);
+void **OBC_DequeueGetDataPointer(OBC_Dequeue *dequeue);
 
 /*************************************
 Utilities

@@ -56,10 +56,10 @@ typedef struct OBC_ErrorPointer{
     void *realValue;
 }OBC_ErrorPointer;
 
-typedef struct OBC_LargeOffset{
+typedef struct OBCL_Offset{
     OBC_Offset row;
     OBC_Offset col;
-}OBC_LargeOffset;
+}OBCL_Offset;
 
 typedef void** OBC_Data;
 

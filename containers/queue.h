@@ -26,7 +26,6 @@ Deallocation
 *************************************/
 
 void OBC_freeQueue(void *arr);
-
 void OBC_freeQueueData(OBC_Queue *queue);
 
 /*************************************
