@@ -1140,8 +1140,8 @@ void testHashMap(){
     }
     clock_t t3 = clock();
 printf("RCOUNT: %u\n",accu);
-    printf("Raw Put Time: %ums\n",t1-t0);
-    printf("Raw GetAdd Time: %ums\n",t3-t2);
+    printf("Raw Put Time: %ums\n",OBC_timerMillis(t0,t1));
+    printf("Raw GetAdd Time: %ums\n",OBC_timerMillis(t2,t3));
 
     OBC_HashMap *kmap = OBC_TO_HASHMAP_PTR(mmap);
     printf("Bucket Total: %u\n",kmap->buckets);
@@ -1195,7 +1195,7 @@ printf("RCOUNT: %u\n",accu);
     }
     t2 = clock();
     printf("0_STR = %s\n",&s_dump[obc(0)].str);
-    printf("Generation Time Taken: %u\n",t2-t1);
+    printf("Generation Time Taken: %u\n",OBC_timerMillis(t1,t2));
 
     t0 = clock();
     for(i = 0; i < KLA_SIZE; i++){
@@ -1260,8 +1260,8 @@ printf("RCOUNT: %u\n",accu);
 
     puts("==================");
 
-    printf("Raw Put Time: %ums\n",t1-t0);
-    printf("Raw Get Time: %ums\n",t3-t2);
+    printf("Raw Put Time: %ums\n",OBC_timerMillis(t0,t1));
+    printf("Raw Get Time: %ums\n",OBC_timerMillis(t2,t3));
 
     printf("Bucket Total: %u\n",raww.buckets);
     printf("Items Per Bucket: %u\n",raww.itemsPerBucket);
@@ -1357,8 +1357,8 @@ OBC_RayIterator riter;
     printf("Total Key Units: %u\n",imap->indirection.keyHashes.maxUnitLength);
     printf("Total Value Units: %u\n",imap->indirection.values.maxUnitLength);
     printf("Total Items Contained: %u\n",imap->indirection.count);
-    printf("PUT Time: %ums\n",i_end-i_start);
-    printf("GET Time: %ums\n",ig_end-ig_start);
+    printf("PUT Time: %ums\n",OBC_timerMillis(i_start,i_end));
+    printf("GET Time: %ums\n",OBC_timerMillis(ig_start,ig_end));
     OBC_freeIndirectMap(ind);
     OBC_freeRay(s_dump);
     OBC_freeRay(u_set);
@@ -1428,7 +1428,7 @@ int main(int argc, char** argv){
             OBC_AllocListBitFree(stuff,0);
         }
         end = clock();
-        printf("Cache Malloc/Free TIME:%u ms\n",(unsigned int)((end-start)*1000/CLOCKS_PER_SEC));
+        printf("Cache Malloc/Free TIME:%u ms\n",OBC_timerMillis(start,end));
         diff += end-start;
     }
     printf("Cache Malloc/Free AVERAGE TIME:%u ms\n",(unsigned int)(diff/ROUNDS));
@@ -1447,7 +1447,7 @@ int main(int argc, char** argv){
             }
         }
         end = clock();
-        printf("16Mil Alloc TIME:%u ms\n",(unsigned int)((end-start)*1000/CLOCKS_PER_SEC));
+        printf("16Mil Alloc TIME:%u ms\n",OBC_timerMillis(start,end));
         diff += end-start;
     }
     printf("16Mil Alloc AVERAGE TIME:%u ms\n",(unsigned int)(diff/ROUNDS));
@@ -1463,12 +1463,13 @@ int main(int argc, char** argv){
             pos = OBC_AllocListBitMalloc(stuff);
             if(pos != kpos){
                 puts("FAILURE ALLOC");
+                printf("%u: %u   %u\n", i, pos, kpos);
                 exit(-43);
             }
             OBC_AllocListBitFree(stuff,kpos);
         }
         end = clock();
-        printf("Post Cache alloc TIME:%u ms\n",(unsigned int)((end-start)*1000/CLOCKS_PER_SEC));
+        printf("Post Cache alloc TIME:%u ms\n",OBC_timerMillis(start,end));
         diff += end-start;
     }
     printf("Post Cache alloc AVERAGE TIME:%u ms\n",(unsigned int)(diff/ROUNDS));
@@ -1507,7 +1508,7 @@ int main(int argc, char** argv){
 
         }
         end = clock();
-        printf("Post Random alloc TIME:%u ms\n",(unsigned int)((end-start)*1000/CLOCKS_PER_SEC));
+        printf("Post Random alloc TIME:%u ms\n",OBC_timerMillis(start,end));
         diff += end-start;
     }
     printf("Post Random alloc AVERAGE TIME:%u ms\n",(unsigned int)(diff/ROUNDS));
