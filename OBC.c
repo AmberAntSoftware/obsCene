@@ -1,4 +1,4 @@
-#include "OBC.h"
+#include "obc.h"
 
 #define OBC_MEMSET_TYPE unsigned int
 
