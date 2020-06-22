@@ -35,7 +35,7 @@ This will allow for an easy touch all approach, and varients will be supplied ba
 
 
 Code Sample
-```
+```c
 typedef struct Point{
     unsigned int x;
     unsigned int y;
@@ -79,7 +79,7 @@ All library calls start with `OBCL_` and mirror OBC_ except addressors can have 
 These are all triple pointers based containers for chunked accessor patterns for limits on malloc() calls in various systems.
 
 Code Sample
-```
+```c
 typedef struct Point{
     unsigned int x;
     unsigned int y;
