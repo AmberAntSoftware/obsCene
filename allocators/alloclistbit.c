@@ -184,13 +184,27 @@ unsigned int OBC_AllocListBitGetNextFree(OBC_AllocListBit *allocator){
     OBC_ALLOCLISTBIT_META *meta = (OBC_ALLOCLISTBIT_META*)allocator->meta.rawData;
 
     if(allocator->maxHead == OBC_NULL_INDEX){
+        //*
+        if(allocator->backed.curUnitLength + UNITS_PER_META >= allocator->backed.curUnitLength){
+            allocator->backed.curUnitLength += UNITS_PER_META;
+            //goto VARG;
+        }
+        /*/
+        OBC_ALLOCLISTBIT_META dcache = meta[(a)*2];
+        if(dcache != OBC_ALLOCLISTBIT_META_FULL){
+            allocator->metaCachePos = allocator->backed.curUnitLength/UNITS_PER_META;
+            allocator->metaCache = dcache;
+            goto META_CALC;
+            //return;
+        }
         if(allocator->metaCachePos*UNITS_PER_META + UNITS_PER_META >= allocator->backed.curUnitLength){
             allocator->backed.curUnitLength = allocator->metaCachePos*UNITS_PER_META + UNITS_PER_META;
-        }
+        }//*/
+//VARG:
         allocator->metaCache = 0;
         ((unsigned char *)&allocator->metaCache)[0]=1;
         allocator->metaCachePos = (allocator->backed.curUnitLength)/UNITS_PER_META;
-        allocator->backed.curUnitLength++;
+        ///allocator->backed.curUnitLength++;
         return allocator->metaCachePos*UNITS_PER_META;
     }
 
@@ -199,6 +213,8 @@ unsigned int OBC_AllocListBitGetNextFree(OBC_AllocListBit *allocator){
 
     allocator->metaCachePos = link;
     allocator->metaCache = meta[link*2];
+
+META_CALC:;
 
     OBC_ALLOCLISTBIT_ADDR pos = OBC_AllocListBitBitPos(allocator->metaCache);
     const OBC_Offset REM = pos&(UNITS_PER_META-1);

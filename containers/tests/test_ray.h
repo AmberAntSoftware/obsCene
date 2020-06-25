@@ -1,0 +1,6 @@
+#ifndef TEST_RAY_H_INCLUDED
+#define TEST_RAY_H_INCLUDED
+
+
+
+#endif // TEST_RAY_H_INCLUDED

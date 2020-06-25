@@ -369,7 +369,7 @@ void OBC_HashMapSetIterStartRaw(OBC_HashMap *map, OBC_HashMapIterator *iter){
 
     if(OBC_X_HashMapDoThresholdExpand(map) == OBC_ERROR_FAILURE){
         iter->iter = OBC_NULL_INDEX;
-        puts("FAILED EXPAND");
+        puts("FAILED THRESHOLD EXPAND");
     }
 
     iter->iter = OBC_X_HASHMAP_HASH_TO_POSITION(iter->hash,map) * map->itemsPerBucket;
@@ -390,7 +390,7 @@ OBC_ERROR_ENUM OBC_X_HashMapDoThresholdExpand(OBC_HashMap *map){
             ///place to put data exists
             //return;
             ///break;
-            puts("FAILED EXPAND");
+            puts("FAILED EXPAND BUCKET TOTAL ON THRESHOLD");
             return OBC_ERROR_FAILURE;
         }else{
             //puts("EXPANDED BUCKET TOTAL");

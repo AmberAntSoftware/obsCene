@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "obc_stdlib/memswap.h"
-
 #include "obc.h"
+
+#include "obc_stdlib/memswap.h"
+#include "obc_stdlib/hash.h"
+#include "obc_stdlib/random.h"
 
 #include "containers/ray.h"
 #include "allocators/allocator.h"
@@ -23,8 +25,7 @@
 
 #include "allocators/alloclistbit.h"
 
-#include "obc_stdlib/hash.h"
-#include "obc_stdlib/random.h"
+
 
 typedef struct BIG_DATA{
     unsigned char dump[180];
@@ -365,9 +366,10 @@ int lazyStressTest(){
     volatile clock_t t1 = clock();
     for(i = 0; i < ALLOC_SIZE; i++){
         stores[i] = malloc(sizeof(toTest));
-        *(stores[i]) = rgei;
         if(stores[i]==NULL){
-            printf("FAILURE: %u\n",i);
+            printf("MALLOC FAILURE: %u\n",i);
+        }else{
+            *(stores[i]) = rgei;
         }
     }
     volatile clock_t t2 = clock();
@@ -391,10 +393,12 @@ int lazyStressTest(){
         size_t dar = rand()%ALLOC_SIZE;
         free(stores[dar]);
         stores[dar] = malloc(sizeof(toTest));
-        *(stores[dar]) = rgei;
         if(stores[dar] == NULL){
-            printf("FAIL: %u\n",dar);
+            printf("RE MALLOC FAIL: %u\n",dar);
+        }else{
+            *(stores[dar]) = rgei;
         }
+
     }
     volatile clock_t t4 = clock();
 
@@ -435,7 +439,6 @@ int allocfastTest(){
     long long int accu = 0;
 
     int size = ALLOC_SIZE;
-    size_t *stores = malloc(ALLOC_SIZE*sizeof(size_t));
     toTest **datas = (toTest**)OBC_newAllocList(sizeof(toTest));
 
 
@@ -525,6 +528,7 @@ int allocfastTest(){
     printf("BackedMetaSize: %u\n",OBC_Ray_CurByteLength(OBC_FROM_RAY_VAL(fast->meta)));
     printf("BackedTotalSize: %u\n",OBC_Ray_CurByteLength(OBC_FROM_RAY_VAL(fast->meta))+OBC_Ray_CurByteLength(OBC_FROM_RAY_VAL(fast->backed)));
 
+    OBC_freeAllocList(datas);
 
     return 0;
     //*/
@@ -594,7 +598,7 @@ void listTests(){
     srand(6464);
     volatile clock_t t3 = clock();
     for(i = 0; i < ALLOC_SIZE; i++){
-        size_t dar = rand()%ALLOC_SIZE;
+        size_t dar = rand()&(ALLOC_SIZE-1);
         OBC_ListRemove(strs,dar);
         size_t allc = OBC_ListNewItem(strs);
         if(allc!=dar){
@@ -606,6 +610,8 @@ void listTests(){
 
     printf("LIST ADD TIME: %ums\n",OBC_timerMillis(start,end));
     printf("LIST RANDOM ALLOC TIME: %ums\n",OBC_timerMillis(t3,t4));
+
+    OBC_freeList(strs);
 }
 
 void stackExamples(){
@@ -1369,8 +1375,11 @@ OBC_RayIterator riter;
 
 int main(int argc, char** argv){
 
-    testHashMap();
     //listTests();
+    //allocfastTest();
+    lazyStressTest();
+
+    testHashMap();
 
     printf("AllocSize: %u\n",sizeof(OBC_AllocListBit));
     printf("int size: %u  :: OFFSET SIZE: %u\n",(unsigned int)sizeof(unsigned int),(unsigned int)sizeof(OBC_Offset));
@@ -1496,13 +1505,14 @@ int main(int argc, char** argv){
         //*
         for(i = 0; i < MAX; i++){
 
-            kpos =
-                (((unsigned int)0)^rand())&(MAX-1);
+            kpos = rand()&(MAX-1);//i*50;
+                //(((unsigned int)0)^rand())&(MAX-1);
             OBC_AllocListBitFree(stuff,kpos);
             pos = OBC_AllocListBitMalloc(stuff);
 
             if(pos != kpos){
                 puts("FAILURE RAND ALLOC");
+                printf("%u: %u   %u\n", i, pos, kpos);
                 exit(-43);
             }
 
