@@ -4,13 +4,6 @@
 #include "../obc.h"
 #include "queue.h"
 
-#define _OBC_DEQUEUE_PTR_CAST(rawPtr) ((OBC_Dequeue *)(rawPtr))
-#define _OBC_DEQUEUE_OFFSET ((size_t)(&((OBC_Dequeue *)NULL)->queue.backed.rawData))
-#define OBC_TO_DEQUEUE_PTR(rawPtr) (_OBC_DEQUEUE_PTR_CAST(((void*)(rawPtr)) - _OBC_DEQUEUE_OFFSET))
-
-#define OBC_FROM_DEQUEUE_PTR(rawPtr) ((void**)(((void*)(rawPtr)) + _OBC_DEQUEUE_OFFSET))
-#define OBC_FROM_DEQUEUE_VAL(dequeueVal) ((void**)(((void*)(&(dequeueVal))) + _OBC_DEQUEUE_OFFSET))
-
 typedef struct OBC_Dequeue{
 
     OBC_Queue queue;
@@ -38,7 +31,7 @@ Data Accessors
 void **OBC_DequeueGetDataPointer(OBC_Dequeue *dequeue);
 
 /*************************************
-Utilities
+Operations
 *************************************/
 
 OBC_Offset OBC_DequeuePopFrontRaw(OBC_Dequeue *dequeue);
@@ -59,7 +52,9 @@ OBC_ERROR_ENUM OBC_DequeueAddBack(void *arr, void* item);
 OBC_ERROR_ENUM OBC_DequeueAdd(void *arr, OBC_Offset pos, void* item);
 OBC_ERROR_ENUM OBC_DequeueAddRaw(OBC_Dequeue *dequeue, OBC_Offset pos, void* item);
 
-
+/*************************************
+Iteration
+*************************************/
 
 typedef OBC_Offset OBC_DequeueIterator;
 
@@ -71,5 +66,17 @@ OBC_Offset OBC_DequeueIterStart(void *arr);
 
 OBC_Offset OBC_DequeueIterNextRaw(OBC_Dequeue *dequeue, OBC_Offset iter);
 OBC_Offset OBC_DequeueIterNext(void *arr, OBC_Offset iter);
+
+/*************************************
+Internal Utilities
+*************************************/
+
+#define _OBC_DEQUEUE_PTR_CAST(rawPtr) ((OBC_Dequeue *)(rawPtr))
+#define _OBC_DEQUEUE_OFFSET ((size_t)(&((OBC_Dequeue *)NULL)->queue.backed.rawData))
+#define OBC_TO_DEQUEUE_PTR(rawPtr) (_OBC_DEQUEUE_PTR_CAST(((void*)(rawPtr)) - _OBC_DEQUEUE_OFFSET))
+
+#define OBC_FROM_DEQUEUE_PTR(rawPtr) ((void**)(((void*)(rawPtr)) + _OBC_DEQUEUE_OFFSET))
+#define OBC_FROM_DEQUEUE_VAL(dequeueVal) ((void**)(((void*)(&(dequeueVal))) + _OBC_DEQUEUE_OFFSET))
+
 
 #endif // DEQUEUE_H_INCLUDED

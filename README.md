@@ -1,44 +1,41 @@
 # obsCene
-Minature C library designed for high performance containers, and easier, faster prototyping.
+Minature C library designed for high performance containers, and better arbitrary coding.
 
 Currently a work in progress.
 
 Due to a lack of sufficiently powerful generics, the bytecode is not quite optimal, as a size member must be present; otherwise attempts are made to be as optimal as possible.
 
-Why is this faster? Using logarithmic memory allocation and not indiviually allocating memory, which is both good for cache memory and prevent threads from blocking each other to allocate memory. This also speeds up the freeing process, as only one free -- `OBC_free[Structure]` -- call needs to be made to free the entire container's data assuming each unit stored in a container does not need to deallocate resources they own.
+Why is this faster? Using logarithmic memory acessing and not indiviually malloc'ing memory, both good for the prefetcher and cache memory alignments, a massive performance boost can be given. This also speeds up the freeing process, as only one free -- `OBC_free[Structure]` -- call needs to be made to free the entire container's data.
 
 
-Error checking container initialization can be done through the OBC_ERROR_ENUM checks or the null pointer for `OBC_init[Container]` and `OBC_new[Container]` functions respectively. This allows for memory fault tolerance for low memory or memory allocation errors across a variety of malloc() implementations.
 
-Error checking on memory allocations and container emplacement or copying into structures can be checked through the OBC_NULL_INDEX check as being an illegal position of memory.
-
-Error checking is not required, but it can make fault tolerant programs.
+Error checking is possible through a combination of NULL pointer checks, illegal bounds NULL_INDEX, and explicit error enumerations OBC_ERROR_FAILURE, but is not required but can make a program even more safe to use.
 
 
 Easy Start Guide
 ==
 
-All library calls start with `OBC_`
+All library calls start with OBC_
 
 There are two ways to make a structure:
 --
 
 • System allocator (malloc) `OBC_new[Container]` will return a double pointer. 
  This is because the structure is initilized with the byte size of the object it will contain.
- This also allows it to be assigned to a type of a double pointer and be accessed in DMA
+ This also allows it to be assigned to a double type and be accessed in DMA
  
 • Initialization `OBC_init[Container]` will initialize the structure in a given memory address.
-  The double pointer access pattern is gotten through the access function `OBC_[Container]GetDataPointer([Container] *container)`
+  The double pointer access pattern is gotten through the access function {under refactoring}
 
-All containers have an iteration syntax in the form of `OBC_[Container]forEach(args...)`
-This will allow for an easy touch all approach, and varients will be supplied based on the container type.
+All containers have an iteration syntax in the form of `OBC_[Container]iter(args...)`
+This will allow easy access touch all approach, and will have future accessors to cut off iterations
 
 
 Code Sample
-```c
+```
 typedef struct Point{
-    unsigned int x;
-    unsigned int y;
+    size_t x;
+    size_t y;
 }Point;
 
 void doList(){
@@ -55,57 +52,10 @@ void doList(){
     }
 
     OBC_Iterator unit;
-    OBC_ListForEach(points, &unit){
-        /*
-        * Manual dereference accessor: (*arr)[index]
-        */
-        printf("Point: %u, %u\n", (*points)[unit.iter].x, (*points)[unit.iter].y);
-        /*
-        * Subscript accessor: arr[obc(index)]
-        */
-        printf("Point: %u, %u\n", points[obc(unit.iter)].x, points[obc(unit.iter)].y);
+    OBC_ListForEach(points, unit){
+        printf("Point: %u, %u\n", (*points)[unit].x, (*points)[unit].y);
     }
-    
+
     OBC_freeList(points);
 }
 ```
-
-
-The 64bit, or LARGE Containers
-==
-
-All library calls start with `OBCL_` and mirror OBC_ except addressors can have more than the offset size and are structs of addressors.
-
-These are all triple pointers based containers for chunked accessor patterns for limits on malloc() calls in various systems.
-
-Code Sample
-```c
-typedef struct Point{
-    unsigned int x;
-    unsigned int y;
-}Point;
-
-void doList(){
-
-    Point ***points = OBCL_newList(sizeof(Point));
-    srand(time(NULL));
-
-    Point point;
-    unsigned int i;
-    for(i = 0; i < 32; i++){
-        point.x = rand();
-        point.y = rand();
-        OBCL_ListAdd(points, &point);
-    }
-
-    OBCL_Iterator unit;
-    OBCL_ListForEach(points, &unit){
-        /*
-        * Subscript accessor: arr[OBC(index)]
-        * capital OBC for large containers
-        */
-        printf("Point: %u, %u\n", points[OBC(unit.iter)].x, points[OBC(unit.iter)].y);
-    }
-    
-    OBCL_freeList(points);
-}```

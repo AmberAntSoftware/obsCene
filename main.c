@@ -2,11 +2,9 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "obc.h"
-
 #include "obc_stdlib/memswap.h"
-#include "obc_stdlib/hash.h"
-#include "obc_stdlib/random.h"
+
+#include "obc.h"
 
 #include "containers/ray.h"
 #include "allocators/allocator.h"
@@ -25,7 +23,8 @@
 
 #include "allocators/alloclistbit.h"
 
-
+#include "obc_stdlib/hash.h"
+#include "obc_stdlib/random.h"
 
 typedef struct BIG_DATA{
     unsigned char dump[180];
@@ -366,10 +365,9 @@ int lazyStressTest(){
     volatile clock_t t1 = clock();
     for(i = 0; i < ALLOC_SIZE; i++){
         stores[i] = malloc(sizeof(toTest));
+        *(stores[i]) = rgei;
         if(stores[i]==NULL){
-            printf("MALLOC FAILURE: %u\n",i);
-        }else{
-            *(stores[i]) = rgei;
+            printf("FAILURE: %u\n",i);
         }
     }
     volatile clock_t t2 = clock();
@@ -393,12 +391,10 @@ int lazyStressTest(){
         size_t dar = rand()%ALLOC_SIZE;
         free(stores[dar]);
         stores[dar] = malloc(sizeof(toTest));
+        *(stores[dar]) = rgei;
         if(stores[dar] == NULL){
-            printf("RE MALLOC FAIL: %u\n",dar);
-        }else{
-            *(stores[dar]) = rgei;
+            printf("FAIL: %u\n",dar);
         }
-
     }
     volatile clock_t t4 = clock();
 
@@ -439,6 +435,7 @@ int allocfastTest(){
     long long int accu = 0;
 
     int size = ALLOC_SIZE;
+    size_t *stores = malloc(ALLOC_SIZE*sizeof(size_t));
     toTest **datas = (toTest**)OBC_newAllocList(sizeof(toTest));
 
 
@@ -505,6 +502,7 @@ int allocfastTest(){
     //*
     for(i = 0; i < ALLOC_SIZE; i++){
         size_t allc = OBC_AllocListMalloc(datas);
+        //if(allc!=ALLOC_SIZE-i){
         if(allc!=ALLOC_SIZE-i){
             printf("FAIL_ALL ALLOC: %u     EXPECT: %u\n",allc,i);
         }
@@ -528,7 +526,6 @@ int allocfastTest(){
     printf("BackedMetaSize: %u\n",OBC_Ray_CurByteLength(OBC_FROM_RAY_VAL(fast->meta)));
     printf("BackedTotalSize: %u\n",OBC_Ray_CurByteLength(OBC_FROM_RAY_VAL(fast->meta))+OBC_Ray_CurByteLength(OBC_FROM_RAY_VAL(fast->backed)));
 
-    OBC_freeAllocList(datas);
 
     return 0;
     //*/
@@ -598,7 +595,11 @@ void listTests(){
     srand(6464);
     volatile clock_t t3 = clock();
     for(i = 0; i < ALLOC_SIZE; i++){
+        //*
         size_t dar = rand()&(ALLOC_SIZE-1);
+        /*/
+        size_t dar = i;
+        //*/
         OBC_ListRemove(strs,dar);
         size_t allc = OBC_ListNewItem(strs);
         if(allc!=dar){
@@ -610,8 +611,6 @@ void listTests(){
 
     printf("LIST ADD TIME: %ums\n",OBC_timerMillis(start,end));
     printf("LIST RANDOM ALLOC TIME: %ums\n",OBC_timerMillis(t3,t4));
-
-    OBC_freeList(strs);
 }
 
 void stackExamples(){
@@ -1079,18 +1078,53 @@ void testHashMap(){
 
     OBC_Hash *hashes = ((OBC_HashMap *)OBC_TO_HASHMAP_PTR(map))->keyHashes.rawData;
     unsigned int counter = 0;
-    for(i = 0; i <
-    ((OBC_HashMap *)OBC_TO_HASHMAP_PTR(map))->keyHashes.maxUnitLength;i++){
+    for(i = 0; i < ((OBC_HashMap *)OBC_TO_HASHMAP_PTR(map))->keyHashes.maxUnitLength;i++){
+        //*
 
-        if(hashes[i]!= OBC_X_HASHMAP_HASH_EMPTY){printf("Key At: %u :: %u\n",i,keys[obc(i)]);
+        if(hashes[i] >= OBC_X_HASHMAP_HASH_FREED){
+            continue;
+        }
+        //if(hashes[i] < OBC_X_HASHMAP_HASH_FREED){
+            printf("Key At: %u :: %u\n",i,keys[obc(i)]);
             printf("Hash At: %u :: %u\n",i,hashes[i]);
             printf("         %u ::  X: %u\n",i, map[obc(i)].x);
             printf("         %u ::  Y: %u\n",i, map[obc(i)].y);
+            printf("      N: %u\n", counter);
             counter++;
+        //}
+        /*/
+        unsigned int base = i, j;
+        for(j = 0; j < ((OBC_HashMap *)OBC_TO_HASHMAP_PTR(map))->itemsPerBucket; j++){
+            if(hashes[i] >= OBC_X_HASHMAP_HASH_FREED){
+                //i = base + ((OBC_HashMap *)OBC_TO_HASHMAP_PTR(map))->itemsPerBucket;
+                continue;
+            }
+            //if(hashes[i] < OBC_X_HASHMAP_HASH_FREED){
+                printf("Key At: %u :: %u\n",i,keys[obc(i)]);
+                printf("Hash At: %u :: %u\n",i,hashes[i]);
+                printf("         %u ::  X: %u\n",i, map[obc(i)].x);
+                printf("         %u ::  Y: %u\n",i, map[obc(i)].y);
+                printf("      N: %u\n", counter);
+                counter++;
+            //}
+            i = base+j+1;
         }
+        //*/
     }
     printf("COUNT: %u\n",counter);
     printf("TOTAL: %u\n",((OBC_HashMap *)OBC_TO_HASHMAP_PTR(map))->keyHashes.maxUnitLength);
+    /**
+    puts("FOREACH__");
+    counter = 0;
+    OBC_HashMapForEach(map, &iter){
+        printf("Key At: %u :: %u\n",iter.iter,keys[obc(iter.iter)]);
+        printf("Hash At: %u :: %u\n",iter.iter,hashes[iter.iter]);
+        printf("         %u ::  X: %u\n",iter.iter, map[obc(iter.iter)].x);
+        printf("         %u ::  Y: %u\n",iter.iter, map[obc(iter.iter)].y);
+        printf("      N: %u\n", counter);
+        counter++;
+    }printf("COUNT: %u\n",counter);
+    //**/
 
     OBC_freeHashMap(map);
 
@@ -1375,11 +1409,20 @@ OBC_RayIterator riter;
 
 int main(int argc, char** argv){
 
-    //listTests();
-    //allocfastTest();
-    lazyStressTest();
+    printf("CLOCK SIZE: %u\n\n", sizeof(clock_t));
 
+    puts("||| List Tests");
+    listTests();
+
+    //return;
+
+    puts("||| Alloc Fast Tests");
+    allocfastTest();
+    puts("||| Lazy Alloc Tests");
+    lazyStressTest();
+    puts("||| Hash Map Tests");
     testHashMap();
+    //listTests();
 
     printf("AllocSize: %u\n",sizeof(OBC_AllocListBit));
     printf("int size: %u  :: OFFSET SIZE: %u\n",(unsigned int)sizeof(unsigned int),(unsigned int)sizeof(OBC_Offset));
@@ -1437,8 +1480,8 @@ int main(int argc, char** argv){
             OBC_AllocListBitFree(stuff,0);
         }
         end = clock();
-        printf("Cache Malloc/Free TIME:%u ms\n",OBC_timerMillis(start,end));
-        diff += end-start;
+        printf("Cache Malloc/Free TIME:%u ms\n",(unsigned int)((end-start)*1000/CLOCKS_PER_SEC));
+        diff += OBC_timerMillis(start,end);
     }
     printf("Cache Malloc/Free AVERAGE TIME:%u ms\n",(unsigned int)(diff/ROUNDS));
 
@@ -1456,10 +1499,15 @@ int main(int argc, char** argv){
             }
         }
         end = clock();
-        printf("16Mil Alloc TIME:%u ms\n",OBC_timerMillis(start,end));
-        diff += end-start;
+        printf("16Mil Alloc TIME:%u ms\n",(unsigned int)((end-start)*1000/CLOCKS_PER_SEC));
+        diff += OBC_timerMillis(start,end);
     }
     printf("16Mil Alloc AVERAGE TIME:%u ms\n",(unsigned int)(diff/ROUNDS));
+    OBC_AllocListBit *llist = OBC_FROM_ALLOCLISTBIT_PTR(stuff);
+    printf("LAST_MALLOC [pos]: %u\n", pos);
+    printf("MAX META: %u\n", llist->metaCache);
+    printf("MAX META POS: %u\n", llist->metaCachePos);
+    ///printf("Attempt Allocation After 16Mils  GOT::%u\n\n",OBC_AllocListBitMalloc(stuff));
 
 
     unsigned int kpos = pos;
@@ -1472,14 +1520,14 @@ int main(int argc, char** argv){
             pos = OBC_AllocListBitMalloc(stuff);
             if(pos != kpos){
                 puts("FAILURE ALLOC");
-                printf("%u: %u   %u\n", i, pos, kpos);
+                printf("%u: %u  %u\n", i, pos, kpos);
                 exit(-43);
             }
             OBC_AllocListBitFree(stuff,kpos);
         }
         end = clock();
-        printf("Post Cache alloc TIME:%u ms\n",OBC_timerMillis(start,end));
-        diff += end-start;
+        printf("Post Cache alloc TIME:%u ms\n",(unsigned int)((end-start)*1000/CLOCKS_PER_SEC));
+        diff += OBC_timerMillis(start,end);
     }
     printf("Post Cache alloc AVERAGE TIME:%u ms\n",(unsigned int)(diff/ROUNDS));
 
@@ -1498,6 +1546,7 @@ int main(int argc, char** argv){
     //**/
 
 
+    printf("PRE RAND ALLOC TST: %u\n",(unsigned int)OBC_AllocListBitMalloc(stuff));
     puts("starting random cache free and alloc\n");
     diff = 0;
     for(k = 0; k < ROUNDS; k++){
@@ -1505,21 +1554,23 @@ int main(int argc, char** argv){
         //*
         for(i = 0; i < MAX; i++){
 
-            kpos = rand()&(MAX-1);//i*50;
-                //(((unsigned int)0)^rand())&(MAX-1);
+            unsigned int rrand = abs(rand());
+            kpos = rrand&(MAX-1);
+            //kpos = (i*50)%MAX;
+                //((((unsigned int)0)^rand())/2)%MAX;
             OBC_AllocListBitFree(stuff,kpos);
             pos = OBC_AllocListBitMalloc(stuff);
 
             if(pos != kpos){
                 puts("FAILURE RAND ALLOC");
-                printf("%u: %u   %u\n", i, pos, kpos);
-                exit(-43);
+                printf("%u: %u  %u\n", i, pos, kpos);
+                exit(-44);
             }
 
         }
         end = clock();
-        printf("Post Random alloc TIME:%u ms\n",OBC_timerMillis(start,end));
-        diff += end-start;
+        printf("Post Random alloc TIME:%u ms\n",(unsigned int)((end-start)*1000/CLOCKS_PER_SEC));
+        diff += OBC_timerMillis(start,end);
     }
     printf("Post Random alloc AVERAGE TIME:%u ms\n",(unsigned int)(diff/ROUNDS));
 

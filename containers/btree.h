@@ -8,28 +8,18 @@ typedef struct OBC_BTree{
 
     OBC_AllocListBit allocator;
     OBC_Ray links;
-    OBC_Offset root;
 
+    OBC_Offset root;
     size_t count;
 
 }OBC_BTree;
-
-typedef struct OBC_BTreeNode{
-
-    //mirrors allocators so not needed
-    //OBC_Offset value;
-
-    OBC_Offset left;
-    OBC_Offset right;
-
-}OBC_BTreeNode;
 
 /*************************************
 Initialization
 *************************************/
 
 void **OBC_newBTree(size_t unitSize);
-void *OBC_initBTree(OBC_BTree *tree, size_t unitSize);
+OBC_ERROR_ENUM OBC_initBTree(OBC_BTree *tree, size_t unitSize);
 
 /*************************************
 Deallocation
@@ -48,11 +38,11 @@ void **OBC_BTreeGetDataPointer(OBC_BTree *tree);
 Operations
 *************************************/
 
-void **OBC_BTreeDelete(void *arr, OBC_Offset backed);
-void **OBC_BTreeDeleteRaw(OBC_BTree *tree, OBC_Offset backed);
+OBC_ERROR_ENUM OBC_BTreeDelete(void *arr, OBC_Offset index);
+OBC_ERROR_ENUM OBC_BTreeDeleteRaw(OBC_BTree *tree, OBC_Offset index);
 
-void **OBC_BTreeDeleteNode(void *arr, OBC_Offset node);
-void **OBC_BTreeDeleteNodeRaw(OBC_BTree *tree, OBC_Offset node);
+OBC_ERROR_ENUM OBC_BTreeDeleteNode(void *arr, OBC_Offset index);
+OBC_ERROR_ENUM OBC_BTreeDeleteNodeRaw(OBC_BTree *tree, OBC_Offset index);
 
 OBC_Offset OBC_BTreeNewNode(void *arr);
 OBC_Offset OBC_BTreeNewNodeRaw(OBC_BTree *tree);
@@ -74,8 +64,8 @@ typedef struct OBC_BTreeIterator{
 }OBC_BTreeIterator;
 
 
-#define OBC_TreeForEach(arrPtr, iter) for(iter = OBC_TreeIterStart(arrPtr); iter != OBC_NULL_INDEX; iter = OBC_TreeIterNext(arrPtr, iter))
-#define OBC_TreeForEachRaw(listPtr, iter) for(iter = OBC_TreeIterStartRaw(listPtr); iter != OBC_NULL_INDEX; iter = OBC_TreeIterNextRaw(listPtr, iter))
+#define OBC_BTreeForEach(arrPtr, listIterPtr) for(OBC_TreeIterStart(arrPtr, listIterPtr); iter != OBC_NULL_INDEX; iter = OBC_TreeIterNext(arrPtr, iter))
+#define OBC_BTreeForEachRaw(listPtr, listIterPtr) for(OBC_TreeIterStartRaw(listPtr, listIterPtr); iter != OBC_NULL_INDEX; iter = OBC_TreeIterNextRaw(listPtr, iter))
 
 OBC_Offset OBC_TreeIterStartRaw(OBC_BTree *tree);
 OBC_Offset OBC_TreeIterStart(void *arr);
@@ -98,13 +88,22 @@ OBC_Offset OBC_TreeAddNext(void *arr, void *itemToAdd, OBC_Offset iter, int spac
 Internal Utilities
 *************************************/
 
-#define _OBC_TREE_PTR_CAST(rawPtr) ((OBC_BTree *)(rawPtr))
-#define _OBC_TREE_OFFSET ((size_t)(&((OBC_BTree *)NULL)->allocator.backed.rawData))
-#define OBC_TO_TREE_PTR(rawPtr) (_OBC_TREE_PTR_CAST(((void*)(rawPtr)) - _OBC_TREE_OFFSET))
+#define _OBC_BTREE_PTR_CAST(rawPtr) ((OBC_BTree *)(rawPtr))
+#define _OBC_BTREE_OFFSET ((size_t)(&((OBC_BTree *)NULL)->allocator.backed.rawData))
+#define OBC_TO_BTREE_PTR(rawPtr) (_OBC_BTREE_PTR_CAST(((void*)(rawPtr)) - _OBC_BTREE_OFFSET))
 
-#define OBC_FROM_TREE_PTR(rawPtr) ((void**)(((void*)(rawPtr)) + _OBC_TREE_OFFSET))
-#define OBC_FROM_TREE_VAL(treeVal) ((void**)(((void*)(&(treeVal))) + _OBC_TREE_OFFSET))
+#define OBC_FROM_BTREE_PTR(rawPtr) ((void**)(((void*)(rawPtr)) + _OBC_BTREE_OFFSET))
+#define OBC_FROM_BTREE_VAL(treeVal) ((void**)(((void*)(&(treeVal))) + _OBC_BTREE_OFFSET))
 
+typedef struct OBC_BTreeNode{
+
+    //mirrors allocators so not needed
+    //OBC_Offset value;
+
+    OBC_Offset left;
+    OBC_Offset right;
+
+}OBC_BTreeNode;
 
 
 OBC_Offset OBC_TreeLinearIterStartRaw(OBC_BTree *tree);

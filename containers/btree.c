@@ -1,57 +1,55 @@
 #include "btree.h"
 
-#define OBC_TREE_LINK_COUNT 2
-#define OBC_TREE_LEFT 0
-#define OBC_TREE_RIGHT 1
 
-/**
-void **OBC_newTree(size_t unitSize){
+void **OBC_newBTree(size_t unitSize){
 
-    OBC_Tree *tree = calloc(1,sizeof(OBC_Tree));
+    OBC_BTree *tree = calloc(1, sizeof(OBC_BTree));
 
-    if(OBC_initTree(tree,unitSize) == NULL){
+    if(OBC_initBTree(tree, unitSize) == OBC_ERROR_FAILURE){
         free(tree);
         return NULL;
     }
 
-    return (void **)OBC_FROM_ALLOCFASTBIT_VAL(tree->allocator);
+    return OBC_BTreeGetDataPointer(tree);
 
 }
-void *OBC_initTree(OBC_Tree *tree,size_t unitSize){
 
-    if(OBC_initRay(& tree->links,0,sizeof(size_t)*OBC_TREE_LINK_COUNT) == NULL){
-        return NULL;
+OBC_ERROR_ENUM OBC_initBTree(OBC_BTree *tree, size_t unitSize){
+
+    if(OBC_initRayComplex(& tree->links, 0, sizeof(OBC_BTreeNode)) == OBC_ERROR_FAILURE){
+        return OBC_ERROR_FAILURE;
     }
 
-    if(OBC_initAllocFastBit(& tree->allocator, unitSize ) == NULL){
+    if(OBC_initAllocListBit(& tree->allocator, unitSize) == OBC_ERROR_FAILURE){
         OBC_freeRayData(& tree->links);
-        return NULL;
+        return OBC_ERROR_FAILURE;
     }
 
     tree->root = OBC_NULL_INDEX;
 
-    return tree;
-}
-void **OBC_TreeGetAccessPointer(OBC_Tree *tree){
-    return (void **)OBC_FROM_ALLOCFASTBIT_VAL(tree->allocator);
+    return OBC_ERROR_SUCCESS;
 }
 
-void OBC_freeTree(void *arr){
+void **OBC_BTreeGetDataPointer(OBC_BTree *tree){
+    return (void **)OBC_FROM_ALLOCLISTBIT_VAL(tree->allocator);
+}
 
-    OBC_Tree *tree = OBC_TO_TREE_PTR(arr);
-    OBC_freeTreeData(tree);
+void OBC_freeBTree(void *arr){
+
+    OBC_BTree *tree = OBC_TO_BTREE_PTR(arr);
+    OBC_freeBTreeData(tree);
     free(tree);
 
 }
-void OBC_freeTreeData(OBC_Tree *tree){
+void OBC_freeBTreeData(OBC_BTree *tree){
 
-    OBC_freeAllocFastBitData(& tree->allocator);
-    OBC_freeRayData(OBC_FROM_RAY_VAL(tree->links));
+    OBC_freeAllocListBitData(& tree->allocator);
+    OBC_freeRayDat(OBC_FROM_RAY_VAL(tree->links));
 
 }
 
 
-
+/**
 
 OBC_ERROR_ENUM OBC_TreeRemoveRaw(OBC_Tree *tree, OBC_Offset parentItem, OBC_Offset freeItem){
 

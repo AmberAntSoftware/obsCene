@@ -26,18 +26,10 @@ OBC_ERROR_ENUM OBC_initList(OBC_List *list, size_t unitSize){
         return OBC_ERROR_FAILURE;
     }
 
-#ifdef OBC_LIST_FAST
-    if(OBC_initAllocList(& list->allocator, unitSize) == OBC_ERROR_FAILURE){
-        OBC_freeRayData(& list->links);
-        return OBC_ERROR_FAILURE;
-    }
-#else
     if(OBC_initAllocListBit(& list->allocator, unitSize) == OBC_ERROR_FAILURE){
         OBC_freeRayData(& list->links);
         return OBC_ERROR_FAILURE;
     }
-#endif
-
 
     list->first = OBC_NULL_INDEX;
     list->last = OBC_NULL_INDEX;
@@ -65,11 +57,7 @@ void OBC_freeListData(OBC_List *list){
 
 OBC_Offset OBC_ListNewItemRaw(OBC_List *list){
 
-#ifdef OBC_LIST_FAST
-    size_t place = OBC_AllocListMallocRaw(& list->allocator);
-#else
-    size_t place = OBC_AllocListBitMallocRaw(& list->allocator);
-#endif
+    OBC_Offset place = OBC_AllocListBitMallocRaw(& list->allocator);
 
     if(place == OBC_NULL_INDEX){
         return OBC_NULL_INDEX;
@@ -114,7 +102,9 @@ OBC_ERROR_ENUM OBC_ListAddRaw(OBC_List *list, void *item){
         return OBC_ERROR_FAILURE;
     }
 
-    OBC_X_MEMCPY(list->allocator.backed.rawData,list->allocator.backed.unitSize,pos,item);
+    memcpy(list->allocator.backed.rawData + (list->allocator.backed.unitSize*pos), item, list->allocator.backed.unitSize);
+
+    //OBC_X_MEMCPY(list->allocator.backed.rawData,list->allocator.backed.unitSize,pos,item);
 
 
     return OBC_ERROR_SUCCESS;
@@ -126,16 +116,9 @@ OBC_ERROR_ENUM OBC_ListRemoveRaw(OBC_List *list, OBC_Offset freeItem){
 
     size_t *data = ((size_t *)(list->links.rawData))+freeItem*OBC_LIST_LINK_COUNT;
 
-#ifdef OBC_LIST_FAST
-    if(OBC_AllocListFreeRaw(& list->allocator,freeItem) == OBC_ERROR_FAILURE){
-        return OBC_ERROR_FAILURE;
-    }
-#else
     if(OBC_AllocListBitFreeRaw(& list->allocator,freeItem) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
-#endif
-
 
     if(data[OBC_LIST_PREV] == freeItem){
         list->first = data[OBC_LIST_NEXT];

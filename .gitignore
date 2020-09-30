@@ -64,3 +64,6 @@ obj/
 #random
 *.zip
 *.cscope_file_list
+
+#custom
+main.c

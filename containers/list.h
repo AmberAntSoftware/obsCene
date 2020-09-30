@@ -2,24 +2,11 @@
 #define LIST_H_INCLUDED
 
 #include "../obc.h"
-
-/**
-#define OBC_LIST_FAST
-/**/
-
-#ifdef OBC_LIST_FAST
-    #include "../allocators/alloclist.h"
-#else
-    #include "../allocators/alloclistbit.h"
-#endif
+#include "../allocators/alloclistbit.h"
 
 typedef struct OBC_List{
 
-#ifdef OBC_LIST_FAST
-    OBC_AllocList allocator;
-#else
     OBC_AllocListBit allocator;
-#endif
     OBC_Ray links;
     OBC_Offset last;
     OBC_Offset first;
@@ -39,9 +26,7 @@ Initialization
 *************************************/
 
 void **OBC_newList(size_t unitSize);
-//void **OBC_newListComplex(size_t unitSize, OBC_LIST_ALLOC allocChoice);
 OBC_ERROR_ENUM OBC_initList(OBC_List *list, size_t unitSize);
-//OBC_ERROR_ENUM OBC_initListComplex(OBC_List *list, size_t unitSize, OBC_LIST_ALLOC allocChoice);
 
 /*************************************
 Deallocation
@@ -80,6 +65,12 @@ Iteration
 #define OBC_ListForEach(arrPtr, iter) for(iter = OBC_ListIterStart(arrPtr); iter != OBC_NULL_INDEX; iter = OBC_ListIterNext(arrPtr, iter))
 #define OBC_ListForEachRaw(listPtr, iter) for(iter = OBC_ListIterStartRaw(listPtr); iter != OBC_NULL_INDEX; iter = OBC_ListIterNextRaw(listPtr, iter))
 
+OBC_Offset OBC_ListIterStartRaw(OBC_List *list);
+OBC_Offset OBC_ListIterStart(void *arr);
+
+OBC_Offset OBC_ListIterNextRaw(OBC_List *list, const OBC_Offset iter);
+OBC_Offset OBC_ListIterNext(void *arr, const OBC_Offset iter);
+
 
 /*************************************
 Alternate Operations
@@ -103,14 +94,6 @@ Internal Utilities
 
 #define OBC_FROM_LIST_PTR(arrPtr) ((void**)(((void*)(arrPtr)) + _OBC_LIST_OFFSET))
 #define OBC_FROM_LIST_VAL(listVal) ((void**)(((void*)(&(listVal))) + _OBC_LIST_OFFSET))
-
-
-
-OBC_Offset OBC_ListIterStartRaw(OBC_List *list);
-OBC_Offset OBC_ListIterStart(void *arr);
-
-OBC_Offset OBC_ListIterNextRaw(OBC_List *list, const OBC_Offset iter);
-OBC_Offset OBC_ListIterNext(void *arr, const OBC_Offset iter);
 
 
 
