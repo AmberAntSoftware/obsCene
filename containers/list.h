@@ -88,6 +88,11 @@ if(OBC_ListNewItem(arrPtr) != OBC_NULL_INDEX){\
 Internal Utilities
 *************************************/
 
+typedef struct OBC_ListLinks{
+    OBC_Offset back;
+    OBC_Offset front;
+}OBC_ListNodes;
+
 #define _OBC_LIST_PTR_CAST(arrPtr) ((OBC_List *)(arrPtr))
 #define _OBC_LIST_OFFSET ((size_t)(&((OBC_List *)NULL)->allocator.backed.rawData))
 #define OBC_TO_LIST_PTR(arrPtr) (_OBC_LIST_PTR_CAST(((void*)(arrPtr)) - _OBC_LIST_OFFSET))

@@ -522,9 +522,9 @@ int allocfastTest(){
 
     OBC_AllocList *fast = OBC_TO_RAW_ALLOCLIST(datas);
 
-    printf("BackedDataSize: %u\n",OBC_Ray_CurByteLength(OBC_FROM_RAY_VAL(fast->backed)));
-    printf("BackedMetaSize: %u\n",OBC_Ray_CurByteLength(OBC_FROM_RAY_VAL(fast->meta)));
-    printf("BackedTotalSize: %u\n",OBC_Ray_CurByteLength(OBC_FROM_RAY_VAL(fast->meta))+OBC_Ray_CurByteLength(OBC_FROM_RAY_VAL(fast->backed)));
+    printf("BackedDataSize: %u\n",OBC_RayGetCurByteLength(OBC_FROM_RAY_VAL(fast->backed)));
+    printf("BackedMetaSize: %u\n",OBC_RayGetCurByteLength(OBC_FROM_RAY_VAL(fast->meta)));
+    printf("BackedTotalSize: %u\n",OBC_RayGetCurByteLength(OBC_FROM_RAY_VAL(fast->meta))+OBC_RayGetCurByteLength(OBC_FROM_RAY_VAL(fast->backed)));
 
 
     return 0;

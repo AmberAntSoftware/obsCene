@@ -22,11 +22,11 @@ OBC_ERROR_ENUM OBC_initAllocListBit(OBC_AllocListBit *allocator, size_t unitSize
 
 OBC_ERROR_ENUM OBC_initAllocListBitComplex(OBC_AllocListBit *allocator, OBC_Offset initialReserveCount, size_t unitSize){
 
-    if(OBC_initRayComplex(&allocator->backed,initialReserveCount,unitSize) == OBC_ERROR_FAILURE){
+    if(OBC_initRayMore(&allocator->backed,initialReserveCount,unitSize) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
 
-    if(OBC_initRayComplex(& allocator->meta,initialReserveCount, sizeof(OBC_ALLOCLISTBIT_META)*2) == OBC_ERROR_FAILURE){
+    if(OBC_initRayMore(& allocator->meta,initialReserveCount, sizeof(OBC_ALLOCLISTBIT_META)*2) == OBC_ERROR_FAILURE){
         OBC_freeRayData(&allocator->backed);
         return OBC_ERROR_FAILURE;
     }

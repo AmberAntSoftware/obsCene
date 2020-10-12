@@ -16,7 +16,7 @@ void **OBC_newBTree(size_t unitSize){
 
 OBC_ERROR_ENUM OBC_initBTree(OBC_BTree *tree, size_t unitSize){
 
-    if(OBC_initRayComplex(& tree->links, 0, sizeof(OBC_BTreeNode)) == OBC_ERROR_FAILURE){
+    if(OBC_initRayMore(& tree->links, 0, sizeof(OBC_BTreeNode)) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
 
@@ -44,7 +44,7 @@ void OBC_freeBTree(void *arr){
 void OBC_freeBTreeData(OBC_BTree *tree){
 
     OBC_freeAllocListBitData(& tree->allocator);
-    OBC_freeRayDat(OBC_FROM_RAY_VAL(tree->links));
+    OBC_freeRayData(OBC_FROM_RAY_VAL(tree->links));
 
 }
 

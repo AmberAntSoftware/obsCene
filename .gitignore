@@ -66,4 +66,4 @@ obj/
 *.cscope_file_list
 
 #custom
-main.c
+#main.c

@@ -22,23 +22,23 @@ void **OBC_newAllocator(size_t unitSize){
 
 void *OBC_initAllocator(OBC_Allocator *allocator, size_t unitSize){
 
-    if(OBC_initRayComplex(
+    if(OBC_initRayMore(
            OBC_TO_RAY_PTR(& allocator->backed.rawData)
            ,0,unitSize) == OBC_ERROR_FAILURE){
         return NULL;
     }
-    if(OBC_initRayComplex(
+    if(OBC_initRayMore(
             OBC_TO_RAY_PTR(& allocator->meta[0].rawData)
            , 1,
        sizeof(OBC_ALLOC_META_TYPE)) == OBC_ERROR_FAILURE){
         OBC_freeRayData(&allocator->backed);
         return NULL;
     }
-    memset(allocator->meta[0].rawData,0,allocator->meta[0].maxUnitLength*allocator->meta[0].unitSize);
+    memset(allocator->meta[0].rawData,0,allocator->meta[0].maxUnitLength* OBC_RayGetUnitSize(&allocator->meta[0]));
 
     unsigned int i;
     for(i = 1; i <= OBC_ALLOC_META_ADDRESSING; i++){
-        if(OBC_initRayComplex(
+        if(OBC_initRayMore(
                OBC_TO_RAY_PTR(& allocator->meta[i].rawData)
                , 0,
                sizeof(OBC_ALLOC_META_TYPE)) == OBC_ERROR_FAILURE){

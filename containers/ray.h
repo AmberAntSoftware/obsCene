@@ -13,6 +13,8 @@ typedef struct OBC_Ray{
     char *rawData;
 
     ///the size of the elements stored in bytes
+    ///removabe if the user is forced to pass in the underlying type size
+    ///uses the top 2 bits for management, so largest size is 2 ^ (sizeof(size_t)*CHAR_BIT-2)
     size_t unitSize;
     ///the current length in units stored = (curLength/unitSize)
     OBC_Offset curUnitLength;
@@ -21,16 +23,44 @@ typedef struct OBC_Ray{
 
 }OBC_Ray;
 
+/*
+typedef enum OBC_RAY_MEM_ENUM {
+    OBC_RAY_MEM_STATIC = 0,
+    OBC_RAY_MEM_MALLOC,
+    OBC_RAY_MEM_REALLOC,
+    OBC_RAY_MEM_MALLOC_REALLOC,
+}OBC_RAY_MEM_ENUM;
+*/
+
 /*************************************
 Initialization
 *************************************/
 
-///NULL on failed allocation
+/**
+returns NULL on any error
+unitSize must be <= OBC_RAY_SIZE_MASK or failure
+**/
 void **OBC_newRay(size_t unitSize);
 void **OBC_newRayComplex(OBC_Offset initialReserveCount, size_t unitSize);
-///FAIL on error
+/**
+returns OBC_ERROR_FAILURE on any error
+unitSize must be <= OBC_RAY_SIZE_MASK or failure
+**/
 OBC_ERROR_ENUM OBC_initRay(OBC_Ray *ray, size_t unitSize);
-OBC_ERROR_ENUM OBC_initRayComplex(OBC_Ray *ray, OBC_Offset initialReserveCount, size_t unitSize);
+OBC_ERROR_ENUM OBC_initRayMore(OBC_Ray *ray, OBC_Offset initialReserveCount, size_t unitSize);
+/**
+returns OBC_ERROR_FAILURE on any error or null buffer with no malloc allocation allowed
+0 sized allocation is allowed to perform no-op memory counters
+unitSize must be <= OBC_RAY_SIZE_MASK or failure
+
+ray -- meta to intialize
+bufferStorage -- small size optimization or static buffer
+initialReserveCount -- amount to allocate or max size of buffer (0 does not malloc until rayAdd/new/emplace)
+unitSize -- the size of each unit
+bufferIsReallocable -- small storage optimization or buffer stored elsewhere, prevent realloc'ing bufferPointer
+newBufferCanMalloc -- prevent any malloc allocations when the buffer specified is full (causes error if no buffer or 0 max init buffer is passed on init)
+**/
+OBC_ERROR_ENUM OBC_initRayComplex(OBC_Ray *ray, void* bufferStorage, OBC_Offset initialReserveCount, size_t unitSize, OBC_bool bufferIsReallocable, OBC_bool newBufferCanMalloc);
 
 /*************************************
 Deallocation
@@ -48,20 +78,33 @@ Data Accessors
 void **OBC_RayGetDataPointer(OBC_Ray *ray);
 
 ///gets the number of units stored in this ray
-OBC_Offset OBC_Ray_CurUnitLength(void *rawPtr);
-OBC_Offset OBC_Ray_CurUnitLengthRaw(OBC_Ray *ray);
+OBC_Offset OBC_RayGetCurUnitLength(void *rawPtr);
+OBC_Offset OBC_RayGetCurUnitLengthRaw(OBC_Ray *ray);
 ///gets the total bytes this ray is using
-size_t OBC_Ray_CurByteLength(void *rawPtr);
-size_t OBC_Ray_CurByteLengthRaw(OBC_Ray *ray);
+size_t OBC_RayGetCurByteLength(void *rawPtr);
+size_t OBC_RayGetCurByteLengthRaw(OBC_Ray *ray);
 ///gets the total allocated bytes
-size_t OBC_Ray_MaxByteLength(void *rawPtr);
-size_t OBC_Ray_MaxByteLengthRaw(OBC_Ray *ray);
+size_t OBC_RayGetMaxByteLength(void *rawPtr);
+size_t OBC_RayGetMaxByteLengthRaw(OBC_Ray *ray);
 ///gets the size in bytes of each element stored
-OBC_Offset OBC_Ray_UnitSize(void *rawPtr);
-OBC_Offset OBC_Ray_UnitSizeRaw(OBC_Ray *ray);
+OBC_Offset OBC_RayGetUnitSize(void *rawPtr);
+OBC_Offset OBC_RayGetUnitSizeRaw(OBC_Ray *ray);
 ///gets the total allocated units
-OBC_Offset OBC_Ray_MaxUnitLength(void *rawPtr);
-OBC_Offset OBC_Ray_MaxUnitLengthRaw(OBC_Ray *ray);
+OBC_Offset OBC_RayGetMaxUnitLength(void *rawPtr);
+OBC_Offset OBC_RayGetMaxUnitLengthRaw(OBC_Ray *ray);
+
+/**
+Determines if the buffer is able to grow with realloc
+No realloc, buffer is small optimization or owned in other data
+*/
+OBC_bool OBC_RayIsReallocable(void *rawPtr);
+OBC_bool OBC_RayIsReallocableRaw(OBC_Ray *ray);
+/**
+Determines if the buffer is able to use malloc
+No malloc, prevents all reallocation and can only use what storage is passed
+*/
+OBC_bool OBC_RayIsMallocable(void *rawPtr);
+OBC_bool OBC_RayIsMallocableRaw(OBC_Ray *ray);
 
 /*************************************
 Operations
@@ -173,7 +216,10 @@ https://en.cppreference.com/w/cpp/container/vector/data
 Internal Utilities
 *************************************/
 
-#define OBC_ERROR_PROPAGATE(tokenResolvingToRayEnumValue) do { if( (tokenResolvingToRayEnumValue) == OBC_ERROR_FAILURE ) { return OBC_ERROR_FAILURE; } } while(0);
+#define OBC_RAY_SIZE_MASK (((~((size_t)0))-7)>>3)
+#define OBC_RAY_CAN_REALLOC_MASK (((size_t)1)<<(CHAR_BIT*sizeof(size_t)-1))
+#define OBC_RAY_CAN_MALLOC_MASK  (((size_t)1)<<(CHAR_BIT*sizeof(size_t)-2))
+#define OBC_RAY_CAN_FREE_MASK  (((size_t)1)<<(CHAR_BIT*sizeof(size_t)-2))
 
 #define _OBC_RAY_PTR_CAST(rawPtr) ((OBC_Ray *)(rawPtr))
 #define _OBC_RAY_OFFSET ((size_t)(&((OBC_Ray *)NULL)->rawData))

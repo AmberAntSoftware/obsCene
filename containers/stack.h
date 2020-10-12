@@ -21,7 +21,7 @@ OBC_ERROR_ENUM OBC_initStack(OBC_Stack *stack, size_t unitSize);
 Deallocation
 *************************************/
 
-void OBC_freeStack(void *raw);
+void OBC_freeStack(void *arr);
 void OBC_freeStackData(OBC_Stack *stack);
 
 /*************************************
@@ -35,13 +35,13 @@ Operations
 *************************************/
 
 OBC_Offset OBC_StackPushRaw(OBC_Stack *stack);
-OBC_Offset OBC_StackPush(void *raw);
+OBC_Offset OBC_StackPush(void *arr);
 
 OBC_Offset OBC_StackPopRaw(OBC_Stack *stack);
-OBC_Offset OBC_StackPop(void *raw);
+OBC_Offset OBC_StackPop(void *arr);
 
 OBC_ERROR_ENUM OBC_ListPushNewRaw(OBC_Stack *stack, void *item);
-OBC_ERROR_ENUM OBC_ListPushNew(void *raw, void *item);
+OBC_ERROR_ENUM OBC_ListPushNew(void *arr, void *item);
 
 
 /*************************************
@@ -79,9 +79,9 @@ Internal Utilities
 
 
 OBC_Offset OBC_StackIterStartRaw(OBC_Stack *stack);
-OBC_Offset OBC_StackIterStart(void *raw);
+OBC_Offset OBC_StackIterStart(void *arr);
 
-OBC_Offset OBC_StackIterNextRaw(OBC_Stack *stack, OBC_Offset iter);
-OBC_Offset OBC_StackIterNext(void *raw, OBC_Offset iter);
+OBC_Offset OBC_StackIterNextRaw(OBC_Stack *stack, OBC_Offset index);
+OBC_Offset OBC_StackIterNext(void *arr, OBC_Offset index);
 
 #endif // STACK_H_INCLUDED

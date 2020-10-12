@@ -22,12 +22,13 @@ void **OBC_newList(size_t unitSize){
 }
 OBC_ERROR_ENUM OBC_initList(OBC_List *list, size_t unitSize){
 
-    if(OBC_initRayComplex(& list->links, 0, sizeof(size_t)*OBC_LIST_LINK_COUNT) == OBC_ERROR_FAILURE){
+    if(OBC_initRayMore(&list->links, 0, sizeof(OBC_Offset)*OBC_LIST_LINK_COUNT) == OBC_ERROR_FAILURE){
+    ///TODO if(OBC_initRayMore(&list->links, 0, sizeof(OBC_ListLinks)) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
 
-    if(OBC_initAllocListBit(& list->allocator, unitSize) == OBC_ERROR_FAILURE){
-        OBC_freeRayData(& list->links);
+    if(OBC_initAllocListBit(&list->allocator, unitSize) == OBC_ERROR_FAILURE){
+        OBC_freeRayData(&list->links);
         return OBC_ERROR_FAILURE;
     }
 
@@ -64,35 +65,39 @@ OBC_Offset OBC_ListNewItemRaw(OBC_List *list){
     }
     if(list->links.maxUnitLength <= place){
         ///consider no_op error as well due to unsync ray alignments
-        if(OBC_RayExpand(OBC_FROM_RAY_VAL(list->links)) != OBC_ERROR_SUCCESS){
+        if(OBC_RayExpandRaw(&list->links) != OBC_ERROR_SUCCESS){
             return OBC_NULL_INDEX;
         }
     }
 
-    size_t *data;
+    OBC_Offset *data;
     if(list->first == OBC_NULL_INDEX){
         list->first = place;
         list->last = place;
     }
 
-    data = ((size_t *)(list->links.rawData))+list->last*OBC_LIST_LINK_COUNT;
+    data = ((OBC_Offset *)(list->links.rawData))+list->last*OBC_LIST_LINK_COUNT;
     data[OBC_LIST_NEXT] = place;
 
-    data = ((size_t *)(list->links.rawData))+place*OBC_LIST_LINK_COUNT;
+    data = ((OBC_Offset *)(list->links.rawData))+place*OBC_LIST_LINK_COUNT;
     data[OBC_LIST_NEXT] = OBC_NULL_INDEX;
     data[OBC_LIST_PREV] = list->last;
     list->last = place;
 
     return place;
 }
+
 OBC_Offset OBC_ListNewItem(void *raw){
-    return OBC_ListNewItemRaw(OBC_TO_LIST_PTR(raw));
+
+    OBC_List *list = OBC_TO_LIST_PTR(raw);
+    return OBC_ListNewItemRaw(list);
 }
 
 
 OBC_ERROR_ENUM OBC_ListAdd(void *raw, void *item){
 
-    return OBC_ListAddRaw(OBC_TO_LIST_PTR(raw),item);
+    OBC_List *list = OBC_TO_LIST_PTR(raw);
+    return OBC_ListAddRaw(list, item);
 }
 
 OBC_ERROR_ENUM OBC_ListAddRaw(OBC_List *list, void *item){
@@ -102,10 +107,10 @@ OBC_ERROR_ENUM OBC_ListAddRaw(OBC_List *list, void *item){
         return OBC_ERROR_FAILURE;
     }
 
-    memcpy(list->allocator.backed.rawData + (list->allocator.backed.unitSize*pos), item, list->allocator.backed.unitSize);
+    const size_t unitSize = OBC_RayGetUnitSizeRaw(&list->allocator.backed);
+    memcpy(list->allocator.backed.rawData + (unitSize*pos), item, unitSize);
 
     //OBC_X_MEMCPY(list->allocator.backed.rawData,list->allocator.backed.unitSize,pos,item);
-
 
     return OBC_ERROR_SUCCESS;
 }
@@ -114,9 +119,9 @@ OBC_ERROR_ENUM OBC_ListAddRaw(OBC_List *list, void *item){
 
 OBC_ERROR_ENUM OBC_ListRemoveRaw(OBC_List *list, OBC_Offset freeItem){
 
-    size_t *data = ((size_t *)(list->links.rawData))+freeItem*OBC_LIST_LINK_COUNT;
+    OBC_Offset *data = ((OBC_Offset *)(list->links.rawData)) + freeItem*OBC_LIST_LINK_COUNT;
 
-    if(OBC_AllocListBitFreeRaw(& list->allocator,freeItem) == OBC_ERROR_FAILURE){
+    if(OBC_AllocListBitFreeRaw(&list->allocator, freeItem) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
 
@@ -128,40 +133,49 @@ OBC_ERROR_ENUM OBC_ListRemoveRaw(OBC_List *list, OBC_Offset freeItem){
         return OBC_ERROR_SUCCESS;
     }
 
-    size_t next = data[OBC_LIST_NEXT];
+    OBC_Offset next = data[OBC_LIST_NEXT];
 
-    data = ((size_t *)(list->links.rawData))+data[OBC_LIST_PREV]*OBC_LIST_LINK_COUNT;
+    data = ((OBC_Offset *)(list->links.rawData)) + data[OBC_LIST_PREV]*OBC_LIST_LINK_COUNT;
     data[OBC_LIST_NEXT] = next;
 
     return OBC_ERROR_SUCCESS;
 }
 OBC_ERROR_ENUM OBC_ListRemove(void *raw, OBC_Offset freeItem){
-    return OBC_ListRemoveRaw(OBC_TO_LIST_PTR(raw),freeItem);
+
+    OBC_List *list = OBC_TO_LIST_PTR(raw);
+    return OBC_ListRemoveRaw(list, freeItem);
 }
 
 OBC_Offset OBC_ListIterStartRaw(OBC_List *list){
+
     if(list->first == OBC_NULL_INDEX){
         return OBC_NULL_INDEX;
     }else{
         return list->first;
     }
+
 }
 
 OBC_Offset OBC_ListIterStart(void *raw){
-    return OBC_ListIterStartRaw(OBC_TO_LIST_PTR(raw));
+
+    OBC_List *list = OBC_TO_LIST_PTR(raw);
+    return OBC_ListIterStartRaw(list);
 }
 
 OBC_Offset OBC_ListIterNextRaw(OBC_List *list, const OBC_Offset iter){
+
     if(iter == OBC_NULL_INDEX){
         return OBC_NULL_INDEX;
     }
 
-    const size_t * next = ((size_t *)(list->links.rawData))+(iter*OBC_LIST_LINK_COUNT);
-    const size_t found = next[OBC_LIST_NEXT];
+    OBC_Offset *next = ((OBC_Offset *)(list->links.rawData)) + (iter*OBC_LIST_LINK_COUNT);
+    OBC_Offset found = next[OBC_LIST_NEXT];
 
     return found;
 }
 
 OBC_Offset OBC_ListIterNext(void *raw, const OBC_Offset iter){
-    return OBC_ListIterNextRaw(OBC_TO_LIST_PTR(raw), iter);
+
+    OBC_List *list = OBC_TO_LIST_PTR(raw);
+    return OBC_ListIterNextRaw(list, iter);
 }

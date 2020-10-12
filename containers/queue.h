@@ -59,8 +59,8 @@ typedef OBC_Offset OBC_QueueIterator;
 OBC_Offset OBC_QueueIterStartRaw(OBC_Queue *queue);
 OBC_Offset OBC_QueueIterStart(void *arr);
 
-OBC_Offset OBC_QueueIterNextRaw(const OBC_Queue *const queue, const OBC_Offset iter);
-OBC_Offset OBC_QueueIterNext(const void *const arr, const OBC_Offset iter);
+OBC_Offset OBC_QueueIterNextRaw(const OBC_Queue *const queue, const OBC_Offset index);
+OBC_Offset OBC_QueueIterNext(const void *const arr, const OBC_Offset index);
 
 /*************************************
 Internal Utilities
