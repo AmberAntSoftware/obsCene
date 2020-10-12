@@ -250,21 +250,6 @@ OBC_ERROR_ENUM OBC_X_HashMapDoThresholdExpand(OBC_HashMap *map);
 
 unsigned char OBC_HashMapGetIterContinue(OBC_HashMapIterator *iter);
 
-//#define OBC_HashMapGetLoop__(arrPtr, hashMapIteratorPtr, keyHash) OBC_HashMapGetLoop(arrPtr, hashMapIteratorPtr, keyHash)
-
-
-
-///#define OBC___X___HASHMAP_ITER_LOOP_TEMPLATE(arrPtr, hashMapIteratorPtr, keyPtr, keyHash, valuePtr, START_FUNC, INCREMENT_FUNC) \
-(hashMapIteratorPtr)->hash = /**keyHash;/**/ /**/OBC_HashMapFitHash(arrPtr,keyHash);/**/ \
-(hashMapIteratorPtr)->key = keyPtr; \
-(hashMapIteratorPtr)->value = valuePtr; \
-for( START_FUNC(arrPtr, (hashMapIteratorPtr)); (hashMapIteratorPtr)->iter < (hashMapIteratorPtr)->X_endIter && (hashMapIteratorPtr)->iter <= OBC_X_HASHMAP_HASH_FREED; INCREMENT_FUNC(arrPtr, (hashMapIteratorPtr)) ) \
-if( (((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(hashMapIteratorPtr)->iter] |1) == OBC_X_HASHMAP_HASH_EMPTY){ \
-/**/if((hashMapIteratorPtr)->X_storage == OBC_NULL_INDEX){(hashMapIteratorPtr)->X_storage = (hashMapIteratorPtr)->iter;} /**/\
-/**(hashMapIteratorPtr)->X_storage = (hashMapIteratorPtr)->iter;/**/\
-/**puts("CONTINUE, iter hash is EMPTY Node");/**/\
-continue;\
-}else if( ((OBC_Hash *)OBC_TO_HASHMAP_PTR(arrPtr)->keyHashes.rawData)[(hashMapIteratorPtr)->iter] == (hashMapIteratorPtr)->hash )
 
 
 

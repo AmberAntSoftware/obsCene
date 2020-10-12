@@ -57,25 +57,29 @@ ray -- meta to intialize
 bufferStorage -- small size optimization or static buffer
 initialReserveCount -- amount to allocate or max size of buffer (0 does not malloc until rayAdd/new/emplace)
 unitSize -- the size of each unit
-bufferIsReallocable -- small storage optimization or buffer stored elsewhere, prevent realloc'ing bufferPointer
-newBufferCanMalloc -- prevent any malloc allocations when the buffer specified is full (causes error if no buffer or 0 max init buffer is passed on init)
+canReallocBuffer -- small storage optimization or buffer stored elsewhere, prevent realloc'ing bufferPointer
+canMallocNewBuffer -- prevent any malloc allocations when the buffer specified is full (causes error if no buffer or 0 max init buffer is passed on init)
 **/
-OBC_ERROR_ENUM OBC_initRayComplex(OBC_Ray *ray, void* bufferStorage, OBC_Offset initialReserveCount, size_t unitSize, OBC_bool bufferIsReallocable, OBC_bool newBufferCanMalloc);
+OBC_ERROR_ENUM OBC_initRayComplex(OBC_Ray *ray, void* bufferStorage, OBC_Offset initialReserveCount, size_t unitSize, OBC_bool canReallocBuffer, OBC_bool canMallocNewBuffer);
 
 /*************************************
 Deallocation
 *************************************/
 
-///Frees the dynamic ray allocation and the owned dynamic data owned
+///Frees the dynamic ray allocation and the owned data buffer
 void OBC_freeRay(void *rawPtr);
 ///Frees only the owned dynamic data owned
 void OBC_freeRayData(OBC_Ray *ray);
+///Frees the dynamic ray allocation and nothing else
+void OBC_freeRayNotData(OBC_Ray *ray);
 
 /*************************************
 Data Accessors
 *************************************/
 
 void **OBC_RayGetDataPointer(OBC_Ray *ray);
+char *OBC_RayGetData(void *rawPtr);
+char *OBC_RayGetDataRaw(OBC_Ray *ray);
 
 ///gets the number of units stored in this ray
 OBC_Offset OBC_RayGetCurUnitLength(void *rawPtr);
@@ -97,14 +101,20 @@ OBC_Offset OBC_RayGetMaxUnitLengthRaw(OBC_Ray *ray);
 Determines if the buffer is able to grow with realloc
 No realloc, buffer is small optimization or owned in other data
 */
-OBC_bool OBC_RayIsReallocable(void *rawPtr);
-OBC_bool OBC_RayIsReallocableRaw(OBC_Ray *ray);
+OBC_bool OBC_RayCanRealloc(void *rawPtr);
+OBC_bool OBC_RayCanReallocRaw(OBC_Ray *ray);
 /**
 Determines if the buffer is able to use malloc
 No malloc, prevents all reallocation and can only use what storage is passed
 */
-OBC_bool OBC_RayIsMallocable(void *rawPtr);
-OBC_bool OBC_RayIsMallocableRaw(OBC_Ray *ray);
+OBC_bool OBC_RayCanMalloc(void *rawPtr);
+OBC_bool OBC_RayCanMallocRaw(OBC_Ray *ray);
+/**
+Determines if the buffer was allocated by malloc or if currently unowned buffer
+No malloc, prevents all reallocation and can only use what storage is passed
+*/
+OBC_bool OBC_RayCanFree(void *rawPtr);
+OBC_bool OBC_RayCanFreeRaw(OBC_Ray *ray);
 
 /*************************************
 Operations

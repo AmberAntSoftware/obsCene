@@ -44,7 +44,7 @@ void OBC_freeBTree(void *arr){
 void OBC_freeBTreeData(OBC_BTree *tree){
 
     OBC_freeAllocListBitData(& tree->allocator);
-    OBC_freeRayData(OBC_FROM_RAY_VAL(tree->links));
+    OBC_freeRayData(&tree->links);
 
 }
 
