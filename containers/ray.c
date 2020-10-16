@@ -302,7 +302,6 @@ OBC_ERROR_ENUM OBC_RayExpand(void *rawPtr){
 
 OBC_ERROR_ENUM OBC_RayExpandRaw(OBC_Ray *ray){
 
-    ///overflow protection for 32bit or ranged
     OBC_Offset units = ray->maxUnitLength;
     if(units*2 < units){
         units = OBC_NULL_INDEX-1;
@@ -318,8 +317,7 @@ OBC_ERROR_ENUM OBC_RayExpandRaw(OBC_Ray *ray){
     if(unitSize > 0){
 
         if(!OBC_RayCanMalloc(ray)){
-            ///return OBC_ERROR_NO_OP;
-            return OBC_ERROR_FAILURE;
+            return OBC_ERROR_NO_OP;
         }
 
         size_t size = units * unitSize;
@@ -359,22 +357,26 @@ OBC_ERROR_ENUM OBC_RayContract(void *rawPtr){
 }
 
 OBC_ERROR_ENUM OBC_RayContractRaw(OBC_Ray *ray){
-    //if(ray->unitSize == 0){
-    //    return OBC_ERROR_NO_OP;
-    //}
 
     size_t unitSize = OBC_RayGetUnitSizeRaw(ray);
-    size_t newSize = ((size_t)ray->maxUnitLength) * (unitSize/2);
+    size_t newSize;
+
+    if(ray->rawData==NULL || unitSize == 0){
+        return OBC_ERROR_NO_OP;
+    }
+
+    newSize = ((size_t)ray->maxUnitLength) * (unitSize/2);
 
     if(newSize < unitSize){
         newSize = unitSize;
     }
 
-    char *newData;
-    if(ray->rawData==NULL || unitSize == 0){
-        newData = malloc(newSize);
-    }else{
-        newData = realloc(ray->rawData,newSize);
+    char *newData = NULL;
+
+    if(OBC_RayCanReallocRaw(ray) || OBC_RayCanFreeRaw(ray)){
+        newData = realloc(ray->rawData, newSize);
+    } else {
+        return OBC_ERROR_NO_OP;
     }
 
     if(newData == NULL){

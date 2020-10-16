@@ -1407,9 +1407,97 @@ OBC_RayIterator riter;
 
 }
 
+void alloclistbitTests(){
+
+    STR_String **strs = (STR_String**)OBC_newAllocListBit(sizeof(STR_String));
+    printf("%p\n",strs);
+    printf("%u\n",sizeof(OBC_Ray));
+
+    STR_String *data;
+    OBC_Offset item;
+
+    volatile clock_t start = clock();
+    unsigned int i;
+    for(i = 0; i < ALLOC_SIZE; i++){
+        //*
+        item = OBC_AllocListBitMalloc(strs);
+        //if(item == OBC_NULL_INDEX)
+    }
+    volatile clock_t end = clock();
+
+    srand(6464);
+    volatile clock_t t3 = clock();
+    for(i = 0; i < ALLOC_SIZE; i++){
+        //*
+        size_t dar = rand()&(ALLOC_SIZE-1);
+        /*/
+        size_t dar = i;
+        //*/
+        OBC_AllocListBitFree(strs,dar);
+        OBC_Offset allc = OBC_AllocListBitMalloc(strs);
+        if(allc!=dar){
+            printf("FAIL_RAND ALLOC_LIST_BIT: %u     EXPECT: %u\n",allc,dar);
+        }
+    }
+    volatile clock_t t4 = clock();
+
+
+    printf("ALLOC_LIST_BIT ADD TIME: %ums\n",OBC_timerMillis(start,end));
+    printf("ALLOC_LIST_BIT RANDOM ALLOC TIME: %ums\n",OBC_timerMillis(t3,t4));
+
+    OBC_freeAllocListBit(strs);
+
+}
+
+void rayTests(){
+
+    STR_String **strs = (STR_String**)OBC_newRay(sizeof(STR_String));
+    printf("%p\n",strs);
+    printf("%u\n",sizeof(OBC_Ray));
+
+    STR_String *data;
+    OBC_Offset item;
+
+    volatile clock_t start = clock();
+    unsigned int i;
+    for(i = 0; i < ALLOC_SIZE; i++){
+        //*
+        item = OBC_RayNewElement(strs);
+        //if(item == OBC_NULL_INDEX)
+    }
+    volatile clock_t end = clock();
+
+    //*
+    ///srand(6464);
+    volatile clock_t t3 = clock();
+    for(i = 0; i < ALLOC_SIZE; i++){
+        ///size_t dar = rand()&(ALLOC_SIZE-1);
+        ///size_t dar = i;
+        OBC_RayRemoveFast(strs,i);
+    }
+    volatile clock_t t4 = clock();
+    //*/
+
+
+    printf("RAY ADD TIME: %ums\n",OBC_timerMillis(start,end));
+    printf("RAY FAST REMOVE TIME: %ums\n",OBC_timerMillis(t3,t4));
+    OBC_freeRay(strs);
+}
+
+
+
+
+
+
 int main(int argc, char** argv){
 
     printf("CLOCK SIZE: %u\n\n", sizeof(clock_t));
+
+    puts("||| Ray TESTS");
+    rayTests();
+
+    puts("||| ALLOC LIST BIT TESTS");
+    alloclistbitTests();
 
     puts("||| List Tests");
     listTests();
