@@ -31,7 +31,7 @@ All containers have an iteration syntax in the form of `OBC_[Container]iter(args
 This will allow easy access touch all approach, and will have future accessors to cut off iterations
 
 
-Code Sample
+Code Sample Explicit
 ```
 typedef struct Point{
     size_t x;
@@ -51,11 +51,41 @@ void doList(){
         OBC_ListAdd(points, &point);
     }
 
-    OBC_Iterator unit;
-    OBC_ListForEach(points, unit){
-        printf("Point: %u, %u\n", (*points)[unit].x, (*points)[unit].y);
+    OBC_ListIterator unit;
+    OBC_ListForEach(points, &unit){
+        printf("Point: %u, %u\n", (*points)[unit.iter].x, (*points)[unit.iter].y);
     }
 
     OBC_freeList(points);
+}
+```
+
+
+Code Sample Implicit
+```
+typedef struct Point{
+    size_t x;
+    size_t y;
+}Point;
+
+void doList(){
+
+    Point **points = OBC_newQueue(sizeof(Point));
+    srand(time(NULL));
+
+    Point point;
+    unsigned int i;
+    for(i = 0; i < 32; i++){
+        point.x = rand();
+        point.y = rand();
+        OBC_QueueAdd(points, &point);
+    }
+
+    OBC_QueueIterator unit;
+    OBC_QueueForEach(points, &unit){
+        printf("Point: %u, %u\n", points[obc(unit.iter)].x, points[obc(unit.iter)].y);
+    }
+
+    OBC_freeQueue(points);
 }
 ```
