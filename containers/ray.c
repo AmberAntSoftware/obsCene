@@ -14,7 +14,7 @@ void **OBC_newRayComplex(OBC_Offset initialReserveCount, size_t unitSize){
         return NULL;
     }
 
-    if(OBC_initRayMore(ray,initialReserveCount, unitSize) == OBC_ERROR_FAILURE){
+    if(OBC_initRayDynamic(ray,initialReserveCount, unitSize) == OBC_ERROR_FAILURE){
         free(ray);
         return NULL;
     }
@@ -23,10 +23,10 @@ void **OBC_newRayComplex(OBC_Offset initialReserveCount, size_t unitSize){
 }
 
 OBC_ERROR_ENUM OBC_initRay(OBC_Ray *ray, size_t unitSize){
-    return OBC_initRayMore(ray, 0, unitSize);
+    return OBC_initRayDynamic(ray, 0, unitSize);
 }
 
-OBC_ERROR_ENUM OBC_initRayMore(OBC_Ray *ray, OBC_Offset initialReserveCount, size_t unitSize){
+OBC_ERROR_ENUM OBC_initRayDynamic(OBC_Ray *ray, OBC_Offset initialReserveCount, size_t unitSize){
     return OBC_initRayComplex(ray, NULL, initialReserveCount, unitSize, OBC_TRUE, OBC_TRUE);
 }
 
@@ -94,6 +94,16 @@ Data Accessors
 
 void **OBC_RayGetDataPointer(OBC_Ray *ray){
     return OBC_FROM_RAY_PTR(ray);
+}
+
+char *OBC_RayGetData(void *rawPtr){
+
+    OBC_Ray *ray = OBC_TO_RAY_PTR(rawPtr);
+    return OBC_RayGetDataRaw(ray);
+}
+
+char *OBC_RayGetDataRaw(OBC_Ray *ray){
+    return ray->rawData;
 }
 
 OBC_Offset OBC_RayGetCurUnitLength(void *rawPtr){

@@ -17,7 +17,7 @@ void **OBC_newStack(size_t unitSize){
 }
 OBC_ERROR_ENUM OBC_initStack(OBC_Stack *stack, size_t unitSize){
 
-    if(OBC_initRayMore(&stack->stack, 0, unitSize) == OBC_ERROR_FAILURE){
+    if(OBC_initRayDynamic(&stack->stack, 0, unitSize) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
 

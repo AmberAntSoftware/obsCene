@@ -19,11 +19,11 @@ void **OBC_newAllocList(size_t unitSize){
 
 OBC_ERROR_ENUM OBC_initAllocList(OBC_AllocList *allocator, size_t unitSize){
 
-    if(OBC_initRayMore(& allocator->backed, 0, unitSize) == OBC_ERROR_FAILURE){
+    if(OBC_initRayDynamic(& allocator->backed, 0, unitSize) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
 
-    if(OBC_initRayMore(& allocator->meta, 0, sizeof(OBC_ALLOCLIST_META)) == OBC_ERROR_FAILURE){
+    if(OBC_initRayDynamic(& allocator->meta, 0, sizeof(OBC_ALLOCLIST_META)) == OBC_ERROR_FAILURE){
         OBC_freeRayData(& allocator->backed);
         return OBC_ERROR_FAILURE;
     }

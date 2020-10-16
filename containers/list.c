@@ -1,5 +1,9 @@
 #include "list.h"
 
+/**
+Note: subscripts optimize more so this is still ugly
+**/
+
 #define OBC_LIST_LINK_COUNT 2
 #define OBC_LIST_NEXT 0
 #define OBC_LIST_PREV 1
@@ -22,7 +26,7 @@ void **OBC_newList(size_t unitSize){
 }
 OBC_ERROR_ENUM OBC_initList(OBC_List *list, size_t unitSize){
 
-    if(OBC_initRayMore(&list->links, 0, sizeof(OBC_Offset)*OBC_LIST_LINK_COUNT) == OBC_ERROR_FAILURE){
+    if(OBC_initRayDynamic(&list->links, 0, sizeof(OBC_Offset)*OBC_LIST_LINK_COUNT) == OBC_ERROR_FAILURE){
     ///TODO if(OBC_initRayMore(&list->links, 0, sizeof(OBC_ListLinks)) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
@@ -34,6 +38,8 @@ OBC_ERROR_ENUM OBC_initList(OBC_List *list, size_t unitSize){
 
     list->first = OBC_NULL_INDEX;
     list->last = OBC_NULL_INDEX;
+
+    list->count = 0;
 
     return OBC_ERROR_SUCCESS;
 }
@@ -58,14 +64,18 @@ void OBC_freeListData(OBC_List *list){
 
 OBC_Offset OBC_ListNewItemRaw(OBC_List *list){
 
-    OBC_Offset place = OBC_AllocListBitMallocRaw(& list->allocator);
+    //*
+    OBC_Offset place = OBC_AllocListBitMallocRaw(&list->allocator);
 
     if(place == OBC_NULL_INDEX){
         return OBC_NULL_INDEX;
     }
     if(list->links.maxUnitLength <= place){
-        ///consider no_op error as well due to unsync ray alignments
         if(OBC_RayExpandRaw(&list->links) != OBC_ERROR_SUCCESS){
+            if(OBC_AllocListBitFreeRaw(&list->allocator, place) == OBC_ERROR_FAILURE){
+                ///TODO critical error, resolve differently maybe
+                return OBC_NULL_INDEX;
+            }
             return OBC_NULL_INDEX;
         }
     }
@@ -83,6 +93,38 @@ OBC_Offset OBC_ListNewItemRaw(OBC_List *list){
     data[OBC_LIST_NEXT] = OBC_NULL_INDEX;
     data[OBC_LIST_PREV] = list->last;
     list->last = place;
+
+    /*/
+    OBC_Offset place = OBC_AllocListBitMallocRaw(& list->allocator);
+
+    if(place == OBC_NULL_INDEX){
+        return OBC_NULL_INDEX;
+    }
+    if(list->links.maxUnitLength <= place){
+        ///consider no_op error as well due to unsync ray alignments
+        if(OBC_RayExpandRaw(&list->links) != OBC_ERROR_SUCCESS){
+            return OBC_NULL_INDEX;
+        }
+    }
+
+    OBC_ListLinks *links = (OBC_ListLinks *)list->links.rawData;
+
+    if(list->first == OBC_NULL_INDEX){
+        list->first = place;
+        list->last = place;
+
+        links[place].back = OBC_NULL_INDEX;
+        links[place].front = OBC_NULL_INDEX;
+        return place;
+    }
+
+    links[list->last].front = place;
+    links[place].front = OBC_NULL_INDEX;
+    links[place].back = list->last;
+    list->last = place;
+    //*/
+
+    list->count++;
 
     return place;
 }
@@ -119,11 +161,13 @@ OBC_ERROR_ENUM OBC_ListAddRaw(OBC_List *list, void *item){
 
 OBC_ERROR_ENUM OBC_ListRemoveRaw(OBC_List *list, OBC_Offset freeItem){
 
-    OBC_Offset *data = ((OBC_Offset *)(list->links.rawData)) + freeItem*OBC_LIST_LINK_COUNT;
+    //*
 
     if(OBC_AllocListBitFreeRaw(&list->allocator, freeItem) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
+
+    OBC_Offset *data = ((OBC_Offset *)(list->links.rawData)) + freeItem*OBC_LIST_LINK_COUNT;
 
     if(data[OBC_LIST_PREV] == freeItem){
         list->first = data[OBC_LIST_NEXT];
@@ -137,6 +181,32 @@ OBC_ERROR_ENUM OBC_ListRemoveRaw(OBC_List *list, OBC_Offset freeItem){
 
     data = ((OBC_Offset *)(list->links.rawData)) + data[OBC_LIST_PREV]*OBC_LIST_LINK_COUNT;
     data[OBC_LIST_NEXT] = next;
+
+    /*/
+
+    if(OBC_AllocListBitFreeRaw(&list->allocator, freeItem) == OBC_ERROR_FAILURE){
+        return OBC_ERROR_FAILURE;
+    }
+
+    OBC_ListLinks *links = (OBC_ListLinks *)list->links.rawData;
+
+    if(links[freeItem].back != OBC_NULL_INDEX){
+        links[links[freeItem].back].front = links[freeItem].front;
+    }
+    if(links[freeItem].front != OBC_NULL_INDEX){
+        links[links[freeItem].front].back = links[freeItem].back;
+    }
+
+    if(list->first == freeItem){
+        list->first = links[freeItem].front;
+    }
+    if(list->last == freeItem){
+        list->last = links[freeItem].back;
+    }
+
+    //*/
+
+    list->count--;
 
     return OBC_ERROR_SUCCESS;
 }

@@ -19,11 +19,11 @@ void **OBC_newAllocRay(size_t unitSize){
 
 OBC_ERROR_ENUM OBC_initAllocRay(OBC_AllocRay *allocRay, size_t unitSize){
 
-    if(OBC_initRayMore(&allocRay->backed, 0, unitSize) == OBC_ERROR_FAILURE){
+    if(OBC_initRayDynamic(&allocRay->backed, 0, unitSize) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
 
-    if(OBC_initRayMore(&allocRay->meta, 0, sizeof(OBC_ALLOC_META_TYPE)) == OBC_ERROR_FAILURE){
+    if(OBC_initRayDynamic(&allocRay->meta, 0, sizeof(OBC_ALLOC_META_TYPE)) == OBC_ERROR_FAILURE){
         OBC_freeRayData(&allocRay->backed);
         return OBC_ERROR_FAILURE;
     }

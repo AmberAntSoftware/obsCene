@@ -22,11 +22,11 @@ OBC_ERROR_ENUM OBC_initAllocListBit(OBC_AllocListBit *allocator, size_t unitSize
 
 OBC_ERROR_ENUM OBC_initAllocListBitComplex(OBC_AllocListBit *allocator, OBC_Offset initialReserveCount, size_t unitSize){
 
-    if(OBC_initRayMore(&allocator->backed,initialReserveCount,unitSize) == OBC_ERROR_FAILURE){
+    if(OBC_initRayDynamic(&allocator->backed,initialReserveCount,unitSize) == OBC_ERROR_FAILURE){
         return OBC_ERROR_FAILURE;
     }
 
-    if(OBC_initRayMore(& allocator->meta,initialReserveCount, sizeof(OBC_ALLOCLISTBIT_META)*2) == OBC_ERROR_FAILURE){
+    if(OBC_initRayDynamic(& allocator->meta,initialReserveCount, sizeof(OBC_ALLOCLISTBIT_META)*2) == OBC_ERROR_FAILURE){
         OBC_freeRayData(&allocator->backed);
         return OBC_ERROR_FAILURE;
     }
@@ -214,7 +214,7 @@ unsigned int OBC_AllocListBitGetNextFree(OBC_AllocListBit *allocator){
     allocator->metaCachePos = link;
     allocator->metaCache = meta[link*2];
 
-META_CALC:;
+///META_CALC:;
 
     OBC_ALLOCLISTBIT_ADDR pos = OBC_AllocListBitBitPos(allocator->metaCache);
     const OBC_Offset REM = pos&(UNITS_PER_META-1);
@@ -227,6 +227,8 @@ META_CALC:;
 }
 
 unsigned int OBC_AllocListBitBitPos(OBC_ALLOCLISTBIT_META meta){
+
+    //*
     unsigned char *raw = (unsigned char*)(&meta);
     unsigned int i;
     for(i = 0; i < sizeof(OBC_ALLOCLISTBIT_META); i+=sizeof(unsigned int)){

@@ -91,7 +91,7 @@ Internal Utilities
 typedef struct OBC_ListLinks{
     OBC_Offset back;
     OBC_Offset front;
-}OBC_ListNodes;
+}OBC_ListLinks;
 
 #define _OBC_LIST_PTR_CAST(arrPtr) ((OBC_List *)(arrPtr))
 #define _OBC_LIST_OFFSET ((size_t)(&((OBC_List *)NULL)->allocator.backed.rawData))

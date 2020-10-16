@@ -47,7 +47,7 @@ returns OBC_ERROR_FAILURE on any error
 unitSize must be <= OBC_RAY_SIZE_MASK or failure
 **/
 OBC_ERROR_ENUM OBC_initRay(OBC_Ray *ray, size_t unitSize);
-OBC_ERROR_ENUM OBC_initRayMore(OBC_Ray *ray, OBC_Offset initialReserveCount, size_t unitSize);
+OBC_ERROR_ENUM OBC_initRayDynamic(OBC_Ray *ray, OBC_Offset initialReserveCount, size_t unitSize);
 /**
 returns OBC_ERROR_FAILURE on any error or null buffer with no malloc allocation allowed
 0 sized allocation is allowed to perform no-op memory counters

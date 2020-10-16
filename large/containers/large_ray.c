@@ -50,7 +50,7 @@ OBC_ERROR_ENUM OBCL_initRayComplex(OBCL_Ray *ray, size_t initialReserveCount, si
                 return OBC_ERROR_FAILURE;
             }
 
-            if( OBC_initRayMore(((OBC_Ray *)ray->containers.rawData) + addr,
+            if( OBC_initRayDynamic(((OBC_Ray *)ray->containers.rawData) + addr,
                                         maxUnits, unitSize) == OBC_ERROR_FAILURE){
                 OBCL_freeRayData(ray);
                 return OBC_ERROR_FAILURE;
